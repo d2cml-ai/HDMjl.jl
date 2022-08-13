@@ -250,11 +250,10 @@ function rlasso(x, y;
     if typeof(x) == DataFrame
         colnames = names(x)
         x = Matrix(x)
+    elseif !isnothing(colnames)
+        colnames = colnames
     else
         colnames = map.(string, "V", 1:p)
-    end
-    if !isnothing(colnames)
-        colnames = colnames
     end
     if typeof(y) == DataFrame
         y = Matrix(y)
