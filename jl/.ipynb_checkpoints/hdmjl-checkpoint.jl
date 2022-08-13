@@ -175,8 +175,8 @@ function LassoShooting_fit(x, y, lmbda;
         weights.
     m: integer, number of iterations the algorithm took
     """
-    n = size(x)[1]
-    p = size(x)[2]
+    n = size(x, 1)
+    p = size(x, 2)
     
     if (isnothing(XX))
         XX = x'*x
