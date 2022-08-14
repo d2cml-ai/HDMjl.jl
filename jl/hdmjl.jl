@@ -253,7 +253,7 @@ function rlasso(x, y;
     elseif !isnothing(colnames)
         colnames = colnames
     else
-        colnames = map.(string, "V", 1:p)
+        colnames = reduce(vcat, map.(string, "V", 1:p))
     end
     if typeof(y) == DataFrame
         y = Matrix(y)
@@ -296,7 +296,7 @@ function rlasso(x, y;
         global coefTemp[isnan.(coefTemp)] .= 0
         global ind1 =  abs.(coefTemp) .> 0
         global x1 = x[:, ind1]
-        if isnothing(x)
+        if isnothing(x1)
             if intercept
                 intercept_value = mean(y .+ mu)
                 coefs = zeros(p+1, 1)
@@ -401,7 +401,7 @@ function rlasso(x, y;
 
     if intercept
         beta = vcat(intercept_value, coefTemp)
-        beta = DataFrame([ append!(["Intercept"], colnames), beta ], :auto)
+        beta = DataFrame([append!(["Intercept"], colnames), beta], :auto)
     else
         beta = coefTemp
     end
