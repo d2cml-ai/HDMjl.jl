@@ -21,7 +21,7 @@ function rlasso(x, y;
     elseif !isnothing(colnames)
         colnames = colnames
     else
-        colnames = map.(string, "V", 1:p)
+        colnames = reduce(vcat, map.(string, "V", 1:p))
     end
     if typeof(y) == DataFrame
         y = Matrix(y)
@@ -38,7 +38,7 @@ function rlasso(x, y;
     end
     
     normx = sqrt.(var(x, corrected = true, dims = 2))
-    Psi = mean.(eachcol(x.^2))
+    Psi = mean.(eachcol(x .^ 2))
     ind = zeros(Bool, p)
     
     XX = x'*x
@@ -47,11 +47,11 @@ function rlasso(x, y;
     startingval = init_values(x, y)["residuals"]
     pen = lambdaCalculation(x = x, y = y, homoskedastic = homoskedastic, X_dependent_lambda = X_dependent_lambda, lambda_start = lambda_start, c = c, gamma = gamma)
     lambda = pen["lambda"]
-    Ups0 = pen["Ups0"]
+    Ups0 = Ups1 = pen["Ups0"]
     lambda0 = pen["lambda0"]
     
     mm = 1
-    s0 = sqrt(var(y, corrected = true))
+    s0 = sqrt(var(y))
     y = vec(y)
     
     while mm <= maxIter
@@ -62,9 +62,9 @@ function rlasso(x, y;
         end
         
         global coefTemp[isnan.(coefTemp)] .= 0
-        global ind1 =  abs.(coefTemp) .> 0
+        global ind1 = abs.(coefTemp) .> 0
         global x1 = x[:, ind1]
-        if isnothing(x1)
+        if isempty(x1)
             if intercept
                 intercept_value = mean(y .+ mu)
                 coefs = zeros(p+1, 1)
@@ -98,16 +98,16 @@ function rlasso(x, y;
             est["rss"] = sum((y .- mean(y)).^2)
             est["dev"] = y .- mean(y)
         end
-        if post
+        if post & !isempty(x1)
             reg = lm(x1, y)
             coefT = coef(reg)
             coefT[isnan.(coefT)] .= 0
             global e1 = y - x1 * coefT
             coefTemp[ind1] = coefT
-        elseif !post
+        elseif !post | isempty(x1)
             global e1 = y - x1 * coefTemp[ind1]
         end
-        s1 = sqrt(var(e1, corrected = true))
+        s1 = sqrt(var(e1))
         
         # Homoskedastic and X-independent
         if homoskedastic & !X_dependent_lambda
@@ -143,11 +143,11 @@ function rlasso(x, y;
         s0 = s1
     end
     
-    global Ups1, ind1, coefTemp = Ups1, ind1, coefTemp
-    if isnothing(x)
+    global x1, Ups1, ind1, coefTemp = x1, Ups1, ind1, coefTemp
+    if isempty(x1)
         coefTemp = nothing
         ind1 = zeros(p, 1)
-    end    
+    end
     if !isnothing(threshold)
         coefTemp[abs.(coefTemp) .< threshold] = 0
     end
@@ -159,9 +159,9 @@ function rlasso(x, y;
             meanx = zeros( size(coefTemp)[1], 1)
         end
         if sum(ind) == 0
-            intercept_value = mu - sum(meanx .* coefTemp)
+            intercept_value = mu - sum(meanx * coefTemp)
         else
-            intercept_value = mu - sum(meanx .* coefTemp)
+            intercept_value = mu - sum(meanx * coefTemp)
         end
     else
         intercept_value = NaN
@@ -169,12 +169,12 @@ function rlasso(x, y;
 
     if intercept
         beta = vcat(intercept_value, coefTemp)
-        beta = DataFrame([ append!(["Intercept"], colnames), beta ], :auto)
+        beta = DataFrame([append!(["Intercept"], colnames), beta], :auto)
     else
         beta = coefTemp
     end
     
-    s1 = sqrt(var(e1, corrected = true))
+    s1 = sqrt(var(e1))
     est = Dict(
     "coefficients" => beta,
     "beta" => DataFrame([colnames, coefTemp], :auto), 
