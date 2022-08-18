@@ -1,4 +1,4 @@
-function LassoShooting_fit(x, y, lmbda, 
+function LassoShooting_fit(x, y, lmbda = nothing; 
         maxIter::Int = 1000, 
         optTol::Float64 = 10^(-5), 
         zeroThreshold::Float64 = 10^(-6), 
@@ -38,7 +38,7 @@ function LassoShooting_fit(x, y, lmbda,
     end
 
    if (isnothing(beta_start))
-        beta = init_values(x, y, 5, false)["coefficients"]
+        beta = init_values(x, y, intercept = false)["coefficients"]
     else
         beta = beta_start
     end
