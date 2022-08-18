@@ -100,7 +100,7 @@ function rlasso(x, y;
         end
         if post & !isempty(x1)
             reg = lm(x1, y)
-            coefT = coef(reg)
+            coefT = GLM.coef(reg)
             coefT[isnan.(coefT)] .= 0
             global e1 = y - x1 * coefT
             coefTemp[ind1] = coefT
