@@ -45,7 +45,7 @@ function rlasso(x, y;
     Xy = x'*y
     
     startingval = init_values(x, y)["residuals"]
-    pen = lambdaCalculation(x = x, y = y, homoskedastic = homoskedastic, X_dependent_lambda = X_dependent_lambda, lambda_start = lambda_start, c = c, gamma = gamma)
+    pen = lambdaCalculation(x = x, y = startingval, homoskedastic = homoskedastic, X_dependent_lambda = X_dependent_lambda, lambda_start = lambda_start, c = c, gamma = gamma)
     lambda = pen["lambda"]
     Ups0 = Ups1 = pen["Ups0"]
     lambda0 = pen["lambda0"]

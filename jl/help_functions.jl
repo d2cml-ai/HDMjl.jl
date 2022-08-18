@@ -1,24 +1,33 @@
 using Statistics, GLM
 
-function init_values(X, y, number::Int64 = 5, intercept::Bool = true)
-    
-    corr = abs.(cor(y, X)[1, :])
-    kx = size(X, 2)
-    index = sortperm(corr, rev = true)[1: min(number, kx)]
-    
-    coefficients = zeros(kx)
-    
-    reg = lm(X[:, index], y)
-    coefficients[index] = GLM.coef(reg)
-    replace!(coefficients, NaN=>0)
-    
-    e = y - predict(reg, X[:, index])
-    
+function init_values(x, y, number::Int64 = 5, intercept::Bool = true)
+
+    n, p = size(x)
+
+    corr = []
+    for i in 1:p
+        append!(corr, abs(cor(y, x[:, i])))
+    end
+
+    index = sortperm(corr, rev = true)[1 : min(number, p)]
+    coefficients = zeros(p)
+
+    x = Matrix(x)
+
+    if intercept
+        x_mtrx = hcat(ones(n), x[:, index])
+        reg = GLM.lm(x_mtrx, y)
+        coefficients[index] = GLM.coef(reg)[2:end]
+        e = y - GLM.predict(reg, x_mtrx)
+    else
+        reg = GLM.lm(x[:, index], y)
+        coefficients[index] = GLM.coef(reg)
+        e = y - GLM.predict(reg, x[:, index])
+    end
+
     res = Dict("coefficients" => coefficients, "residuals" => e)
-    
+
     return res
-    #return index
-    
 end
 
 function lambdaCalculation(     ; homoskedastic::Bool=false, X_dependent_lambda::Bool=false,
