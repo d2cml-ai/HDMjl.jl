@@ -1,5 +1,5 @@
 using CSV, DataFrames, GLM, GLMNet
-using Distributions, Random
+using Distributions, Random, Statistics
 
 # pwd()
 # ajr = CSV.read("jl/Data/ajr.csv", DataFrame)
@@ -16,16 +16,23 @@ x = x[:, 2:21]
 
 # params
 
+size(x)
+
+
+
+
 function rlassologit(x, y; 
     penalty_c::Float64 = 0.1,
     post::Bool = true,
     penalty_gamma::Float64 = .1,
-    penalty_lambda::Float64 = nothing,
+    penalty_lambda::Any = nothing, #nothing
     intercept::Bool = true,
-    control_threshold::Float64 = nothing)
+    control_threshold::Any = nothing #nothing
+    )
 
 
     n, p = size(x)
+
 
     if !isnothing(penalty_c)
         if post
@@ -166,5 +173,5 @@ function rlassologit(x, y;
 
 end
     
-r = rlassologit(x, y)
-r["beta"]
+# r = rlassologit(x, y, post = false)
+# r["beta"]
