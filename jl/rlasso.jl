@@ -45,7 +45,7 @@ function rlasso(x, y;
     Xy = x'*y
     
     startingval = init_values(x, y)["residuals"]
-    pen = lambdaCalculation(x = x, y = y, homoskedastic = homoskedastic, X_dependent_lambda = X_dependent_lambda, lambda_start = lambda_start, c = c, gamma = gamma)
+    pen = lambdaCalculation(x = x, y = startingval, homoskedastic = homoskedastic, X_dependent_lambda = X_dependent_lambda, lambda_start = lambda_start, c = c, gamma = gamma)
     lambda = pen["lambda"]
     Ups0 = Ups1 = pen["Ups0"]
     lambda0 = pen["lambda0"]
@@ -100,7 +100,7 @@ function rlasso(x, y;
         end
         if post & !isempty(x1)
             reg = lm(x1, y)
-            coefT = coef(reg)
+            coefT = GLM.coef(reg)
             coefT[isnan.(coefT)] .= 0
             global e1 = y - x1 * coefT
             coefTemp[ind1] = coefT

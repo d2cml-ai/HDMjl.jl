@@ -1,24 +1,33 @@
-using Statistics, GLM
+using Statistics, GLM, LinearAlgebra
 
-function init_values(X, y, number::Int64 = 5, intercept::Bool = true)
-    
-    corr = abs.(cor(y, X)[1, :])
-    kx = size(X, 2)
-    index = sortperm(corr, rev = true)[1: min(number, kx)]
-    
-    coefficients = zeros(kx)
-    
-    reg = lm(X[:, index], y)
-    coefficients[index] = GLM.coef(reg)
-    replace!(coefficients, NaN=>0)
-    
-    e = y - predict(reg, X[:, index])
-    
+function init_values(x, y, number::Int64 = 5, intercept::Bool = true)
+
+    n, p = size(x)
+
+    corr = []
+    for i in 1:p
+        append!(corr, abs(cor(y, x[:, i])))
+    end
+
+    index = sortperm(corr, rev = true)[1 : min(number, p)]
+    coefficients = zeros(p)
+
+    x = Matrix(x)
+
+    if intercept
+        x_mtrx = hcat(ones(n), x[:, index])
+        reg = GLM.lm(x_mtrx, y)
+        coefficients[index] = GLM.coef(reg)[2:end]
+        e = y - GLM.predict(reg, x_mtrx)
+    else
+        reg = GLM.lm(x[:, index], y)
+        coefficients[index] = GLM.coef(reg)
+        e = y - GLM.predict(reg, x[:, index])
+    end
+
     res = Dict("coefficients" => coefficients, "residuals" => e)
-    
+
     return res
-    #return index
-    
 end
 
 function lambdaCalculation(     ; homoskedastic::Bool=false, X_dependent_lambda::Bool=false,
@@ -43,7 +52,7 @@ function lambdaCalculation(     ; homoskedastic::Bool=false, X_dependent_lambda:
         # Initialize lambda
         lmbda0 = lambda_start
 
-        Ups0 = (1 /sqrt(n)) * sqrt.((y.^2)'*(x.^2))
+        Ups0 = (1 /sqrt(n)) * sqrt.((x.^2)' * (y.^2))
 
         # Calculate the final vector of penalty terms
         lmbda = lmbda0 * Ups0
@@ -77,7 +86,7 @@ function lambdaCalculation(     ; homoskedastic::Bool=false, X_dependent_lambda:
     elseif homoskedastic == true && X_dependent_lambda == true
 
         psi = mean.(eachcol(x.^2))
-        tXtpsi = (x' ./ sqrt(psi))'
+        tXtpsi = (x' ./ sqrt(psi))' 
 
         R = 5000
         sim = zeros(R,1)
@@ -88,12 +97,12 @@ function lambdaCalculation(     ; homoskedastic::Bool=false, X_dependent_lambda:
         end
 
         # Initialize lambda based on the simulated quantiles
-        lmbda0 = c*quantile(vec(sim), 1 - gamma)
+        lmbda0 = c*quantile.(vec(sim), 1 - gamma)
 
         Ups0 = sqrt(var(y, corrected = true))
 
         # Calculate the final vector of penalty terms
-        lmbda = zeros(p,1) .+ lmbda0 * Ups0
+        lmbda = zeros(p,1) .+ lmbda0 .* Ups0
 
     # 5) Heteroskedastic and X-independent
     elseif homoskedastic == false &&  X_dependent_lambda == false
@@ -101,9 +110,9 @@ function lambdaCalculation(     ; homoskedastic::Bool=false, X_dependent_lambda:
         # The original includes the comment, "1=num endogenous variables"
         lmbda0 = 2 * c * sqrt(n) * quantile(Normal(0.0, 1.0),1 - gamma/(2*p*1))
 
-        Ups0 = (1 /sqrt(n)) * sqrt.((y.^2)'*(x.^2))'
+        Ups0 = (1 /sqrt(n)) * sqrt.((x.^2)' * (y.^2))'
         
-        lmbda = lmbda0 * Ups0
+        lmbda = lmbda0 .* Ups0
 
     # 6) Heteroskedastic and X-dependent
     elseif homoskedastic == false &&  X_dependent_lambda == true
@@ -120,17 +129,18 @@ function lambdaCalculation(     ; homoskedastic::Bool=false, X_dependent_lambda:
 
         for l in 1:R
                 g = reshape(repeat(randn(n), inner = p),(p, n))'
-                sim[l] = n * maximum(2*abs.(mean.(eachcol(tXtpsi.* g))))
+                sim[l] = n * maximum(2*abs.(mean.(eachcol(tXehattpsi.* g))))
         end
 
         # Initialize lambda based on the simulated quantiles
-        lmbda0 = c*quantile(vec(sim), 1 - gamma)
+        lmbda0 = c .* quantile.(vec(sim), 1 - gamma)
 
-        Ups0 = (1 /sqrt(n)) * sqrt.((y.^2)'*(x.^2))
+        Ups0 = (1 /sqrt(n)) * sqrt.((x.^2)' * (y.^2))
 
-        lmbda = lmbda0 * Ups0
+        lmbda = lmbda0 .* Ups0
 
     end
     return Dict("lambda0" => lmbda0, "lambda" => lmbda, "Ups0" => Ups0) 
     
 end
+
