@@ -56,14 +56,28 @@ function rlasso(x, y;
     
     while mm <= maxIter
         if mm == 1 & post
+            # print("s")
             global coefTemp = LassoShooting_fit(x, y, lambda ./ 2, XX = XX, Xy = Xy)["coefficients"]
         else
+            # print("no")
             global coefTemp = LassoShooting_fit(x, y, lambda, XX = XX, Xy = Xy)["coefficients"]
+            # print(coefTemp)
         end
         
-        global coefTemp[isnan.(coefTemp)] .= 0
-        global ind1 = abs.(coefTemp) .> 0
+        # global coefTemp[isnan.(coefTemp)] .= 0 ##errot
+        # print(coefTemp)
+        global ind0 = abs.(coefTemp) .> 0
+        global ind1 = []
+        for i in eachindex(ind0)
+            if ind0[i] == 1
+                append!(ind1, i)
+            end
+        end
+
+
         global x1 = x[:, ind1]
+        # print(size(x1))
+
         if isempty(x1)
             if intercept
                 intercept_value = mean(y .+ mu)
@@ -98,6 +112,7 @@ function rlasso(x, y;
             est["rss"] = sum((y .- mean(y)).^2)
             est["dev"] = y .- mean(y)
         end
+        
         if post & !isempty(x1)
             reg = lm(x1, y)
             coefT = GLM.coef(reg)
@@ -108,7 +123,7 @@ function rlasso(x, y;
             global e1 = y - x1 * coefTemp[ind1]
         end
         s1 = sqrt(var(e1))
-        
+        #------ 
         # Homoskedastic and X-independent
         if homoskedastic & !X_dependent_lambda
             Ups1 = s1 * Psi
@@ -137,12 +152,11 @@ function rlasso(x, y;
         end
         
         mm = mm + 1
-        if abs.(s0 - s1) < tol
-            break
-        end
-        s0 = s1
+        # if abs.(s0 - s1) < tol
+            # break
+        # end
+        # s0 = s1
     end
-    
     global x1, Ups1, ind1, coefTemp = x1, Ups1, ind1, coefTemp
     if isempty(x1)
         coefTemp = nothing
@@ -187,6 +201,7 @@ function rlasso(x, y;
     "sigma" => s1,
     "iter" => mm,
     #"call"=> Not a Python option
+    # "predict" => 
     "options" => Dict("post" => post, "intercept" => intercept, 
             "ind.scale" => ind, "mu" => mu, "meanx" => meanx),
     "model" => model

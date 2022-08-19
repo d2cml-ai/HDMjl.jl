@@ -1,34 +1,43 @@
 using Statistics, GLM, LinearAlgebra
 
-function init_values(x, y, number::Int64 = 5, intercept::Bool = true)
+
+function init_values(x, y; number::Int64 = 5, intercept::Bool = true)
 
     n, p = size(x)
 
     corr = []
     for i in 1:p
-        append!(corr, abs(cor(y, x[:, i])))
+        append!(corr, abs.(cor(y, x[:, i])))
     end
 
     index = sortperm(corr, rev = true)[1 : min(number, p)]
     coefficients = zeros(p)
-
-    x = Matrix(x)
+    data = hcat(y, ones(n), Matrix(x)[:, index])
+    
 
     if intercept
-        x_mtrx = hcat(ones(n), x[:, index])
-        reg = GLM.lm(x_mtrx, y)
+        data = hcat(y, ones(n), Matrix(x)[:, index])
+        reg = GLM.lm(data[:, Not(1)], data[:, 1])
         coefficients[index] = GLM.coef(reg)[2:end]
-        e = y - GLM.predict(reg, x_mtrx)
+        y_hat = GLM.predict(reg, data[:, Not(1)])
+        e = y .- y_hat
     else
-        reg = GLM.lm(x[:, index], y)
+        data = hcat(y, Matrix(x)[:, index])
+        reg = GLM.lm(data[:, Not(1)], data[:, 1])
         coefficients[index] = GLM.coef(reg)
-        e = y - GLM.predict(reg, x[:, index])
+        y_hat = GLM.predict(reg, data[:, Not(1)])
+        e = y .- y_hat   
     end
 
-    res = Dict("coefficients" => coefficients, "residuals" => e)
-
+    res = Dict(
+        "coefficients" => coefficients, "residuals" => e, "index" => index, 
+        "Data" => data, "predict" =>  y_hat
+    )
+    # val = Dict("x" => x1, "y" => y, "ind" => index)
     return res
+    # return val
 end
+
 
 function lambdaCalculation(     ; homoskedastic::Bool=false, X_dependent_lambda::Bool=false,
                                 lambda_start=nothing, c::Float64=1.1, gamma::Float64=0.1, 
@@ -110,10 +119,10 @@ function lambdaCalculation(     ; homoskedastic::Bool=false, X_dependent_lambda:
         # The original includes the comment, "1=num endogenous variables"
         lmbda0 = 2 * c * sqrt(n) * quantile(Normal(0.0, 1.0),1 - gamma/(2*p*1))
 
-        Ups0 = (1 /sqrt(n)) * sqrt.((x.^2)' * (y.^2))'
+        Ups0 = (1 /sqrt(n)) * sqrt.((y.^2)'*(x.^2))'
         
-        lmbda = lmbda0 .* Ups0
-
+        lmbda = lmbda0 * Ups0
+        
     # 6) Heteroskedastic and X-dependent
     elseif homoskedastic == false &&  X_dependent_lambda == true
 

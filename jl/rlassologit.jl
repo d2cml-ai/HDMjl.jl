@@ -165,9 +165,9 @@ function rlassologit(x, y;
     end
 
     est = Dict(
-        "Coefficients" => coefs, "beta" => coefTemp1, "intercept" => a0, "index" => ind,
+        "coefficients" => coefs, "beta" => coefTemp1, "intercept" => a0, "index" => ind,
         "lambda0" => lambda0, "residuals" => e1, "sigma" => sqrt(var(e1)),
-        "Options" => Dict("post" => post, "intercept" => intercept, "control" => control_threshold)
+        "options" => Dict("post" => post, "intercept" => intercept, "control" => control_threshold)
     )
     return est
 
