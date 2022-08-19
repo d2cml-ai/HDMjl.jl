@@ -104,137 +104,145 @@ rlassologit.character <- function(x, data = NULL, post = TRUE, intercept = TRUE,
 }
 
 #' @rdname rlassologit
-#' @export
-rlassologit.default <- function(
-  x, y, post = TRUE
-  , intercept = TRUE
-  ,  model = TRUE
-  , penalty = list(
-    lambda = NULL,
-    c = 1.1
-    , gamma =  0.1/log(n))
-    , control = list(threshold = NULL)
-    , ...) {
+# #' @export
+# rlassologit.default <- function(
+#   x, y, post = TRUE
+#   , intercept = TRUE
+#   ,  model = TRUE
+#   , penalty = list(
+#     lambda = NULL,
+#     c = 1.1
+#     , gamma =  0.1/log(n))
+#     , control = list(threshold = NULL)
+#     , ...) {
 
-  n <- dim(x)[1]
-  p <- dim(x)[2]
+library(hdm)
+ajr = hdm::AJR
+y = ajr$GDP
+x_form = GDP ~ Latitude + Latitude2 + Africa + Asia + Namer + Samer
+x = model.matrix(x_form, ajr)
+d = ajr$Exprop
+z = ajr$logMort
 
-  if (is.null(colnames(x))) 
-    colnames(x) <- paste("V", 1:p, sep = "")
-  ind.names <- 1:p
-  
-  if (!exists("c", where = penalty)) {
-    if (post==TRUE) {
-      penalty$c = 1.1
-    } else {
-      penalty$c = 0.5
-    }
-  }
-  
-  if (!exists("gamma", where = penalty)) {
-    penalty$gamma = 0.1/log(n)
-  }
-  
-  if (is.null(penalty$gamma)) {
-    penalty$gamma = 0.1/log(n)
-  }
-  
-  if (!is.null(penalty$lambda)) {
-    lambda <- penalty$lambda/(2 * n)
-    lambda0 <- lambda * (2 * n)
+n <- dim(x)[1]
+p <- dim(x)[2]
+
+if (is.null(colnames(x))) 
+  colnames(x) <- paste("V", 1:p, sep = "")
+ind.names <- 1:p
+
+if (!exists("c", where = penalty)) {
+  if (post==TRUE) {
+    penalty$c = 1.1
   } else {
-    lambda0 <- penalty$c/2 * sqrt(n) * qnorm(1 - penalty$gamma/(2 * p))
-    #lambda0 <- penalty$c/2 * sqrt(n) * qnorm(1 - penalty$gamma/(max(n, p*log(n))))
-    lambda <- lambda0/(2 * n)
+    penalty$c = 0.5
   }
-  
-  s0 <- sqrt(var(y))
-  # calculation parameters
-  #xs <- scale(x, center = FALSE, scale = TRUE) # to prevent "double" scaling, removed also from next line
-  log.lasso <- glmnet::glmnet(x, y, family = c("binomial"), alpha = 1,
-                              lambda = lambda[1], standardize = TRUE, intercept = intercept)
-  coefTemp <- as.vector(log.lasso$beta)
-  coefTemp[is.na(coefTemp)] <- 0
-  ind1 <- (abs(coefTemp) > 0)
-  x1 <- as.matrix(x[, ind1, drop = FALSE])
-  if (dim(x1)[2] == 0) {
-    if (intercept == TRUE) {
-      a0 <- log(mean(y)/(1 - mean(y)))
-      res <- y - mean(y)
-      coefs <- c(a0, rep(0,p))
-      names(coefTemp) <- names(ind1) <- colnames(x)
-      names(coefs) <- c("(Intercept)", names(coefTemp))
-    }
-    
-    if (intercept == FALSE) {
-      a0 <- 0  # or NA?
-      res <- y - 0.5
-      message("Residuals not defined, set to 0.5")
-      coefs <- rep(0,p)
-      names(coefTemp) <- names(ind1) <- colnames(x)
-      names(coefs) <- names(coefTemp)
-    }
-    est <- list(coefficients = coefs, beta = coefTemp, intercept = a0, index = rep(FALSE, 
-                                                               p), s0 = s0, lambda0 = lambda0, residuals = res, sigma = sqrt(var(res)), 
-                call = match.call(), options = list(post = post, intercept = intercept, 
-                                                    control = control))
-    if (model) est$model <- x
-    class(est) <- c("rlassologit")
-    return(est)
-  }
-  
-  # refinement variance estimation
-  if (post) {
-    if (intercept) {
-      # reg <- glm.fit(x1,y, family = binomial(link = 'logit'),
-      # intercept=intercept)
-      reg <- glm(y ~ x1, family = binomial(link = "logit"))
-      coefT <- coef(reg)[-1]
-      coefT[is.na(coefT)] <- 0
-      e1 <- y - reg$fitted.values
-      coefTemp[ind1] <- coefT
-    }
-    
-    if (!intercept) {
-      reg <- glm(y ~ -1 + x1, family = binomial(link = "logit"))
-      coefT <- coef(reg)
-      coefT[is.na(coefT)] <- 0
-      e1 <- y - reg$fitted.values
-      coefTemp[ind1] <- coefT
-    }
-  }
-  if (!post) {
-    e1 <- y - predict(log.lasso, newx = x, type = "response")
-  }
-  
-  coefTemp <- as.vector(coefTemp)
-  coefTemp[abs(coefTemp) < control$threshold] <- 0
-  ind1 <- as.vector(ind1)
-  names(coefTemp) <- names(ind1) <- colnames(x)
-  
-  
+}
+
+if (!exists("gamma", where = penalty)) {
+  penalty$gamma = 0.1/log(n)
+}
+
+if (is.null(penalty$gamma)) {
+  penalty$gamma = 0.1/log(n)
+}
+
+if (!is.null(penalty$lambda)) {
+  lambda <- penalty$lambda/(2 * n)
+  lambda0 <- lambda * (2 * n)
+} else {
+  lambda0 <- penalty$c/2 * sqrt(n) * qnorm(1 - penalty$gamma/(2 * p))
+  #lambda0 <- penalty$c/2 * sqrt(n) * qnorm(1 - penalty$gamma/(max(n, p*log(n))))
+  lambda <- lambda0/(2 * n)
+}
+
+s0 <- sqrt(var(y))
+# calculation parameters
+#xs <- scale(x, center = FALSE, scale = TRUE) # to prevent "double" scaling, removed also from next line
+log.lasso <- glmnet::glmnet(x, y, family = c("binomial"), alpha = 1,
+                            lambda = lambda[1], standardize = TRUE, intercept = intercept)
+coefTemp <- as.vector(log.lasso$beta)
+coefTemp[is.na(coefTemp)] <- 0
+ind1 <- (abs(coefTemp) > 0)
+x1 <- as.matrix(x[, ind1, drop = FALSE])
+if (dim(x1)[2] == 0) {
   if (intercept == TRUE) {
-    if (post == TRUE) 
-      a0 <- coef(reg)[1]
-    if (post == FALSE) 
-      a0 <- coef(log.lasso)[1]
-    
-    coefs <- c(a0, coefTemp)
-    names(coefs)[1] <- "(Intercept)"
+    a0 <- log(mean(y)/(1 - mean(y)))
+    res <- y - mean(y)
+    coefs <- c(a0, rep(0,p))
+    names(coefTemp) <- names(ind1) <- colnames(x)
+    names(coefs) <- c("(Intercept)", names(coefTemp))
   }
   
   if (intercept == FALSE) {
     a0 <- 0  # or NA?
-    coefs <- coefTemp
+    res <- y - 0.5
+    message("Residuals not defined, set to 0.5")
+    coefs <- rep(0,p)
+    names(coefTemp) <- names(ind1) <- colnames(x)
+    names(coefs) <- names(coefTemp)
   }
-  
-  est <- list(coefficients = coefs, beta = coefTemp, intercept=a0, index = ind1, lambda0 = lambda0, 
-              residuals = e1, sigma = sqrt(var(e1)), call = match.call(), options = list(post = post, 
-                                                                                         intercept = intercept, control = control))
+  est <- list(coefficients = coefs, beta = coefTemp, intercept = a0, index = rep(FALSE, 
+                                                             p), s0 = s0, lambda0 = lambda0, residuals = res, sigma = sqrt(var(res)), 
+              call = match.call(), options = list(post = post, intercept = intercept, 
+                                                  control = control))
   if (model) est$model <- x
   class(est) <- c("rlassologit")
   return(est)
 }
+
+# refinement variance estimation
+if (post) {
+  if (intercept) {
+    # reg <- glm.fit(x1,y, family = binomial(link = 'logit'),
+    # intercept=intercept)
+    reg <- glm(y ~ x1, family = binomial(link = "logit"))
+    coefT <- coef(reg)[-1]
+    coefT[is.na(coefT)] <- 0
+    e1 <- y - reg$fitted.values
+    coefTemp[ind1] <- coefT
+  }
+  
+  if (!intercept) {
+    reg <- glm(y ~ -1 + x1, family = binomial(link = "logit"))
+    coefT <- coef(reg)
+    coefT[is.na(coefT)] <- 0
+    e1 <- y - reg$fitted.values
+    coefTemp[ind1] <- coefT
+  }
+}
+if (!post) {
+  e1 <- y - predict(log.lasso, newx = x, type = "response")
+}
+
+coefTemp <- as.vector(coefTemp)
+coefTemp[abs(coefTemp) < control$threshold] <- 0
+ind1 <- as.vector(ind1)
+names(coefTemp) <- names(ind1) <- colnames(x)
+
+
+if (intercept == TRUE) {
+  if (post == TRUE) 
+    a0 <- coef(reg)[1]
+  if (post == FALSE) 
+    a0 <- coef(log.lasso)[1]
+  
+  coefs <- c(a0, coefTemp)
+  names(coefs)[1] <- "(Intercept)"
+}
+
+if (intercept == FALSE) {
+  a0 <- 0  # or NA?
+  coefs <- coefTemp
+}
+
+est <- list(coefficients = coefs, beta = coefTemp, intercept=a0, index = ind1, lambda0 = lambda0, 
+            residuals = e1, sigma = sqrt(var(e1)), call = match.call(), options = list(post = post, 
+                                                                                       intercept = intercept, control = control))
+if (model) est$model <- x
+class(est) <- c("rlassologit")
+return(est)
+# }
 
 
 ############################################################################################################################### 
