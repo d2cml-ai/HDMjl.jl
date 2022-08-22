@@ -1,5 +1,5 @@
 using GLM
-using Distributions
+using Distributionss
 
 include("rlasso.jl")
 include("rlassologit.jl")
