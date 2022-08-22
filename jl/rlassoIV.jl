@@ -41,10 +41,10 @@ function rlassoIV(x, d, y, z; select_Z::Bool = true, select_X::Bool = true, post
         if sum(lasso_y_x["index"]) == 0
             Zr = PZ .- mean(x)
         else
-            Yr = lasso_PZ_x["residuals"]
+            Zr = lasso_PZ_x["residuals"]
         end
         
-        res = tsls(Dr, Yr, Zr, intercept = false, homoskedastic = false)
+        res = tsls(Dr, Yr, Zr, intercept = false) #heteroscedastic to be added
         return res
     end
 end
