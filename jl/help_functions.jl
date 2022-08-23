@@ -1,4 +1,4 @@
-function init_values(X, y; number::Int64 = 5) # intercept::Bool = true
+function init_values(X, y; number::Int64 = 5, intercept::Bool = true)
     
     corr = abs.(cor(y, X)[1, :])
     kx = size(X, 2)
