@@ -48,7 +48,7 @@ function tsls(d::Array, y::Array, z::Array, x::Union{Nothing, DataFrame, Array} 
         e = y - X * b
         S = 0
         for i in 1:n
-            S = S + e[i] ^ 2 * (Z[i, :] * Z[i, :]')
+            S = S + e[i] ^ 2 * (Z[i, :]' * Z[i, :])
         end
         S = S / n
         VC1 = n .* M * (Mxz * Mzz .* S * Mzz * Mxz') * M

@@ -44,7 +44,7 @@ function rlassoIV(x, d, y, z; select_Z::Bool = true, select_X::Bool = true, post
             Zr = lasso_PZ_x["residuals"]
         end
         
-        res = tsls(Dr, Yr, Zr, intercept = false) #heteroscedastic to be added
+        res = tsls(Dr, Yr, Zr, intercept = false, homoscedastic = false)
         return res
     end
 end
