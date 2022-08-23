@@ -10,7 +10,7 @@ function init_values(X, y; number::Int64 = 5, intercept::Bool = true)
     coefficients[index] = GLM.coef(reg)
     replace!(coefficients, NaN => 0)
     
-    e = y - predict(reg, X[:, index])
+    e = y - GLM.predict(reg, X[:, index])
     
     res = Dict("coefficients" => coefficients, "residuals" => e)
     
