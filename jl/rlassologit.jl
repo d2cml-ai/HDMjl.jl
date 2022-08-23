@@ -79,9 +79,7 @@ function rlassologit(x, y;
             append!(columns_select, i)
         end
     end
-
     x2 = x1[:, columns_select]
-
     if size(x2, 2) == 0
         if intercept == true
             a0 = log(mean(y) / (1 - mean(y)))
@@ -138,6 +136,7 @@ function rlassologit(x, y;
         e1 = y - GLMNet.predict(log_lasso, x1, outtype = :response)
     end
 
+
     ctr_inx = []
     if !isnothing(control_threshold)
         ctr_eval = abs.(coefTemp1) .< control_threshold
@@ -175,3 +174,88 @@ end
     
 # r = rlassologit(x, y, post = false)
 # r["beta"]
+
+### rlassologitEffect
+
+x
+y
+d
+I3 = []
+post = true
+
+x = Matrix(x[:, :])
+d = Matrix(d[:, :])
+y = Matrix(y[:, :])
+
+n, p = size(x)
+
+la1 = 1.1 / 2 & sqrt(n) * quantile(Normal(0, 1), 1 - 0.05 / (max(n, (p + 1) * log(n))))
+
+dx = hcat(d, x)
+
+l1 = rlassologit(dx, y, post = post, intercept = true, penalty_lambda = la1)
+x1 = l1["residuals"]
+
+t = l1["coefficients"] * dx
+
+sigma2 = exp.(t) ./ (1 .+ exp.(t)).^2
+
+w = copy(sigma2)
+f = sqrt.(sigma2)
+
+I1 = l1["index"]
+
+lambda = 2.2 * sqrt(n) * quantile(Normal(0, 1), 1 - 0.05 / max(n, p * log(n)))
+la2 = repeat([lamda], p)
+xf = x .* f
+df = d .* f
+
+l2 = rlasso(xf, df, post = post, intercept = true, homocedastic = "none", lambda_start = la2, penalty_c = 1.1, penalty_gamma = 0.1)
+
+I2 = l2["index"]
+z = l2["residuals"] ./ sqrt.(sigma2)
+
+if unique(I3) == 2
+    I = I1 + I2 + I3
+    # I = as_logical(I)
+else
+    I = I1 + I2
+    # I = as_logical(I)
+end
+
+ind = []
+for i in eachindex(I)
+    if i > 1
+        append!(ind, i)
+    end
+end
+
+
+xselect = x[:, I]
+p3 = size(xselect, 2)
+
+data3 = hcat(y, d, xselect)
+rename!(data3, x1 => "y")
+
+
+l3 = glm(Term(:y) ~  sum(Term.(Symbol.(names(data3[:, Not(:y)])))), data3, Binomial()) 
+alpha = GLM.coef(l3)[2]
+
+t3 = GLM.predict(l3)
+g3 = exp.(t3) / (1 + exp.(t3))
+w3 = g3 * (1 - g3)
+s21 = 1 / mean(@. w3 * d * z)^2 * mean((y - g3).^2 * z.^2)
+# TODO: index GLM
+# xtilde = x[:, index(l3)]
+# p2 = sum(index(l3))
+
+b = hcat(d, xtilde)
+p3 = size(b, 2)
+A = zeros(p4, p4)
+
+for i in i:n
+    w3[i]  #*outer(b[i, :], b[i, :])
+end
+
+# TODO: 210 en adelante
+s22 = 

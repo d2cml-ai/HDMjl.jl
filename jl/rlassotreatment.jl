@@ -207,6 +207,11 @@ function rlassoLATE(x, d, y, z; bootstrap = "none", n_rep = 100, always_takers =
     return object
 end
 
+function rlassoATE(x, d, y; bootstrap = "none", n_rep = 500)
+    z = copy(d)
+    res = rlassoLATE(x, d, y, z, bootstrap = bootstrap, n_rep = n_rep)
+    res["type"] = "ATE"
+end
 
 rlassoLATE(x, d, y, z, bootstrap = "wild", always_takers = true, never_takers = true, intercept = false, post = false)
 
