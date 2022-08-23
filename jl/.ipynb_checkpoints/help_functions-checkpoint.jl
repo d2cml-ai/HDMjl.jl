@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 function init_values(X, y; number::Int64 = 5) # intercept::Bool = true
+=======
+function init_values(X, y; number::Int64 = 5, intercept::Bool = true)
+>>>>>>> main
     
     corr = abs.(cor(y, X)[1, :])
     kx = size(X, 2)
@@ -15,6 +19,11 @@ function init_values(X, y; number::Int64 = 5) # intercept::Bool = true
     res = Dict("coefficients" => coefficients, "residuals" => e)
     
     return res
+<<<<<<< HEAD
+=======
+    #return index
+    
+>>>>>>> main
 end
 
 function lambdaCalculation(; homoskedastic::Bool = false, X_dependent_lambda::Bool = false, lambda_start = nothing, c::Float64 = 1.1, gamma::Float64 = 0.1, numSim::Int = 5000, y = nothing, x = nothing)
