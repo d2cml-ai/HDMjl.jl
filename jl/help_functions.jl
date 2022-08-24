@@ -1,5 +1,5 @@
-using GLM
-using Test
+# using GLM
+# using Test
 function init_values(x, y; number::Int64 = 5, intercept::Bool = true)
 
 
@@ -35,8 +35,6 @@ function init_values(x, y; number::Int64 = 5, intercept::Bool = true)
     )
     # val = Dict("x" => x1, "y" => y, "ind" => index)
     return res
-    # return val
-
 end
 
 

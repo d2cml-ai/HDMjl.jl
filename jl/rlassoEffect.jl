@@ -2,7 +2,7 @@
 ## params
 using GLM, Statistics, CSV, DataFrames
 
-include("hdmjl.jl")
+# include("hdmjl.jl")
 
 xlate = CSV.read("jl/data/xlate.csv", DataFrame)
 dlate = CSV.read("jl/data/dlate.csv", DataFrame)
