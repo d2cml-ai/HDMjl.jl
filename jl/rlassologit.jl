@@ -172,7 +172,7 @@ function rlassologit(x, y;
 
 end
     
-# r = rlassologit(x, y, post = false)
+r = rlassologit(x, y, post = false)
 # r["beta"]
 
 ### rlassologitEffect
