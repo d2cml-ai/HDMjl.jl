@@ -47,7 +47,7 @@ function rlasso(x, y; post = true, intercept = true, model = true,
                 coef = zeros(p, 1)
             end
             est = Dict("coefficients" => coef, "beta" => zeros(p, 1), "intercept" => intercept_value, "index" => zeros(Bool, p), "lambda" => lambda, "lambda0" => lambda0, "loadings" => Ups0, 
-            "residuals" => y - mean(y), "sigma" => var(y), "iter" => mm, "options" => Dict("post" => post, "intercept" => intercept, "ind_scale" => ind, "mu" => mu, "meanx" => meanx))
+            "residuals" => y .- mean(y), "sigma" => var(y), "iter" => mm, "options" => Dict("post" => post, "intercept" => intercept, "ind_scale" => ind, "mu" => mu, "meanx" => meanx))
             if model
                 est["model"] = x
             else
@@ -59,7 +59,8 @@ function rlasso(x, y; post = true, intercept = true, model = true,
         end
         
         if post
-            reg = lm(x1, y)
+            data_post = hcat(y, x1)
+            reg = lm(data_post[:, Not(1)], data_post[:, 1])
             coefT = GLM.coef(reg)
             coefT[isnan.(coefT)] .= 0
             global e1 = y - x1 * coefT
@@ -74,7 +75,7 @@ function rlasso(x, y; post = true, intercept = true, model = true,
             Ups1 = s1 * Psi
             lambda = pen["lambda0"] * Ups1
         
-        # Homoskedastic and X-dependent
+        # Homosked/astic and X-dependent
         elseif homoskedastic & X_dependent_lambda
             Ups1 = s1 * Psi
             lambda = pend["lambda0"] * Ups1

@@ -1,5 +1,6 @@
-# using CSV, DataFrames, GLM, GLMNet
-# using Distributions, Random, Statistics
+using CSV, DataFrames, GLM, GLMNet
+using Distributions, Random, Statistics
+include("hdmjl.jl")
 
 # pwd()
 # ajr = CSV.read("jl/Data/ajr.csv", DataFrame)
@@ -9,16 +10,10 @@
 # x = modelmatrix(x_form, ajr)
 # d = ajr.Exprop
 # z = ajr.logMort
-# y = CSV.read("jl/Data/y_rnd.csv", DataFrame)
-# x = CSV.read("jl/Data/x_rnd.csv", DataFrame)
-# y = y.x
-# x = x[:, 2:21]
-
-# # params
-
-# size(x)
-
-
+y = CSV.read("jl/Data/y_rnd.csv", DataFrame)
+x = CSV.read("jl/Data/x_rnd.csv", DataFrame)
+y = y.x
+x = x[:, 2:21]
 
 
 function rlassologit(x, y; 
@@ -79,10 +74,9 @@ function rlassologit(x, y;
             append!(columns_select, i)
         end
     end
-
     x2 = x1[:, columns_select]
+    if size(x2, 2) == 0
 
-    if isempty(x2)
         if intercept == true
             a0 = log(mean(y) / (1 - mean(y)))
             res = y .- mean(y)
@@ -140,6 +134,7 @@ function rlassologit(x, y;
         e1 = y - GLMNet.predict(log_lasso, x1, outtype = :response)
     end
 
+
     ctr_inx = []
     if !isnothing(control_threshold)
         ctr_eval = abs.(coefTemp1) .< control_threshold
@@ -169,11 +164,169 @@ function rlassologit(x, y;
     est = Dict(
         "coefficients" => coefs, "beta" => coefTemp1, "intercept" => a0, "index" => ind,
         "lambda0" => lambda0, "residuals" => e1, "sigma" => sqrt(var(e1)),
-        "Options" => Dict("post" => post, "intercept" => intercept, "control" => control_threshold)
+        "options" => Dict("post" => post, "intercept" => intercept, "control" => control_threshold)
     )
     return est
 
 end
     
-# r = rlassologit(x, y, post = false)
-# r["beta"]
+r = rlassologit(x, y, post = false)
+r["beta"]
+
+### rlassologitEffect
+
+bi = CSV.read("jl/Data/zlate.csv", DataFrame)
+x = CSV.read("jl/Data/x_rnd.csv", DataFrame)
+
+# dlate = CSV.read("jl/Data/zlate.csv", DataFrame)
+# include("hdmjl.jl")
+
+
+
+function rlassologitEffect(X, Y, D; I3::Any = nothing, post = true)
+
+    x = Matrix(X[:, :])
+    d = D[:]
+    y = Y[:]
+    # d = bi[:, 3]
+    # y = bi[:, 2]
+
+    n, p = size(x)
+
+    la1 = 1.1 / 2 * sqrt(n) * quantile(Normal(0, 1), 1 - 0.05 / (max(n, (p + 1) * log(n))))
+
+    dx = hcat(d, x)
+
+    l1 = rlassologit(dx, y, post = post, intercept = true, penalty_lambda = la1)
+    x1 = l1["residuals"]
+
+    t = hcat(ones(n), dx) * l1["coefficients"]
+
+    sigma2 = exp.(t) ./ (1 .+ exp.(t)).^2
+
+    w = copy(sigma2)
+    f = sqrt.(sigma2)
+
+    I1 = l1["index"][Not(1)]
+
+    lambda = 2.2 * sqrt(n) * quantile(Normal(0, 1), 1 - 0.05 / max(n, p * log(n)))
+    la2 = repeat([lambda], p)
+    xf = x .* f
+    df = d .* f
+    l2 = rlasso(xf, df, post = post, intercept = true, homoskedastic = false, lambda_start = la2, c = 1.1, gamma = 0.1)
+    # return l2
+    # include("hdmjl.jl")
+    I2 = l2["index"]
+    z = l2["residuals"] ./ sqrt.(sigma2)
+
+    if isnothing(I3)
+        I = I1 + I2 
+        I = as_logical(I)
+    else
+        I = I1 + I2 + I3
+        I = as_logical(I)
+    end
+
+
+    ind = []
+    for i in eachindex(I)
+        if I[i] > 0 
+            append!(ind, i)
+        end
+    end
+    ind
+
+    xselect = x[:, ind]
+    p3 = size(xselect, 2)
+
+    data3 = DataFrame(hcat(y, d, xselect))
+    rename!(data3, "x1" => "y")
+
+
+    l3 = glm(Term(:y) ~  sum(Term.(Symbol.(names(data3[:, Not(:y)])))), data3, Binomial()) 
+    alpha = GLM.coef(l3)[2]
+    data3
+    g3 = GLM.predict(l3)
+    w3 = @. g3 * (1 - g3)
+    s21 = 1 / mean(@. w3 * d * z)^2 * mean((y .- g3).^2 .* z.^2)
+    # TODO: index GLM
+    # xtilde = x[:, index(l3)]
+    # p2 = sum(index(l3))
+    S2 = max(s21)
+    se = sqrt(s21 / n)
+    tval = alpha / se
+    if isnothing(I)
+        no_select = 1
+    else
+        no_select = 0
+    end
+    # GLM.residuals(l3)
+
+    res = Dict("epsilon" => y - g3, "v" => z)
+    results = Dict(
+        "alpha" => alpha, "se" => se, "t" => tval,# "pval" => pval,
+        "no_select" => no_select, "coefficients" => alpha, "coefficient" => alpha,
+        "residuals" => res, "sample_size" => n, "post" => post
+    )
+    return results
+end
+
+x0 = Matrix(x)
+yyy = bi[:, 4]
+ddd = bi[:, 2]
+include("hdmjl.jl")
+
+
+function rlassologitEffects(x, y; index = 1:3, I3 = nothing, post = true)
+    x = Matrix(x)
+    y = Matrix(y[:, :])
+    n, p = size(x)
+    
+    if Set(index) == 2
+        k = p1 = sum(index)
+    else
+        k = p1 = length(index)
+    end
+
+    coefficients = zeros(k)
+    se = zeros(k)
+    t = zeros(k)
+    reside = Dict("epsilon" => Dict(), "v" => Dict())
+    lasso_regs = Dict()
+
+    # print(k)
+    for i in 1:k
+        d = x[:, index[i]]
+        xt = x[:, Not(index[i])]
+        if isnothing(I3)
+            I3m = I3
+        else
+            I3m = I3[Not(index[i])]
+        end
+        
+        lasso_regs[i] = try
+            rlassologitEffect(xt, y, d, I3 = I3m, post = post)
+        catch
+            "try-error"
+        end
+        if lasso_regs[i] == "try-error"
+            continue
+        else
+            coefficients[i] = lasso_regs[i]["alpha"]
+            se[i] = lasso_regs[i]["se"]
+            t[i] = lasso_regs[i]["t"]
+            reside["epsilon"][i] = lasso_regs[i]["residuals"]["epsilon"]
+            reside["v"][i] = lasso_regs[i]["residuals"]["v"]
+        end
+    end
+    # residual = 
+    res = Dict(
+        "coefficients" => coefficients, "se" => se, "t" => t,
+        "lasso_regs" => lasso_regs, "index" => index, "sample_size" => n,
+        "residuals" => reside
+    )
+    return res
+end
+# rlassologitEffects(x0, yyy)
+# rr = rlassologitEffect(x0, yyy, ddd)
+# rr["residuals"]["v"]

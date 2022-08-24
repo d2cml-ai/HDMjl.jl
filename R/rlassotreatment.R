@@ -101,8 +101,43 @@ rlassoLATE <- function(x, ...)
 #' @param post logical. If \code{TRUE}, post-lasso estimation is conducted.
 #' @param intercept logical. If \code{TRUE}, intercept is included which is not
 #' @rdname TE
-rlassoLATE.default <- function(x, d, y, z, bootstrap = "none", nRep = 500, post = TRUE, 
-                       intercept = TRUE, always_takers = TRUE, never_takers = TRUE, ...) {
+# x_late = matrix(rnorm(100 * 10), ncol = 10)
+# d_late = matrix(sample(c(1, 0), 400, T), ncol = 4)
+# z_late = matrix(sample(c(1, 0), 400, T), ncol = 4)
+# y_late = (x_late * 1.8 * rnorm(100))[, 1:3]
+
+# write.csv(x_late, "jl/data/xlate.csv", row.names = F)
+# write.csv(y_late, "jl/data/ylate.csv", row.names = F)
+# write.csv(d_late, "jl/data/dlate.csv", row.names = F)
+# write.csv(z_late, "jl/data/zlate.csv", row.names = F)
+getwd()
+x_late = read.csv("jl/data/xlate.csv")
+y_late = read.csv("jl/data/ylate.csv")
+d_late = read.csv("jl/data/dlate.csv")
+z_late = read.csv("jl/data/zlate.csv")
+
+#' @export
+#' @param post logical. If \code{TRUE}, post-lasso estimation is conducted.
+#' @param intercept logical. If \code{TRUE}, intercept is included which is not
+#' @rdname TE
+
+x = x_late
+d = d_late[, 2]
+y = y_late[, 3]
+z = z_late[, 1]
+
+# rlassoLATE.default <- function(
+  x
+  d
+  y
+  z 
+  bootstrap = "none" 
+  nRep = 5
+  post = TRUE 
+  intercept = TRUE 
+  always_takers = TRUE
+  never_takers = TRUE
+  # , ...) {
   x <- as.matrix(x)
   n <- dim(x)[1]
   p <- dim(x)[2]
@@ -125,8 +160,8 @@ rlassoLATE.default <- function(x, d, y, z, bootstrap = "none", nRep = 500, post 
                      intercept = intercept, control = control, penalty = penalty)
   my_z0x <- predict(b_y_z0xL, newdata = x)
   # E[D|Z = 1,X] = md_z1x
-  lambda <- 2.2 * sqrt(n) * qnorm(1 - (.1/log(n))/(2 * (2 * p)))
-  penalty <- list(lambda.start = lambda, c = 1.1, gamma = 0.1)
+  lambda <- 2.2 * sqrt(n) * qnorm(1 - (.1/log(n))/(2 * (2 * p))) #$$$$$$$$$$$44
+  penalty <- list(lambda.start = lambda, c = 1.1, gamma = 0.1)#4$$$$$$$$$$$$$$$$
   
   # if (sum(d - z) != 0) {
   #   b_d_z1xL <- rlassologit(d[indz1] ~ x[indz1, , drop = FALSE], post = post, 
@@ -229,7 +264,136 @@ rlassoLATE.default <- function(x, d, y, z, bootstrap = "none", nRep = 500, post 
   object$type <- "LATE"
   class(object) <- "rlassoTE"
   return(object)
-}
+
+# rlassoLATE.default <- function(x, d, y, z, bootstrap = "none", nRep = 500, post = TRUE, 
+#                        intercept = TRUE, always_takers = TRUE, never_takers = TRUE, ...) {
+#   x <- as.matrix(x)
+#   n <- dim(x)[1]
+#   p <- dim(x)[2]
+#   checkmate::checkChoice(bootstrap, c("none", "Bayes", "normal", "wild"))
+#   checkmate::checkLogical(always_takers, never_takers)
+#   lambda <- 2.2 * sqrt(n) * qnorm(1 - (.1/log(n))/(2 * (2 * p)))
+#   control <- list(numIter = 15, tol = 10^-5)
+#   # penalty <- list(method = 'none', lambda.start = rep(lambda, p), c =
+#   # 1.1, gamma = 0.1)
+#   penalty <- list(homoscedastic = "none", lambda.start = rep(lambda, 
+#                                                              p), c = 1.1, gamma = 0.1)
+#   indz1 <- (z == 1)
+#   indz0 <- (z == 0)
+#   # E[Y|Z = 1,X] = my_z1x
+#   b_y_z1xL <- rlasso(y[indz1] ~ x[indz1, , drop = FALSE], post = post, 
+#                      intercept = intercept, control = control, penalty = penalty)
+#   my_z1x <- predict(b_y_z1xL, newdata = x)
+#   # E[Y|Z = 0,X] = my_z0x
+#   b_y_z0xL <- rlasso(y[indz0] ~ x[indz0, , drop = FALSE], post = post, 
+#                      intercept = intercept, control = control, penalty = penalty)
+#   my_z0x <- predict(b_y_z0xL, newdata = x)
+#   # E[D|Z = 1,X] = md_z1x
+#   lambda <- 2.2 * sqrt(n) * qnorm(1 - (.1/log(n))/(2 * (2 * p)))
+#   penalty <- list(lambda.start = lambda, c = 1.1, gamma = 0.1)
+  
+#   # if (sum(d - z) != 0) {
+#   #   b_d_z1xL <- rlassologit(d[indz1] ~ x[indz1, , drop = FALSE], post = post, 
+#   #                           intercept = intercept, penalty = penalty)
+#   #   md_z1x <- predict(b_d_z1xL, newdata = x)
+#   # } else {
+#   #   md_z1x <- rep(1, n)
+#   # }
+#   # 
+#   # E[D|Z = 0,X] = md_z0x
+#   #penalty <- list(homoscedastic = "none", lambda.start = rep(lambda, 
+#   #                                                           p), c = 1.1, gamma = 0.1)
+#   #b_d_z0x <- rlassologit(d[indz0] ~ x[indz0, ], post = post, intercept = intercept, penalty = penalty)
+#   #md_z0x <- predict(b_d_z0x, newdata = x)
+#   # md_z0x <- rep(0, n)
+  
+#   # E[D|Z = 1,X] = md_z1x
+#   if (identical(d,z)) {
+#     md_z1x <- rep(1, n)
+#     md_z0x <- rep(0, n)
+#   }
+  
+#   else  {
+  
+#     if (all(always_takers, never_takers)) {
+#         g_d_z1 <- rlassologit(d[indz1] ~ x[indz1, , drop = FALSE], 
+#                               post = post, intercept = intercept, penalty = penalty)
+#         md_z1x <- predict(g_d_z1, newdata = x)
+        
+#         g_d_z0 <- rlassologit(d[indz0] ~ x[indz0, , drop = FALSE], 
+#                               post = post, intercept = intercept, penalty = penalty)
+#         md_z0x <- predict(g_d_z0, newdata = x) 
+#       }
+    
+    
+#     if (always_takers == FALSE & never_takers == TRUE) {
+#       g_d_z1 <- rlassologit(d[indz1] ~ x[indz1, , drop = FALSE], 
+#                             post = post, intercept = intercept, penalty = penalty)
+#       md_z1x <- predict(g_d_z1, newdata = x)
+      
+#       ### no always-takers: E[D=1 | Z=0,X] = 0
+#       md_z0x <- rep(0, n)
+#     }
+    
+#     if (always_takers == TRUE & never_takers == FALSE) {
+#       ### no never-takers: E[D=1 | Z=1,X] = 1
+#       md_z1x <- rep(1, n)
+      
+#       g_d_z0 <- rlassologit(d[indz0] ~ x[indz0, , drop = FALSE], 
+#                             post = post, intercept = intercept, penalty = penalty)
+#       md_z0x <- predict(g_d_z0, newdata = x)
+#     }
+  
+#     if (always_takers == FALSE & never_takers == FALSE) {
+#       md_z1x <- rep(1, n)
+#       md_z0x <- rep(0, n)
+    
+#     message("If there are no always-takers and no never-takers, ATE is estimated")
+#     }
+#   }
+  
+#   # E[Z|X] = mz_x
+#   b_z_xL <- rlassologit(z ~ x, post = post, intercept = intercept)
+#   mz_x <- predict(b_z_xL, newdata = x)
+#   mz_x <- mz_x * (mz_x > 1e-12 & mz_x < 1 - 1e-12) + (1 - 1e-12) * (mz_x > 
+#                                                                       1 - 1e-12) + 1e-12 * (mz_x < 1e-12)
+  
+#   eff <- (z * (y - my_z1x)/mz_x - ((1 - z) * (y - my_z0x)/(1 - mz_x)) + 
+#             my_z1x - my_z0x)/mean(z * (d - md_z1x)/mz_x - ((1 - z) * (d - md_z0x)/(1 - 
+#                                                                                      mz_x)) + md_z1x - md_z0x)
+  
+#   se <- sqrt(var(eff))/sqrt(n)
+#   late <- mean(eff)
+#   individual <- eff
+  
+#   object <- list(se = se, te = late, individual = individual, type = "LATE", 
+#                  call = match.call(), samplesize = n)
+  
+#   if (bootstrap != "none") {
+#     boot <- rep(NA, nRep)
+#     for (i in 1:nRep) {
+#       if (bootstrap == "Bayes") {
+#         weights <- rexp(n, rate = 1) - 1
+#       }
+#       if (bootstrap == "normal") {
+#         weights <- rnorm(n)
+#       }
+#       if (bootstrap == "wild") {
+#         weights <- rnorm(n)/sqrt(2) + (rnorm(n)^2 - 1)/2
+#       }
+#       weights <- weights + 1
+#       boot[i] <- mean(weights * (z * (y - my_z1x)/mz_x - ((1 - z) * 
+#                                                             (y - my_z0x)/(1 - mz_x)) + my_z1x - my_z0x))/mean(weights * 
+#                                                                                                                 (z * (d - md_z1x)/mz_x - ((1 - z) * (d - md_z0x)/(1 - mz_x)) + 
+#                                                                                                                    md_z1x - md_z0x))
+#     }
+#     object$boot.se <- sqrt(var(boot))
+#     object$type_boot <- bootstrap
+#   }
+#   object$type <- "LATE"
+#   class(object) <- "rlassoTE"
+#   return(object)
+# }
 
 
 #' @rdname TE
