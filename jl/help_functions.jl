@@ -1,21 +1,61 @@
-function init_values(X, y; number::Int64 = 5, intercept::Bool = true)
+# <<<<<<< HEAD
+# function init_values(X, y; number::Int64 = 5, intercept::Bool = true)
     
-    corr = abs.(cor(y, X)[1, :])
-    kx = size(X, 2)
-    index = sortperm(corr, rev = true)[1:min(number, kx)]
+#     corr = abs.(cor(y, X)[1, :])
+#     kx = size(X, 2)
+#     index = sortperm(corr, rev = true)[1:min(number, kx)]
     
-    coefficients = zeros(kx)
+#     coefficients = zeros(kx)
     
-    reg = lm(X[:, index], y)
-    coefficients[index] = GLM.coef(reg)
-    replace!(coefficients, NaN => 0)
+#     reg = lm(X[:, index], y)
+#     coefficients[index] = GLM.coef(reg)
+#     replace!(coefficients, NaN => 0)
     
-    e = y - GLM.predict(reg, X[:, index])
+#     e = y - GLM.predict(reg, X[:, index])
     
-    res = Dict("coefficients" => coefficients, "residuals" => e)
+#     res = Dict("coefficients" => coefficients, "residuals" => e)
+# =======
+# using GLM
+# using Test
+function init_values(x, y; number::Int64 = 5, intercept::Bool = true)
+
+
+    n, p = size(x)
+
+    corr = []
+    for i in 1:p
+        append!(corr, abs.(cor(y, x[:, i])))
+    end
+
+    index = sortperm(corr, rev = true)[1 : min(number, p)]
+    coefficients = zeros(p)
+    data = hcat(y, ones(n), Matrix(x)[:, index])
+# >>>>>>> a19c043a28d1bc3b41ba5acb2df4d1cab854a221
     
+
+    if intercept
+        data = hcat(y, ones(n), Matrix(x)[:, index])
+        reg = GLM.lm(data[:, Not(1)], data[:, 1])
+        coefficients[index] = GLM.coef(reg)[2:end]
+        y_hat = GLM.predict(reg, data[:, Not(1)])
+        e = y .- y_hat
+    else
+        data = hcat(y, Matrix(x)[:, index])
+        reg = GLM.lm(data[:, Not(1)], data[:, 1])
+        coefficients[index] = GLM.coef(reg)
+        y_hat = GLM.predict(reg, data[:, Not(1)])
+        e = y .- y_hat   
+    end
+
+    res = Dict(
+        "coefficients" => coefficients, "residuals" => e, "index" => index, 
+        "Data" => data, "predict" =>  y_hat
+    )
+    # val = Dict("x" => x1, "y" => y, "ind" => index)
     return res
 end
+
+
 
 function lambdaCalculation(; homoskedastic::Bool = false, X_dependent_lambda::Bool = false, lambda_start = nothing, c::Float64 = 1.1, gamma::Float64 = 0.1, numSim::Int = 5000, y = nothing, x = nothing)
     
@@ -84,4 +124,16 @@ function lambdaCalculation(; homoskedastic::Bool = false, X_dependent_lambda::Bo
     end
     
     return Dict("lambda" => lambda, "lambda0" => lambda0, "Ups0" => Ups0)
+end
+
+function as_logical(array)
+    b = []
+    for i in array
+        if i > 0
+            append!(b, true)
+        else
+            append!(b, false)
+        end
+    end
+    return b
 end
