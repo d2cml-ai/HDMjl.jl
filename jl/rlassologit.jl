@@ -183,7 +183,7 @@ x = CSV.read("jl/Data/x_rnd.csv", DataFrame)
 
 
 
-function rlassoEffect(X, Y, D; I3::Any = nothing, post = true)
+function rlassologitEffect(X, Y, D; I3::Any = nothing, post = true)
 
     x = Matrix(X[:, :])
     d = D[:]
@@ -271,11 +271,62 @@ function rlassoEffect(X, Y, D; I3::Any = nothing, post = true)
     return results
 end
 
-xxx = Matrix(x)
-yyy = bi[:, 2]
-ddd = bi[:, 4]
+x0 = Matrix(x)
+yyy = bi[:, 4]
+ddd = bi[:, 2]
 include("hdmjl.jl")
 
-rr = rlassoEffect(xxx, yyy, ddd)
-# Set(rr .>= 0)
-coefTemp
+
+function rlassologitEffects(x, y; index = 1:3, I3 = nothing, post = true)
+    x = Matrix(x)
+    y = Matrix(y[:, :])
+    n, p = size(x)
+    
+    if Set(index) == 2
+        k = p1 = sum(index)
+    else
+        k = p1 = length(index)
+    end
+
+    coefficients = zeros(k)
+    se = zeros(k)
+    t = zeros(k)
+    reside = Dict("epsilon" => Dict(), "v" => Dict())
+    lasso_regs = Dict()
+
+    # print(k)
+    for i in 1:k
+        d = x[:, index[i]]
+        xt = x[:, Not(index[i])]
+        if isnothing(I3)
+            I3m = I3
+        else
+            I3m = I3[Not(index[i])]
+        end
+        
+        lasso_regs[i] = try
+            rlassologitEffect(xt, y, d, I3 = I3m, post = post)
+        catch
+            "try-error"
+        end
+        if lasso_regs[i] == "try-error"
+            continue
+        else
+            coefficients[i] = lasso_regs[i]["alpha"]
+            se[i] = lasso_regs[i]["se"]
+            t[i] = lasso_regs[i]["t"]
+            reside["epsilon"][i] = lasso_regs[i]["residuals"]["epsilon"]
+            reside["v"][i] = lasso_regs[i]["residuals"]["v"]
+        end
+    end
+    # residual = 
+    res = Dict(
+        "coefficients" => coefficients, "se" => se, "t" => t,
+        "lasso_regs" => lasso_regs, "index" => index, "sample_size" => n,
+        "residuals" => reside
+    )
+    return res
+end
+# rlassologitEffects(x0, yyy)
+# rr = rlassologitEffect(x0, yyy, ddd)
+# rr["residuals"]["v"]
