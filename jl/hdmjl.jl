@@ -1,4 +1,4 @@
-using Statistics, GLM, DataFrames, LinearAlgebra, GLMNet
+using Statistics, GLM, DataFrames, LinearAlgebra, GLMNet, Random
 include("help_functions.jl")
 include("LassoShooting_fit.jl")
 include("rlasso.jl")

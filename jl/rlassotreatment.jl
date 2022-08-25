@@ -1,4 +1,4 @@
-using GLM, Statistics
+#= using GLM, Statistics
 using Distributions, Random
 
 include("hdmjl.jl")
@@ -26,7 +26,7 @@ rlasso(Matrix(x)[:, [3, 4]], x[:, 2])["coefficients"]
 bootstrap = "none"
 n_rep = 5 #500
 post = true
-intercept = true
+intercept = true =#
 # always_takers = true
 # never_takers = true
 
@@ -213,5 +213,64 @@ function rlassoATE(x, d, y; bootstrap = "none", n_rep = 500)
     res["type"] = "ATE"
 end
 
-rlassoLATE(x, d, y, z, bootstrap = "wild", always_takers = true, never_takers = true, intercept = false, post = false)
+# rlassoLATE(x, d, y, z, bootstrap = "wild", always_takers = true, never_takers = true, intercept = false, post = false)
 
+function rlassoLATET(x, d, y, z; bootstrap::String = "none", n_rep::Int64 = 500, post::Bool = true, always_takers::Bool = true, never_takers::Bool = true, intercept::Bool = true)
+    n = size(x, 1)
+    p = size(x, 2)
+    lambda = 2.2 * sqrt(n) * quantile(Normal(0.0, 1.0),  1 - (.1 / log(n)) / (2 * (2 * p)))
+    lambda_start = fill(lambda, p)
+    indz1 = findall(z .== 1)
+    indz0 = findall(z .== 0)
+    b_y_z0xL = rlasso(x[indz0, :], y[indz0], post = post, intercept = intercept, gamma = 0.1, lambda_start = lambda_start)
+    my_z0x = x * b_y_z0xL["coefficients"]
+
+    if d == z
+        md_z0x = zeros(n)
+    else
+        if always_takers
+            g_d_z0 = rlassologit(x[indz0, :], d[indz0], post = post, intercept = intercept, penalty_c = 1.1, penalty_lambda = lambda_start)
+            md_z0x = x * g_d_z0["coefficients"]
+        else
+            md_z0x = zeros(n)
+        end
+    end
+    
+    # lambdaP = 2.2 * sqrt(n) * quantile(Normal(0.0, 1.0),  1 - (.1 / log(n)) / (2 * p))
+    b_z_xl = rlassologit(x, z, post = post, intercept = intercept, penalty_c = 1.1, penalty_lambda = lambda_start)
+    mz_x = x * b_z_xl["coefficients"]
+    mz_x[mz_x .< 1e-12] .= 1e-12
+    mz_x[mz_x .> (1 - 1e-12)] .= 1 - 1e-12
+    
+    eff = ((y - my_z0x) - (ones(n) - z) .* (y - my_z0x) ./ (ones(n) - mz_x)) ./ mean((d - md_z0x) - (ones(n) - z) .* (d - md_z0x) ./ (ones(n) - mz_x))
+
+    se = sqrt(var(eff)) / sqrt(n)
+    latet = mean(eff)
+    individual = eff
+    object = Dict("se" => se, "te" => latet, "individual" => individual, "type" => "LATET", "sample_size" => n)
+
+    if bootstrap != "none"
+        boot = fill(NaN, n_rep)
+        for i in 1:n_rep
+            if bootstrap == "Bayes"
+                weights = randexp(n) - 1
+            elseif bootstrap == "normal"
+                weights = randn(n)
+            elseif bootstrap == "wild"
+                randn(n) ./ sqrt(2) + (randn(n) .^ 2 .- 1) ./ 2
+            end
+            weights = weights .+ 1
+            boot[i] = mean(weights .* ((y - my_z0x) - (ones(n) - z) .* (y - my_z0x) ./ (ones(n) - mz_x))) / mean(weights .* ((d - md_z0x) - (ones(n) - z) .* (d - md_z0x) ./ (ones(n) - mz_x)))
+        end
+        object["boot_se"] = sqrt(var(boot))
+        object["type_boot"] = bootstrap
+    end
+    return object
+end
+
+function ATET(x, d, y, bootstrap::String = "none", n_rep::Int64 = 500)
+    z = copy(d)
+    res = LATET(x, d, y, z, bootstrap = bootstrap, n_rep = n_rep)
+    res["type"] = "ATET"
+    return res
+end
