@@ -7,10 +7,15 @@ function rlasso(x, y; post = true, intercept = true, model = true,
     n = size(y, 1)
     p = size(x, 2)
     
-    meanx = mean(x, dims = 1)
-    x = x .- meanx
-    mu = mean(y)
-    y = y .- mu
+    if intercept
+        meanx = mean(x, dims = 1)
+        x = x .- meanx
+        mu = mean(y)
+        y = y .- mu
+    else
+        meanx = zeros(1, p)
+        mu = 0
+    end
     
     XX = x' * x
     Xy = x' * y
