@@ -1,42 +1,5 @@
-#= using GLM, Statistics
-using Distributions, Random
-
-include("hdmjl.jl")
-include("rlassologit.jl")
-
-using CSV, DataFrames
-xlate = CSV.read("jl/data/xlate.csv", DataFrame)
-ylate = CSV.read("jl/data/ylate.csv", DataFrame)
-dlate = CSV.read("jl/data/dlate.csv", DataFrame)
-zlate = CSV.read("jl/data/zlate.csv", DataFrame)
-
-x = xlate[:, :]
-d = dlate[:, 2]
-y = ylate[:, 3]
-z = zlate[:, 1]
-
-rlassologit(Matrix(x), d)
-
-rlasso(Matrix(x)[:, [3, 4]], x[:, 2])["coefficients"]
-
-
-### params
-#### x, d, y, z
-
-bootstrap = "none"
-n_rep = 5 #500
-post = true
-intercept = true =#
-# always_takers = true
-# never_takers = true
-
 function rlassoLATE(x, d, y, z; bootstrap = "none", n_rep = 100, always_takers = true, 
     post = true, intercept = true, never_takers = true)
-
-    ## rlassoLATE with intercept 
-    ## bootstrap missing
-    # intercept = true
-
 
     x1 = Matrix(x)
     n, p = size(x1)
@@ -68,7 +31,6 @@ function rlassoLATE(x, d, y, z; bootstrap = "none", n_rep = 100, always_takers =
     indz1, indz0 = [], []
 
     for i in eachindex(z)
-        # print(i)
         if z[i] == 1
             append!(indz1, i)
         else
@@ -83,23 +45,14 @@ function rlassoLATE(x, d, y, z; bootstrap = "none", n_rep = 100, always_takers =
     x_z0 = Matrix(x1[indz0, :])
     y_z0 = y[indz0, :]
 
-
-    # include("help_functions.jl")
-    # include("hdmjl.jl")
-    # include("LassoShooting_fit.jl")
-    
-    # init_values(x_z1, y_z1)
-    
     b_y_z1xL = rlasso(
         x_z1, y_z1, post = post, intercept = intercept,
         tol = ctrl_tol, maxIter = ctrl_num_iter, #controls
         homoskedastic = penalty_homoscedastic, c = penalty_c, gamma = penalty_gamma, #penalty
         lambda_start = penalty_lambda_start
-        # lambda start not found => via Lambda calculation
     )
 
     ### intercept with main X
-    # b_y_z1xL["coefficients"]
     my_z1x = get_mtrx(x1) * b_y_z1xL["coefficients"]
 
     b_y_z0xL = rlasso(
@@ -107,21 +60,16 @@ function rlassoLATE(x, d, y, z; bootstrap = "none", n_rep = 100, always_takers =
         tol = ctrl_tol, maxIter = ctrl_num_iter, #controls
         homoskedastic = penalty_homoscedastic, c = penalty_c, gamma = penalty_gamma, #penalty
         lambda_start = penalty_lambda_start
-        # lambda start not found => via Lambda calculation
     )
 
-    ## with intercept
     my_z0x = get_mtrx(x1) * b_y_z0xL["coefficients"]
 
     lambda = 2.2 * sqrt(n) * quantile(Normal(0, 1), 1 - (.1 / log(n)) / (2 * (2 * p)))
-
-    # include("rlassologit.jl")
 
     if z == d
         md_z1x = ones(n)
         md_z0x = zeros(n)
     else
-        # intercept true default repeat
         x1 = Matrix(x)
         if all([always_takers, never_takers])
 
@@ -153,16 +101,12 @@ function rlassoLATE(x, d, y, z; bootstrap = "none", n_rep = 100, always_takers =
         end
     end
 
-    ## intercept
-
     b_z_xl = rlassologit(x1, z, post = post, intercept = intercept)
     yp_b = get_mtrx(x1) * b_z_xl["coefficients"]
     mz_x = 1 ./ (1 .+ exp.(-1 .* (yp_b)))
 
     mz_x = mz_x .* (mz_x .> 1e-12 .&& mz_x .< (1 - 1e-12)) .+ (1 - 1e-12) .* (
         mz_x .> 1 .- 1e-12) .+ 1e-12 .* (mz_x .< 1e-12)
-    
-    # @. z * (y - my_z1x) / mz_x - ((1- z) * (y - my_z0x))
 
     eff = @. (
         z * (y - my_z1x) / mz_x - ((1 - z) * (y - my_z0x)/(1 - mz_x)) + 
@@ -202,7 +146,6 @@ function rlassoLATE(x, d, y, z; bootstrap = "none", n_rep = 100, always_takers =
         object["boot_n"] = n_rep
     end
     object
-    # boot
 
     return object
 end
@@ -213,8 +156,6 @@ function rlassoATE(x, d, y; bootstrap = "none", n_rep = 500)
     res["type"] = "ATE"
     return res
 end
-
-# rlassoLATE(x, d, y, z, bootstrap = "wild", always_takers = true, never_takers = true, intercept = false, post = false)
 
 function rlassoLATET(x, d, y, z; bootstrap::String = "none", n_rep::Int64 = 500, post::Bool = true, always_takers::Bool = true, never_takers::Bool = true, intercept::Bool = true)
     n = size(x, 1)
@@ -241,7 +182,6 @@ function rlassoLATET(x, d, y, z; bootstrap::String = "none", n_rep::Int64 = 500,
         end
     end
     
-    # lambdaP = 2.2 * sqrt(n) * quantile(Normal(0.0, 1.0),  1 - (.1 / log(n)) / (2 * p))
     b_z_xl = rlassologit(x, z, post = post, intercept = intercept, c = 1.1, lambda = lambda_start)
     if intercept
         mz_x = hcat(ones(n), x) * b_z_xl["coefficients"]

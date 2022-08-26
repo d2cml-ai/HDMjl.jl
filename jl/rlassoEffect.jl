@@ -1,32 +1,4 @@
 
-## params
-using GLM, Statistics, CSV, DataFrames
-
-# include("hdmjl.jl")
-
-xlate = CSV.read("jl/data/xlate.csv", DataFrame)
-dlate = CSV.read("jl/data/dlate.csv", DataFrame)
-
-method = "double selection"
-
-x = xlate[:, :]
-y = xlate[:, 5]
-d = dlate[:, 3]
-# CSV.read("jl/data/xlate.csv")
-
-b = [12, 1, 0, 2]
-
-b_bool = []
-for i in b
-    if i == 0
-        append!(b_bool, false)
-    else
-        append!(b_bool, true)
-    end
-end
-
-include("hdmjl.jl")
-
 rlassoEffect(x, y, d, post = false, I3 = [0, 1, 0, 1, 0, 0, 1, 0, 1, 2])["selection_index"]#, method = "partialling out") 
 function rlassoEffect(
         x, 

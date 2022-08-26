@@ -1,22 +1,3 @@
-# <<<<<<< HEAD
-# function init_values(X, y; number::Int64 = 5, intercept::Bool = true)
-    
-#     corr = abs.(cor(y, X)[1, :])
-#     kx = size(X, 2)
-#     index = sortperm(corr, rev = true)[1:min(number, kx)]
-    
-#     coefficients = zeros(kx)
-    
-#     reg = lm(X[:, index], y)
-#     coefficients[index] = GLM.coef(reg)
-#     replace!(coefficients, NaN => 0)
-    
-#     e = y - GLM.predict(reg, X[:, index])
-    
-#     res = Dict("coefficients" => coefficients, "residuals" => e)
-# =======
-# using GLM
-# using Test
 function init_values(x, y; number::Int64 = 5, intercept::Bool = true)
 
 
@@ -30,7 +11,6 @@ function init_values(x, y; number::Int64 = 5, intercept::Bool = true)
     index = sortperm(corr, rev = true)[1 : min(number, p)]
     coefficients = zeros(p)
     data = hcat(y, ones(n), Matrix(x)[:, index])
-# >>>>>>> a19c043a28d1bc3b41ba5acb2df4d1cab854a221
     
 
     if intercept
@@ -51,7 +31,6 @@ function init_values(x, y; number::Int64 = 5, intercept::Bool = true)
         "coefficients" => coefficients, "residuals" => e, "index" => index, 
         "Data" => data, "predict" =>  y_hat
     )
-    # val = Dict("x" => x1, "y" => y, "ind" => index)
     return res
 end
 
