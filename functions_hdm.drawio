@@ -203,7 +203,7 @@
                 <mxCell id="52" value="rlassologit" style="whiteSpace=wrap;html=1;fontSize=18;fontColor=#FAFAFA;strokeColor=none;strokeWidth=2;fillColor=#008a00;gradientColor=none;gradientDirection=north;labelBackgroundColor=none;" parent="1" vertex="1">
                     <mxGeometry x="1440" y="-940" width="120" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="64" value="rlassoEffects" style="whiteSpace=wrap;html=1;fontSize=18;strokeColor=#B09500;strokeWidth=2;fillColor=#e3c800;fontColor=#000000;" parent="1" vertex="1">
+                <mxCell id="64" value="rlassoEffects" style="whiteSpace=wrap;html=1;fontSize=18;strokeColor=#005700;strokeWidth=2;fillColor=#008a00;fontColor=#ffffff;" parent="1" vertex="1">
                     <mxGeometry x="1840" y="-730" width="145" height="50" as="geometry"/>
                 </mxCell>
             </root>
