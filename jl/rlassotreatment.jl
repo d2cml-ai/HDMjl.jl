@@ -211,6 +211,7 @@ function rlassoATE(x, d, y; bootstrap = "none", n_rep = 500)
     z = copy(d)
     res = rlassoLATE(x, d, y, z, bootstrap = bootstrap, n_rep = n_rep)
     res["type"] = "ATE"
+    return res
 end
 
 # rlassoLATE(x, d, y, z, bootstrap = "wild", always_takers = true, never_takers = true, intercept = false, post = false)
@@ -223,13 +224,17 @@ function rlassoLATET(x, d, y, z; bootstrap::String = "none", n_rep::Int64 = 500,
     indz1 = findall(z .== 1)
     indz0 = findall(z .== 0)
     b_y_z0xL = rlasso(x[indz0, :], y[indz0], post = post, intercept = intercept, gamma = 0.1, lambda_start = lambda_start)
-    my_z0x = x * b_y_z0xL["coefficients"]
+    if intercept
+        my_z0x = hcat(ones(n), x) * b_y_z0xL["coefficients"]
+    elseif !intercept
+        my_z0x = x * b_y_z0xL["coefficients"]
+    end
 
     if d == z
         md_z0x = zeros(n)
     else
         if always_takers
-            g_d_z0 = rlassologit(x[indz0, :], d[indz0], post = post, intercept = intercept, penalty_c = 1.1, penalty_lambda = lambda_start)
+            g_d_z0 = rlassologit(x[indz0, :], d[indz0], post = post, intercept = intercept, c = 1.1, lambda = lambda_start)
             md_z0x = x * g_d_z0["coefficients"]
         else
             md_z0x = zeros(n)
@@ -237,12 +242,18 @@ function rlassoLATET(x, d, y, z; bootstrap::String = "none", n_rep::Int64 = 500,
     end
     
     # lambdaP = 2.2 * sqrt(n) * quantile(Normal(0.0, 1.0),  1 - (.1 / log(n)) / (2 * p))
-    b_z_xl = rlassologit(x, z, post = post, intercept = intercept, penalty_c = 1.1, penalty_lambda = lambda_start)
-    mz_x = x * b_z_xl["coefficients"]
+    b_z_xl = rlassologit(x, z, post = post, intercept = intercept, c = 1.1, lambda = lambda_start)
+    if intercept
+        mz_x = hcat(ones(n), x) * b_z_xl["coefficients"]
+    elseif !intercept
+        mz_x = x * b_z_xl["coefficients"]
+    end
+
+    mz_x = 1 ./ (1 .+ exp.(-1 .* (mz_x)))
     mz_x[mz_x .< 1e-12] .= 1e-12
     mz_x[mz_x .> (1 - 1e-12)] .= 1 - 1e-12
     
-    eff = ((y - my_z0x) - (ones(n) - z) .* (y - my_z0x) ./ (ones(n) - mz_x)) ./ mean((d - md_z0x) - (ones(n) - z) .* (d - md_z0x) ./ (ones(n) - mz_x))
+    eff = ((y - my_z0x) - (1 .- z) .* (y - my_z0x) ./ (1 .- mz_x)) / mean((d - md_z0x) - (1 .- z) .* (d - md_z0x) ./ (1 .- mz_x))
 
     se = sqrt(var(eff)) / sqrt(n)
     latet = mean(eff)
@@ -268,9 +279,9 @@ function rlassoLATET(x, d, y, z; bootstrap::String = "none", n_rep::Int64 = 500,
     return object
 end
 
-function ATET(x, d, y, bootstrap::String = "none", n_rep::Int64 = 500)
+function rlassoATET(x, d, y, bootstrap::String = "none", n_rep::Int64 = 500)
     z = copy(d)
-    res = LATET(x, d, y, z, bootstrap = bootstrap, n_rep = n_rep)
+    res = rlassoLATET(x, d, y, z, bootstrap = bootstrap, n_rep = n_rep)
     res["type"] = "ATET"
     return res
 end

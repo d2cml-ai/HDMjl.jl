@@ -49,7 +49,7 @@ function rlassologit(x, y; model::Bool = true, c::Float64 = 1.1, post::Bool = tr
         end
         est = Dict("coefficients" => coefs, "beta" => coefTemp, "intercept" => a0, 
         "index" => zeros(Bool, p), "s0" => s0, "lambda0" => lambda0, "residuals" => res, 
-        "sigma" => sqrt(var(res)), "options" => Dict("post" => post, "intercept => intercept", "threshold" => threshold))
+        "sigma" => sqrt(var(res)), "options" => Dict("post" => post, "intercept" => intercept, "threshold" => threshold))
 
         return est 
     end
