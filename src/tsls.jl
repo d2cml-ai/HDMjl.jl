@@ -1,4 +1,4 @@
-function tsls(d, y, z, x::Union{Nothing, DataFrame, Array} = nothing; intercept::Bool = true, homoscedastic::Bool = true)
+function tsls(d, y, z, x::Union{Nothing, Array} = nothing; intercept::Bool = true, homoscedastic::Bool = true) # x::Union{Nothing, DataFrame, Array}
     d = Matrix(d)
     x = Matrix(x)
     z = Matrix(z)
@@ -7,7 +7,7 @@ function tsls(d, y, z, x::Union{Nothing, DataFrame, Array} = nothing; intercept:
     return res
 end
 
-function tsls(d::Array, y::Array, z::Array, x::Union{Nothing, DataFrame, Array} = nothing; intercept::Bool = true, homoscedastic::Bool = true)
+function tsls(d::Array, y::Array, z::Array, x::Union{Nothing, Array} = nothing; intercept::Bool = true, homoscedastic::Bool = true) # x::Union{Nothing, DataFrame, Array}
     n = size(y, 1)
     
     if intercept && !isnothing(x)

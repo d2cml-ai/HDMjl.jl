@@ -1,5 +1,4 @@
 
-rlassoEffect(x, y, d, post = false, I3 = [0, 1, 0, 1, 0, 0, 1, 0, 1, 2])["selection_index"]#, method = "partialling out") 
 function rlassoEffect(
         x, 
         y, 
@@ -16,18 +15,6 @@ function rlassoEffect(
     n, p = size(x)
 
     # i3 = Set(I3)
-
-    function as_logical(array)
-        b = []
-        for i in array
-            if i == 0
-                append!(b, false)
-            else
-                append!(b, true)
-            end
-        end
-        return b
-    end
 
     if method == "double selection"
         I1 = rlasso(x, d, post = post)["index"]

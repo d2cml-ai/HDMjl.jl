@@ -1,6 +1,6 @@
-# hdmjl
-The hdmjl package is a port of parts of the R package hdm translated into Julia.
+# HDMJL
 
-The following is the graph of the functions we are currently working on. It will change as we add more functions:
-
-![Graph](functions_hdm.png)
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://d2cml-ai.github.io/HDMJL.jl/stable/)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://d2cml-ai.github.io/HDMJL.jl/dev/)
+[![Build Status](https://github.com/d2cml-ai/HDMJL.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/d2cml-ai/HDMJL.jl/actions/workflows/CI.yml?query=branch%3Amaster)
+[![Coverage](https://codecov.io/gh/d2cml-ai/HDMJL.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/d2cml-ai/HDMJL.jl)
