@@ -53,6 +53,6 @@ jobs:
       - run: |
           julia --project=docs -e '
             using Documenter: DocMeta, doctest
-            using HDMJL
-            DocMeta.setdocmeta!(HDMJL, :DocTestSetup, :(using HDMJL); recursive=true)
-            doctest(HDMJL)'
+            using HDMjl
+            DocMeta.setdocmeta!(HDMjl, :DocTestSetup, :(using HDMjl); recursive=true)
+            doctest(HDMjl)'

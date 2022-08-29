@@ -1,14 +1,14 @@
 ```@meta
-CurrentModule = HDMJL
+CurrentModule = HDMjl
 ```
 
-# HDMJL
+# HDMjl
 
-Documentation for [HDMJL](https://github.com/d2cml-ai/HDMJL.jl).
+Documentation for [HDMjl](https://github.com/d2cmjl-ai/HDMjl.jl).
 
 ```@index
 ```
 
 ```@autodocs
-Modules = [HDMJL]
+Modules = [HDMjl]
 ```

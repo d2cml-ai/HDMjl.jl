@@ -1,16 +1,16 @@
-using HDMJL
+using HDMjl
 using Documenter
 
-DocMeta.setdocmeta!(HDMJL, :DocTestSetup, :(using HDMJL); recursive=true)
+DocMeta.setdocmeta!(HDMjl, :DocTestSetup, :(using HDMjl); recursive=true)
 
 makedocs(;
-    modules=[HDMJL],
-    authors="Rodrigo Grijalba, John Flores Rojas, Alexander Quispe, Anzony Quispe",
-    repo="https://github.com/d2cml-ai/HDMJL.jl/blob/{commit}{path}#{line}",
-    sitename="HDMJL.jl",
+    modules=[HDMjl],
+    authors="Jhon Flores Rojas, Rodrigo Grijalba, Alexander Quispe, Anzony Quispe",
+    repo="https://github.com/d2cmjl-ai/HDMjl.jl/blob/{commit}{path}#{line}",
+    sitename="HDMjl.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://d2cml-ai.github.io/HDMJL.jl",
+        canonical="https://d2cmjl-ai.github.io/HDMjl.jl",
         edit_link="master",
         assets=String[],
     ),
@@ -20,6 +20,6 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/d2cml-ai/HDMJL.jl",
+    repo="github.com/d2cmjl-ai/HDMjl.jl",
     devbranch="master",
 )

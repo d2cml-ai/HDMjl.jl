@@ -1,6 +1,6 @@
-using HDMJL
+using HDMjl
 using Test
 
-@testset "HDMJL.jl" begin
+@testset "HDMjl.jl" begin
     # Write your tests here.
 end

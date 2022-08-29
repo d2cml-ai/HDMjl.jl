@@ -27,9 +27,9 @@ git-tree-sha1 = "6030186b00a38e9d0434518627426570aac2ef95"
 uuid = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 version = "0.27.23"
 
-[[deps.HDMJL]]
+[[deps.HDMjl]]
 path = ".."
-uuid = "8671466e-81a7-4532-a195-b11d982aa63c"
+uuid = "8de29b41-9195-4bda-bbba-e5831b2a12ad"
 version = "0.1.0"
 
 [[deps.IOCapture]]
