@@ -33,7 +33,7 @@ function rlasso(x, y; post = true, intercept = true, model = true,
     s0 = sqrt(var(y))
     
     while mm <= maxIter
-        if mm == 1
+        if mm == 1 & post
             coefTemp = LassoShooting_fit(x, y, lambda / 2, XX = XX, Xy = Xy)["coefficients"]
         else
             coefTemp = LassoShooting_fit(x, y, lambda, XX = XX, Xy = Xy)["coefficients"]
