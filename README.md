@@ -6,7 +6,7 @@
 [![Coverage](https://codecov.io/gh/d2cmjl-ai/HDMjl.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/d2cmjl-ai/HDMjl.jl)
 
 ### HDMjl.jl
-+ A collection of methods for estimation and quantification of uncertainty in high-dimensional approximately sparse models. Based on Chernozukov, Hansen and Spindler (2016).
++ This package is a port of the `hdm` library in R. A collection of methods for estimation and quantification of uncertainty in high-dimensional approximately sparse models. Based on Chernozukov, Hansen and Spindler (2016).
 
 ### Getting started
 
@@ -43,16 +43,25 @@ julia> using HDMjl
 ### Prediction using Lasso and Post-Lasso
 
 ```julia
+using Random
 julia> Random.seed!(1234);
+
 julia> n = 100;
+
 julia> p = 100;
+
 julia> s = 3;
+
 julia> X = randn(n, p);
+
 julia> beta = vcat(fill(5, s), zeros(p - s));
+
 julia> Y = X * beta + randn(n);
 ```
 
-We estimate the models using Lasso
+The Post-Lasso procedure fits an OLS regression excluding the variables not previously selected by Lasso. The `rlasso` algorithm uses the standard errors of the residuals from this regression to evaluate wether there has been a gain in the goodness of the fit in the current iteration.
+
+We can estimate the models using Lasso
 
 ```julia
 julia> rlasso(X, Y, post = false)
@@ -93,4 +102,38 @@ Dict{String, Any} with 15 entries:
   "beta"         => [4.94557, 5.14366, 4.8095, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0…
   "options"      => Dict{String, Any}("intercept"=>true, "post"=>true, "meanx"=>[-0.217494 0.000263084 … -0.00737349…
   "coefficients" => [0.0258985, 4.94557, 5.14366, 4.8095, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, …
+```
+
+### Inference on Target Coefficients through Orthogonal Estimating Equations
+
+Following Chernozhukov, Hansen and Spindler (2015), the `HDMjl` package makes use of orthogonal estimating equations methods to reduce estimation bias. We can do this through the `rlassoEffect` function, through the `"partialling out"` or the `"double selection"` `method` options.
+
+```julia
+julia> Random.seed!(1234);
+
+julia> n = 5000;
+
+julia> p = 20;
+
+julia> X = randn(n, p - 1);
+
+julia> beta = ones(p - 1);
+
+julia> d = randn(n);
+
+julia> alpha = 1.0;
+
+julia> Y = alpha * d + X * beta + randn(n);
+
+julia> rlassoEffect(X, Y, d, method = "partialling out")
+Dict{String, Any} with 9 entries:
+  "alpha"            => 0.99166
+  "t"                => 71.0117
+  "se"               => 0.0139648
+  "coefficients_reg" => [0.014376, 1.00644, 1.01451, 0.972988, 0.980083, 1.01576, 0.971863, 0.973955, 0.992963, 0.97…
+  "sample_size"      => 5000
+  "coefficient"      => 0.99166
+  "selection_index"  => Any[true, true, true, true, true, true, true, true, true, true, true, true, true, true, true…
+  "residuals"        => Dict{String, Array{Float64}}("v"=>[-1.43987; -1.73542; … ; -0.583284; -0.475297;;], "epsilon"…
+  "coefficients"     => 0.99166
 ```
