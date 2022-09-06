@@ -59,7 +59,7 @@ julia> beta = vcat(fill(5, s), zeros(p - s));
 julia> Y = X * beta + randn(n);
 ```
 
-The Post-Lasso procedure fits an OLS regression excluding the variables not previously selected by Lasso. The `rlasso` algorithm uses the standard errors of the residuals from this regression to evaluate wether there has been a gain in the goodness of the fit in the current iteration.
+The Post-Lasso procedure fits an OLS regression excluding the variables not previously selected by Lasso. The `rlasso` algorithm uses the standard errors of the residuals from this regression to evaluate whether there has been a gain in the goodness of the fit in the current iteration.
 
 We can estimate the models using Lasso
 
