@@ -1,7 +1,7 @@
 name = "HDMjl"
 uuid = "8de29b41-9195-4bda-bbba-e5831b2a12ad"
 authors = ["Jhon Flores Rojas", "Rodrigo Grijalba", "Alexander Quispe", "Anzony Quispe"]
-version = "0.0.3"
+version = "0.0.4"
 
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
