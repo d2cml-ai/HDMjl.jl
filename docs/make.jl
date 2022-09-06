@@ -21,5 +21,5 @@ makedocs(;
 
 deploydocs(;
     repo="github.com/d2cmjl-ai/HDMjl.jl",
-    devbranch="master",
+    devbranch="main",
 )
