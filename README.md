@@ -12,53 +12,53 @@
 
 To install the stable version of the package, you may acquire the package from the Julia General Registry by using
 
-```julia-repl
-] add HDMjl
+```julia
+julia> ] add HDMjl
 ```
 
-in the REPL, or
+or
 
 ```julia
-import Pkg; Pkg.add("HDMjl")
+julia> import Pkg; Pkg.add("HDMjl")
 ```
 
 You may also install the dev version of the package by directly acquiring it from the [repository](https://github.com/d2cml-ai/HDMjl.jl) by using
 
-```julia-repl
-] add https://github.com/d2cml-ai/HDMjl.jl
+```julia
+julia> ] add https://github.com/d2cml-ai/HDMjl.jl
 ```
 
-in the REPL, or 
+or 
 
 ```julia
-import Pkg; Pkg.add(url = "https://github.com/d2cml-ai/HDMjl.jl")
+julia> import Pkg; Pkg.add(url = "https://github.com/d2cml-ai/HDMjl.jl")
 ```
 
 If the compatibility conditions are met, the package should install automatically, and you may load the package:
 
 ```julia
-using HDMjl
+julia> using HDMjl
 ```
 
 ### Prediction using Lasso and Post-Lasso
 
 ```julia
-Random.seed!(1234)
-n = 100
-p = 100
-s = 3
-X = randn(n, p)
-beta = vcat(fill(5, s), zeros(p - s))
-Y = X * beta + randn(n)
+julia> Random.seed!(1234);
+julia> n = 100;
+julia> p = 100;
+julia> s = 3;
+julia> X = randn(n, p);
+julia> beta = vcat(fill(5, s), zeros(p - s));
+julia> Y = X * beta + randn(n);
 ```
 
 We estimate the models using Lasso
 
 ```julia
-lasso = rlasso(X, Y, post = false)
+julia> lasso = rlasso(X, Y, post = false)
 ```
  and Post-Lasso
 
 ```julia
-lasso = rlasso(X, Y, post = true)
+julia> lasso = rlasso(X, Y, post = true)
 ```
