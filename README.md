@@ -43,7 +43,8 @@ julia> using HDMjl
 ### Prediction using Lasso and Post-Lasso
 
 ```julia
-using Random
+julia> using Random
+
 julia> Random.seed!(1234);
 
 julia> n = 100;
@@ -59,7 +60,7 @@ julia> beta = vcat(fill(5, s), zeros(p - s));
 julia> Y = X * beta + randn(n);
 ```
 
-The Post-Lasso procedure fits an OLS regression excluding the variables not previously selected by Lasso. The `rlasso` algorithm uses the standard errors of the residuals from this regression to evaluate whether there has been a gain in the goodness of the fit in the current iteration.
+The Post-Lasso procedure fits an OLS regression excluding the variables not previously selected by Lasso. The `rlasso` algorithm uses the standard errors of the residuals from this regression to evaluate whether there has been a gain in the goodness of the fit in the current iteration. Just like most of the functions in the package, `rlasso` returns a dictionary with the results of the regression.
 
 We can estimate the models using Lasso
 
@@ -137,3 +138,4 @@ Dict{String, Any} with 9 entries:
   "residuals"        => Dict{String, Array{Float64}}("v"=>[-1.43987; -1.73542; … ; -0.583284; -0.475297;;], "epsilon"…
   "coefficients"     => 0.99166
 ```
+

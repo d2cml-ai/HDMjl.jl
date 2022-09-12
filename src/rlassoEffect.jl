@@ -8,9 +8,9 @@ function rlassoEffect(
         post = true
     )
 
-    x = Matrix(x)
+    #= x = Matrix(x)
     y = Matrix(y[:, :])
-    d = Matrix(d[:, :])
+    d = Matrix(d[:, :]) =#
 
     n, p = size(x)
 
@@ -30,33 +30,26 @@ function rlassoEffect(
             I = nothing
         end
     
-        inx = []
-    
-        for i in eachindex(I)
-            if I[i] == 1
-                append!(inx, i)
-            end
-        end
-    
+        I[I .> 1] .= 1
+        I = BitVector(I)
        
-        data = hcat(y, ones(n), d, x[:,inx])
-        reg1 = GLM.lm(data[:, Not(1)], data[:, 1])
+        x = hcat(ones(n), d, x[:, I])
+        reg1 = GLM.lm(x, y)
         alpha = GLM.coef(reg1)[2]
     
         xi = GLM.residuals(reg1) .* sqrt(n / (n - sum(I) - 1))
     
         if isnothing(I)
-            data2 = hcat(d, ones(n), zeros(n))
-            reg2 = GLM.lm(data2[:, [2]], data2[:, 1])
+            reg2 = GLM.lm(ones(n, 1), d)
         else
-            reg2 = GLM.lm(data[:, Not(1)], data[: , 1])
+            reg2 = GLM.lm(x[Not(2)], d)
         end
     
         v = GLM.residuals(reg2)
     
-        va_r = 1 / n * 1 /mean(v.^2) * mean(v.^2 .* xi.^2) * 1 / mean(v.^2)
+        var = 1 / n * 1 /mean(v.^2) * mean(v.^2 .* xi.^2) * 1 / mean(v.^2)
     
-        se = sqrt(va_r)
+        se = sqrt(var)
     
         tval = alpha / se
     
@@ -66,7 +59,6 @@ function rlassoEffect(
             no_select = 1
         else
             no_select = 0
-            I = as_logical(I)
         end
     
         res = Dict(
@@ -89,9 +81,9 @@ function rlassoEffect(
         reg3 = GLM.lm(data0[:, Not(1)], data0[:, 1])
         alpha = GLM.coef(reg3)[2]
 
-        va_r = vcov(reg3)[2, 2]
-        se = sqrt.(va_r)
-        tval = alpha ./ sqrt(va_r)
+        var = vcov(reg3)[2, 2]
+        se = sqrt.(var)
+        tval = alpha ./ sqrt(var)
         # pval = 
         res = Dict("epsilon" => GLM.residuals(reg3), "v" => dr)
 
