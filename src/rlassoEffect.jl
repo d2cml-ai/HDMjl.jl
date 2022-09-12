@@ -30,7 +30,7 @@ function rlassoEffect(
             I = nothing
         end
     
-        I[I .> 1] .= 1
+        I[I .> 0] .= 1
         I = BitVector(I)
        
         x = hcat(ones(n), d, x[:, I])
