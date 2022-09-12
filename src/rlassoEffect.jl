@@ -42,7 +42,7 @@ function rlassoEffect(
         if isnothing(I)
             reg2 = GLM.lm(ones(n, 1), d)
         else
-            reg2 = GLM.lm(x[:, Not(2)], reshape(d, n, 1))
+            reg2 = GLM.lm(x[:, Not(2)], d)
         end
     
         v = GLM.residuals(reg2)
