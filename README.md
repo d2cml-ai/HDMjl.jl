@@ -107,7 +107,7 @@ Dict{String, Any} with 15 entries:
 
 ### Inference on Target Coefficients through Orthogonal Estimating Equations
 
-Following Chernozhukov, Hansen and Spindler (2015), the `HDMjl` package makes use of orthogonal estimating equations methods to reduce estimation bias. We can do this through the `rlassoEffect` function, through the `"partialling out"` or the `"double selection"` `method` options.
+Following Chernozhukov, Hansen and Spindler (2015), the `HDMjl` package makes use of orthogonal estimating equations methods to reduce estimation bias. We can do this through the `rlassoEffect` function which does orthogonal estimation using `double selection` by default.
 
 ```julia
 julia> Random.seed!(1234);
@@ -126,16 +126,69 @@ julia> alpha = 1.0;
 
 julia> Y = alpha * d + X * beta + randn(n);
 
+```
+
+```julia
+julia> rlassoEffect(X, Y, d, method = "double selection")
+Dict{String, Any} with 10 entries:
+  "alpha"            => 0.995604
+  "t"                => 72.0529
+  "se"               => 0.0138177
+  "no_select"        => 0
+  "coefficients_reg" => [0.00381425, 0.995604, 0.992196, 1.00151, 0.973211, 0.982338, 1.01797, 0.978455, 1.01751, 1.003…
+  "sample_size"      => 5000
+  "coefficient"      => 0.995604
+  "selection_index"  => Bool[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+  "residuals"        => Dict("v"=>[-1.47981, -1.77528, -2.14908, -0.628691, -0.209521, -0.577875, -0.634301, -0.0914649…
+  "coefficients"     => 0.995604
+```
+
+We can also use the `partialling out` method:
+
+```julia
 julia> rlassoEffect(X, Y, d, method = "partialling out")
 Dict{String, Any} with 9 entries:
   "alpha"            => 0.99166
   "t"                => 71.0117
   "se"               => 0.0139648
-  "coefficients_reg" => [0.014376, 1.00644, 1.01451, 0.972988, 0.980083, 1.01576, 0.971863, 0.973955, 0.992963, 0.97…
+  "coefficients_reg" => [0.014376, 1.00644, 1.01451, 0.972988, 0.980083, 1.01576, 0.971863, 0.973955, 0.992963, 0.97425…
   "sample_size"      => 5000
   "coefficient"      => 0.99166
-  "selection_index"  => Any[true, true, true, true, true, true, true, true, true, true, true, true, true, true, true…
-  "residuals"        => Dict{String, Array{Float64}}("v"=>[-1.43987; -1.73542; … ; -0.583284; -0.475297;;], "epsilon"…
+  "selection_index"  => Any[true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, t…
+  "residuals"        => Dict("v"=>[-1.43987, -1.73542, -2.00637, -0.544431, -0.111036, -0.601902, -0.667784, -0.0965776…
   "coefficients"     => 0.99166
 ```
 
+#### Estimating treatment effect in a linear model with many confounding factors
+
+We can use this method for the Barro & Lee (1994) dataset, which has a large amount of covariates (61) relative to the sample size (90). Selecting covariates through Post-Lasso gives us more precise estimators.
+
+```julia
+julia> using CodecXz
+
+julia> using RData
+
+julia> using DataFrames
+
+julia> url = "https://github.com/cran/hdm/raw/master/data/GrowthData.rda";
+
+julia> GrowthData = load(download(url))["GrowthData"];
+
+julia> y = GrowthData[:, 1];
+
+julia> d = GrowthData[:, 3];
+
+julia> X = Matrix(GrowthData[:, Not(1, 2, 3)]);
+
+julia> rlassoEffect(X, y, d, method = "partialling out")
+Dict{String, Any} with 9 entries:
+  "alpha"            => -0.0498115
+  "t"                => -3.57421
+  "se"               => 0.0139364
+  "coefficients_reg" => [0.0581009, -0.0755655, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0…
+  "sample_size"      => 90
+  "coefficient"      => -0.0498115
+  "selection_index"  => Any[true, false, true, false, true, false, false, false, false, false  …  false, false, false, …
+  "residuals"        => Dict("v"=>[0.522248, 0.130278, 0.072321, -0.131969, 0.0984047, 0.357306, 0.294098, 0.797784, -0…
+  "coefficients"     => -0.0498115
+```
