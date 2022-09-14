@@ -4,7 +4,7 @@ CurrentModule = HDMjl
 
 # HDMjl
 
-Documentation for [HDMjl](https://github.com/d2cmjl-ai/HDMjl.jl).
+Documentation for [HDMjl](https://github.com/d2cml-ai/HDMjl.jl).
 
 ```@index
 ```
