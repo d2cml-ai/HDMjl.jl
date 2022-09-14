@@ -73,16 +73,16 @@ function rlassoLATE(x, d, y, z; bootstrap = "none", n_rep = 100, always_takers =
         x1 = Matrix(x)
         if all([always_takers, never_takers])
 
-            g_d_z1 = rlassologit(x_z1, d[indz1], post = post, intercept = intercept, penalty_lambda = lambda, penalty_c = penalty_c, penalty_gamma = penalty_gamma)
+            g_d_z1 = rlassologit(x_z1, d[indz1], post = post, intercept = intercept, lambda = lambda, c = penalty_c, gamma = penalty_gamma)
             yp1 = get_mtrx(x1) * g_d_z1["coefficients"]
             md_z1x = 1 ./ (1 .+ exp.(-1 .* (yp1)))
 
-            g_d_z0 = rlassologit(x_z0, d[indz0], post = post, intercept = intercept, penalty_lambda = lambda, penalty_c = penalty_c, penalty_gamma = penalty_gamma)
+            g_d_z0 = rlassologit(x_z0, d[indz0], post = post, intercept = intercept, lambda = lambda, c = penalty_c, gamma = penalty_gamma)
             yp0 = get_mtrx(x1) * g_d_z0["coefficients"]
             md_z0x = 1 ./ (1 .+ exp.(-1 .* (yp0)))
 
         elseif always_takers == false & never_takers == true
-            g_d_z1 = rlassologit(x_z1, d[indz1], post = post, intercept = intercept, penalty_lambda = lambda, penalty_c = penalty_c, penalty_gamma = penalty_gamma)
+            g_d_z1 = rlassologit(x_z1, d[indz1], post = post, intercept = intercept, lambda = lambda, c = penalty_c, gamma = penalty_gamma)
             yp1 = get_mtrx(x1) * g_d_z1["coefficients"]
             md_z1x = 1 ./ (1 .+ exp.(-1 .* (yp0)))
 
@@ -92,7 +92,7 @@ function rlassoLATE(x, d, y, z; bootstrap = "none", n_rep = 100, always_takers =
 
             md_z1x = ones(size(x, 1))
 
-            g_d_z0 = rlassologit(x_z0, d[indz0], post = post, intercept = intercept, penalty_lambda = lambda, penalty_c = penalty_c, penalty_gamma = penalty_gamma)
+            g_d_z0 = rlassologit(x_z0, d[indz0], post = post, intercept = intercept, lambda = lambda, c = penalty_c, gamma = penalty_gamma)
             yp0 = get_mtrx(x1) * g_d_z0["coefficients"]
             md_z0x = 1 ./ (1 .+ exp.(-1 .* (yp0)))
         elseif always_takers == false & never_takers == false
