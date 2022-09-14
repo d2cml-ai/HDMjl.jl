@@ -1,9 +1,9 @@
 # HDMjl
 
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://d2cmjl-ai.github.io/HDMjl.jl/stable/)
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://d2cmjl-ai.github.io/HDMjl.jl/dev/)
-[![Build Status](https://github.com/d2cmjl-ai/HDMjl.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/d2cmjl-ai/HDMjl.jl/actions/workflows/CI.yml?query=branch%3Amain)
-[![Coverage](https://codecov.io/gh/d2cmjl-ai/HDMjl.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/d2cmjl-ai/HDMjl.jl)
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://d2cml-ai.github.io/HDMjl.jl/stable/)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://d2cml-ai.github.io/HDMjl.jl/dev/)
+[![Build Status](https://github.com/d2cml-ai/HDMjl.jl/workflows/CI/badge.svg)](https://github.com/d2cml-ai/HDMjl.jl/actions/workflows/CI.yml?query=branch%3Amain)
+[![Coverage](https://codecov.io/gh/d2cml-ai/HDMjl.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/d2cml-ai/HDMjl.jl)
 
 ### HDMjl.jl
 + This package is a port of the `hdm` library in R. A collection of methods for estimation and quantification of uncertainty in high-dimensional approximately sparse models. Based on Chernozukov, Hansen and Spindler (2016).
@@ -158,7 +158,7 @@ Dict{String, Any} with 9 entries:
   "coefficients"     => -0.0498115
 ```
 
-### Instrumental Variable Estimation in High Dimentional Settings
+### Instrumental Variable Estimation in High-Dimentional Settings
 
 The `rlassoIV` function is able to select exogenous variables (`X_select = true`), instrumental variables (`Z_select = true`) by default, and use orthogonal estimating ecuations through partialling out for a two-stage least squares regression. We also supply the `tsls` function, which computes two-stage least squares estimates.
 
@@ -192,4 +192,47 @@ Dict{String, Any} with 5 entries:
   "coefficients" => [-0.0238347;;]
 ```
 
+### Inference on Treatment Effects on a High-Dimensional Setting
+
+The `rlassoATE`, `rlassoLATE`, `rlassoATET`, and `rlassoLATET` functions are included for estimation of the corresponding treatment effect statistics.
+
+```julia
+julia> url = "https://github.com/cran/hdm/raw/master/data/pension.rda";
+
+julia> pension = load(download(url))["pension"];
+
+julia> y = pension[:, "tw"];
+
+julia> d = pension[:, "p401"];
+
+julia> z = pension[:, "e401"];
+
+julia> X = Matrix(pension[:, ["i2", "i3", "i4", "i5", "i6", "i7", "a2", "a3", "a4", "a5", "fsize", "hs", "smcol", "col", "marr", "twoearn", "db", "pira", "hown"]]);
+
+julia> rlassoATE(X, d, y)
+Dict{String, Any} with 5 entries:
+  "se"          => 1909.23
+  "individual"  => [-9211.92, -40333.7, -77025.7, -20507.1, -2.55449e5, 341338.0, 79615.6, 52735.4, -22352.2, 1.00036e5…
+  "sample_size" => 9915
+  "te"          => 10251.4
+  "type"        => "ATE"
+
+julia> rlassoATET(X, d, y)
+Dict{String, Any} with 5 entries:
+  "se"          => 2914.85
+  "individual"  => [-5151.06, -45726.0, -1.90777e5, -1158.65, -2.99297e5, 6.96894e5, 1.26797e5, 12989.6, -7746.7, 49838…
+  "sample_size" => 9915
+  "te"          => 10770.3
+  "type"        => "ATET"
+
+julia> rlassoLATE(X, d, y, z)
+Dict{String, Any} with 5 entries:
+  "se"          => 2296.83
+  "individual"  => [-16701.9, -87403.6, -1.4475e5, -20743.3, -650529.0, 7.69715e5, 1.85518e5, 77270.6, -31613.2, 132354…
+  "sample_size" => 9915
+  "te"          => 9511.06
+  "type"        => "LATE"
+
+
+```
 
