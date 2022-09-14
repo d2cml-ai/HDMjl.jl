@@ -109,58 +109,6 @@ Dict{String, Any} with 15 entries:
 
 Following Chernozhukov, Hansen and Spindler (2015), the `HDMjl` package makes use of orthogonal estimating equations methods to reduce estimation bias. We can do this through the `rlassoEffect` function which does orthogonal estimation using `double selection` by default.
 
-```julia
-julia> Random.seed!(1234);
-
-julia> n = 5000;
-
-julia> p = 20;
-
-julia> X = randn(n, p - 1);
-
-julia> beta = ones(p - 1);
-
-julia> d = randn(n);
-
-julia> alpha = 1.0;
-
-julia> Y = alpha * d + X * beta + randn(n);
-
-```
-
-```julia
-julia> rlassoEffect(X, Y, d, method = "double selection")
-Dict{String, Any} with 10 entries:
-  "alpha"            => 0.995604
-  "t"                => 72.0529
-  "se"               => 0.0138177
-  "no_select"        => 0
-  "coefficients_reg" => [0.00381425, 0.995604, 0.992196, 1.00151, 0.973211, 0.982338, 1.01797, 0.978455, 1.01751, 1.003…
-  "sample_size"      => 5000
-  "coefficient"      => 0.995604
-  "selection_index"  => Bool[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-  "residuals"        => Dict("v"=>[-1.47981, -1.77528, -2.14908, -0.628691, -0.209521, -0.577875, -0.634301, -0.0914649…
-  "coefficients"     => 0.995604
-```
-
-We can also use the `partialling out` method:
-
-```julia
-julia> rlassoEffect(X, Y, d, method = "partialling out")
-Dict{String, Any} with 9 entries:
-  "alpha"            => 0.99166
-  "t"                => 71.0117
-  "se"               => 0.0139648
-  "coefficients_reg" => [0.014376, 1.00644, 1.01451, 0.972988, 0.980083, 1.01576, 0.971863, 0.973955, 0.992963, 0.97425…
-  "sample_size"      => 5000
-  "coefficient"      => 0.99166
-  "selection_index"  => Any[true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, t…
-  "residuals"        => Dict("v"=>[-1.43987, -1.73542, -2.00637, -0.544431, -0.111036, -0.601902, -0.667784, -0.0965776…
-  "coefficients"     => 0.99166
-```
-
-#### Estimating treatment effect in a linear model with many confounding factors
-
 We can use this method for the Barro & Lee (1994) dataset, which has a large amount of covariates (61) relative to the sample size (90). Selecting covariates through Post-Lasso gives us more precise estimators.
 
 ```julia
@@ -180,6 +128,23 @@ julia> d = GrowthData[:, 3];
 
 julia> X = Matrix(GrowthData[:, Not(1, 2, 3)]);
 
+julia> rlassoEffect(X, y, d, method = "double selection")
+Dict{String, Any} with 10 entries:
+  "alpha"            => -0.0500059
+  "t"                => -3.16666
+  "se"               => 0.0157914
+  "no_select"        => 0
+  "coefficients_reg" => [-0.406451, -0.0500059, -0.0782423, -0.574676, 0.0511529, -0.0470218, 0.212279, -0.000376038, 0…
+  "sample_size"      => 90
+  "coefficient"      => -0.0500059
+  "selection_index"  => Bool[1, 0, 1, 0, 1, 0, 0, 0, 0, 0  …  0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  "residuals"        => Dict("v"=>[0.497555, 0.183798, 0.0705184, -0.123959, 0.0872214, 0.311811, 0.273583, 0.800463, -…
+  "coefficients"     => -0.0500059
+```
+
+We can also use `partialling out` for the orthogonal estimating equations.
+
+```julia
 julia> rlassoEffect(X, y, d, method = "partialling out")
 Dict{String, Any} with 9 entries:
   "alpha"            => -0.0498115
@@ -192,3 +157,39 @@ Dict{String, Any} with 9 entries:
   "residuals"        => Dict("v"=>[0.522248, 0.130278, 0.072321, -0.131969, 0.0984047, 0.357306, 0.294098, 0.797784, -0…
   "coefficients"     => -0.0498115
 ```
+
+### Instrumental Variable Estimation in High Dimentional Settings
+
+The `rlassoIV` function is able to select exogenous variables (`X_select = true`), instrumental variables (`Z_select = true`) by default, and use orthogonal estimating ecuations through partialling out for a two-stage least squares regression. We also supply the `tsls` function, which computes two-stage least squares estimates.
+
+We desmonstrate this with the eminent domain data used by Belloni, Chen, Chernozhukov & Hansen (2012):
+
+```julia
+julia> using Statistics
+
+julia> url = "https://github.com/cran/hdm/raw/master/data/EminentDomain.rda";
+
+julia> EminentDomain = load(download(url))["EminentDomain"];
+
+julia> z = EminentDomain["logGDP"]["z"];
+
+julia> x = EminentDomain["logGDP"]["x"];
+
+julia> d = EminentDomain["logGDP"]["d"];
+
+julia> y = EminentDomain["logGDP"]["y"];
+
+julia> x = x[:, (mean(x, dims = 1) .> 0.05)'];
+
+julia> z = z[:, (mean(z, dims = 1) .> 0.05)'];
+
+julia> rlassoIV(x, d, y, z)
+Dict{String, Any} with 5 entries:
+  "se"           => [0.128507]
+  "sample_size"  => 312
+  "vcov"         => [0.0165139;;]
+  "residuals"    => [-0.20468; 0.0311701; … ; 0.252309; 0.335146;;]
+  "coefficients" => [-0.0238347;;]
+```
+
+

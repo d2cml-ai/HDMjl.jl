@@ -105,7 +105,7 @@ function rlassoLATE(x, d, y, z; bootstrap = "none", n_rep = 100, always_takers =
     yp_b = get_mtrx(x1) * b_z_xl["coefficients"]
     mz_x = 1 ./ (1 .+ exp.(-1 .* (yp_b)))
 
-    mz_x = mz_x .* (mz_x .> 1e-12 .& mz_x .< (1 - 1e-12)) .+ (1 - 1e-12) .* (
+    mz_x = mz_x .* ((mz_x .> 1e-12) .&& (mz_x .< (1 - 1e-12))) .+ (1 - 1e-12) .* (
         mz_x .> 1 .- 1e-12) .+ 1e-12 .* (mz_x .< 1e-12)
 
     eff = @. (
