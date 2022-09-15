@@ -23,7 +23,7 @@ function rlassoLATE(x, d, y, z; bootstrap = "none", n_rep = 100, always_takers =
 
     ctrl_num_iter, ctrl_tol = 15, 10^-5
 
-    penalty_homoscedastic = false #-> none
+    penalty_homoscedastic = "none"
     penalty_lambda_start = repeat([lambda], p)
     penalty_c = 1.1
     penalty_gamma = 0.1
@@ -160,45 +160,55 @@ end
 function rlassoLATET(x, d, y, z; bootstrap::String = "none", n_rep::Int64 = 500, post::Bool = true, always_takers::Bool = true, never_takers::Bool = true, intercept::Bool = true)
     n = size(x, 1)
     p = size(x, 2)
-    lambda = 2.2 * sqrt(n) * quantile(Normal(0.0, 1.0),  1 - (.1 / log(n)) / (2 * (2 * p)))
-    lambda_start = fill(lambda, p)
+    lambda = 2.2 * sqrt(n) * quantile(Normal(0.0, 1.0),  1 - (0.1 / log(n)) / (2 * (2 * p)))
     indz1 = findall(z .== 1)
     indz0 = findall(z .== 0)
-    b_y_z0xL = rlasso(x[indz0, :], y[indz0], post = post, intercept = intercept, gamma = 0.1, lambda_start = lambda_start)
+    b_y_z0xL = rlasso(x[indz0, :], y[indz0], post = post, intercept = intercept, homoskedastic = "none", c = 1.1, gamma = 0.1, lambda_start = lambda)
     if intercept
         my_z0x = hcat(ones(n), x) * b_y_z0xL["coefficients"]
     elseif !intercept
         my_z0x = x * b_y_z0xL["coefficients"]
     end
 
+
+
     if d == z
         md_z0x = zeros(n)
     else
         if always_takers
-            g_d_z0 = rlassologit(x[indz0, :], d[indz0], post = post, intercept = intercept, c = 1.1, lambda = lambda_start)
-            md_z0x = x * g_d_z0["coefficients"]
+            g_d_z0 = rlassologit(x[indz0, :], d[indz0], post = post, intercept = intercept, c = 1.1, gamma = 0.1, lambda = lambda)
+            if intercept
+                md_z0x = hcat(ones(n), x) * g_d_z0["coefficients"]
+            elseif !intercept
+                md_z0x = x * g_d_z0["coefficients"]
+            end
+            md_z0x = @. 1 / (1 + exp(-md_z0x))
         else
             md_z0x = zeros(n)
         end
     end
-    
-    b_z_xl = rlassologit(x, z, post = post, intercept = intercept, c = 1.1, lambda = lambda_start)
+
+    b_z_xl = rlassologit(x, z, post = post, intercept = intercept, c = 1.1, gamma = 0.1, lambda = lambda)
     if intercept
         mz_x = hcat(ones(n), x) * b_z_xl["coefficients"]
     elseif !intercept
         mz_x = x * b_z_xl["coefficients"]
     end
 
-    mz_x = 1 ./ (1 .+ exp.(-1 .* (mz_x)))
-    mz_x[mz_x .< 1e-12] .= 1e-12
-    mz_x[mz_x .> (1 - 1e-12)] .= 1 - 1e-12
+    mz_x = @. 1 / (1 + exp(-mz_x))
+
+    mz_x = mz_x .* ((mz_x .> 1e-12) .&& (mz_x .< (1 - 1e-12))) .+ (1 - 1e-12) .* (mz_x .> 1 .- 1e-12) .+ 1e-12 .* (mz_x .< 1e-12)    
     
-    eff = ((y - my_z0x) - (1 .- z) .* (y - my_z0x) ./ (1 .- mz_x)) / mean((d - md_z0x) - (1 .- z) .* (d - md_z0x) ./ (1 .- mz_x))
+    effnum = (y - my_z0x) - (1 .- z) .* (y - my_z0x)./(1 .- mz_x)
+    
+    effden = mean((d - md_z0x) - (1 .- z) .* (d - md_z0x)./(1 .- mz_x))
+
+    eff = effnum ./ effden
 
     se = sqrt(var(eff)) / sqrt(n)
     latet = mean(eff)
     individual = eff
-    object = Dict("se" => se, "te" => latet, "individual" => individual, "type" => "LATET", "sample_size" => n)
+    res = Dict("se" => se, "te" => latet, "individual" => individual, "type" => "LATET", "sample_size" => n)
 
     if bootstrap != "none"
         boot = fill(NaN, n_rep)
@@ -213,10 +223,12 @@ function rlassoLATET(x, d, y, z; bootstrap::String = "none", n_rep::Int64 = 500,
             weights = weights .+ 1
             boot[i] = mean(weights .* ((y - my_z0x) - (ones(n) - z) .* (y - my_z0x) ./ (ones(n) - mz_x))) / mean(weights .* ((d - md_z0x) - (ones(n) - z) .* (d - md_z0x) ./ (ones(n) - mz_x)))
         end
-        object["boot_se"] = sqrt(var(boot))
-        object["type_boot"] = bootstrap
+        res["boot_se"] = sqrt(var(boot))
+        res["type_boot"] = bootstrap
+        
+        return res
     end
-    return object
+    return res
 end
 
 function rlassoATET(x, d, y, bootstrap::String = "none", n_rep::Int64 = 500)

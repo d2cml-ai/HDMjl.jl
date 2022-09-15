@@ -71,31 +71,40 @@ function rlasso(x, y; post = true, intercept = true, model = true,
             global e1 = y - x1 * coefT
             coefTemp[ind1] = coefT
         elseif !post
-            e1 = y .- x1 * coefTemp[ind1]
+            e1 = y - x1 * coefTemp[ind1]
         end 
         s1 = sqrt(var(e1))
         
         # Homoskedastic and X-independent
-        if homoskedastic & !X_dependent_lambda
+        if homoskedastic == true & !X_dependent_lambda
             Ups1 = s1 * Psi
             lambda = pen["lambda0"] * Ups1
         
-        # Homosked/astic and X-dependent
-        elseif homoskedastic & X_dependent_lambda
+        # Homoskedastic and X-dependent
+        elseif homoskedastic == true & X_dependent_lambda
             Ups1 = s1 * Psi
             lambda = pend["lambda0"] * Ups1
             
         # Heteroskedastic and X-independent
-        elseif !homoskedastic & !X_dependent_lambda
-            Ups1 = 1 / sqrt(n) .* sqrt.(((e1' .^ 2) * (x .^ 2))')
+        elseif homoskedastic == false & !X_dependent_lambda
+            Ups1 = 1 / sqrt(n) .* sqrt.(((e1 .^ 2)' * (x .^ 2))')
             lambda = Ups1 * pen["lambda0"]
             
         # Heteroskedastic and X-dependent
+        elseif homoskedastic == false & X_dependent_lambda
             lc = lambdaCalculation(x = x, y = e1, homoskedastic = homoskedastic, X_dependent_lambda = X_dependent_lambda, lambda_start = lambda_start, c = c, gamma = gamma)
             Ups1 = lc["Ups0"]
             lambda = lc["lambda"]
+
+        # Homoskedastic = "none"
+        elseif homoskedastic == "none"
+            if isnothing(lambda_start)
+                throw(ArgumentError("lambda_start required when homoskedastic is set to none" ))
+            end
+            Ups1 = 1 / sqrt(n) .* sqrt.(((e1 .^ 2)' * (x .^ 2))')
+            lambda = Ups1 .* pen["lambda0"]
         end
-        
+
         mm = mm + 1
         if abs(s0 - s1) < tol
             break

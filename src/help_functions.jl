@@ -36,10 +36,10 @@ end
 
 
 
-function lambdaCalculation(; homoskedastic::Bool = false, X_dependent_lambda::Bool = false, lambda_start = nothing, c::Float64 = 1.1, gamma::Float64 = 0.1, numSim::Int = 5000, y = nothing, x = nothing)
+function lambdaCalculation(; homoskedastic::Union{Bool, String} = false, X_dependent_lambda::Bool = false, lambda_start = nothing, c::Float64 = 1.1, gamma::Float64 = 0.1, numSim::Int = 5000, y = nothing, x = nothing)
     
     # homoskedastic and X-independent
-    if homoskedastic & !X_dependent_lambda
+    if homoskedastic == true & !X_dependent_lambda
         p = size(x, 2)
         n = size(x, 1)
         lambda0 = 2 * c * sqrt(n) * quantile(Normal(0.0, 1.0), 1 - gamma / (2 * p))
@@ -47,14 +47,14 @@ function lambdaCalculation(; homoskedastic::Bool = false, X_dependent_lambda::Bo
         lambda = zeros(p) .+ lambda0 * Ups0
     
     # homoskedastic and X-dependent
-    elseif homoskedastic & X_dependent_lambda
+    elseif homoskedastic == true & X_dependent_lambda
         p = size(x, 2)
         n = size(x, 1)
         R = numSim
         sim = zeros(R, 1)
         
         psi = mean(x .^ 2, dims = 1)
-        tXtpsi = (x' ./ sqrt(psi))'
+        tXtpsi = (x' ./ sqrt.(psi))'
         
         for i in 1:R
             g = reshape(repeat(randn(n), inner = p),(p, n))'
@@ -66,7 +66,7 @@ function lambdaCalculation(; homoskedastic::Bool = false, X_dependent_lambda::Bo
         lambda = lambda0 * Ups0
         
     # heteroskeddastic and X-independent
-    elseif !homoskedastic & !X_dependent_lambda
+    elseif homoskedastic == false & !X_dependent_lambda
         p = size(x, 2)
         n = size(x, 1)
         lambda0 = 2 * c * sqrt(n) * quantile(Normal(0.0, 1.0), 1 - gamma / (2 * p))
@@ -74,7 +74,7 @@ function lambdaCalculation(; homoskedastic::Bool = false, X_dependent_lambda::Bo
         lambda = lambda0 * Ups0
         
     # heteroskedastic and X-dependent
-    elseif !homoskedastic & X_dependent_lambda
+    elseif homoskedastic == false & X_dependent_lambda
         p = size(x, 2)
         n = size(x, 1)
         R = numSim
@@ -100,6 +100,16 @@ function lambdaCalculation(; homoskedastic::Bool = false, X_dependent_lambda::Bo
             lambda_start = zeros(p) .+ lambda_start
         end
         lambda = lambda_start
+    end
+
+    if homoskedastic == "none"
+        if isnothing(lambda_start)
+            throw(ArgumentError("lambda_start required when homoskedastic is set to none" ))
+        end
+        n = size(x, 1)
+        lambda0 = lambda_start
+        Ups0 = (1 /sqrt(n)) * sqrt.((y.^2)'*(x.^2))
+        lambda = lambda0 .* Ups0
     end
     
     return Dict("lambda" => lambda, "lambda0" => lambda0, "Ups0" => Ups0)
