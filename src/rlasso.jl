@@ -83,7 +83,7 @@ function rlasso(x, y; post = true, intercept = true, model = true,
         # Homoskedastic and X-dependent
         elseif homoskedastic == true & X_dependent_lambda
             Ups1 = s1 * Psi
-            lambda = pend["lambda0"] * Ups1
+            lambda = pen["lambda0"] * Ups1
             
         # Heteroskedastic and X-independent
         elseif homoskedastic == false & !X_dependent_lambda
