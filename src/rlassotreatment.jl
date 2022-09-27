@@ -105,7 +105,7 @@ function rlassoLATE(x, d, y, z; bootstrap = "none", n_rep = 100, always_takers =
     yp_b = get_mtrx(x1) * b_z_xl["coefficients"]
     mz_x = 1 ./ (1 .+ exp.(-1 .* (yp_b)))
 
-    mz_x = mz_x .* ((mz_x .> 1e-12) .&& (mz_x .< (1 - 1e-12))) .+ (1 - 1e-12) .* (
+    mz_x = mz_x .* ((mz_x .> 1e-12) .& (mz_x .< (1 - 1e-12))) .+ (1 - 1e-12) .* (
         mz_x .> 1 .- 1e-12) .+ 1e-12 .* (mz_x .< 1e-12)
 
     eff = @. (
@@ -197,7 +197,7 @@ function rlassoLATET(x, d, y, z; bootstrap::String = "none", n_rep::Int64 = 500,
 
     mz_x = @. 1 / (1 + exp(-mz_x))
 
-    mz_x = mz_x .* ((mz_x .> 1e-12) .&& (mz_x .< (1 - 1e-12))) .+ (1 - 1e-12) .* (mz_x .> 1 .- 1e-12) .+ 1e-12 .* (mz_x .< 1e-12)    
+    mz_x = mz_x .* ((mz_x .> 1e-12) .& (mz_x .< (1 - 1e-12))) .+ (1 - 1e-12) .* (mz_x .> 1 .- 1e-12) .+ 1e-12 .* (mz_x .< 1e-12)    
     
     effnum = (y - my_z0x) - (1 .- z) .* (y - my_z0x)./(1 .- mz_x)
     
