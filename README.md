@@ -6,7 +6,9 @@
 [![Coverage](https://codecov.io/gh/d2cml-ai/HDMjl.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/d2cml-ai/HDMjl.jl)
 
 ### HDMjl.jl
-+ This package is a port of the `hdm` library in R. A collection of methods for estimation and quantification of uncertainty in high-dimensional approximately sparse models. Based on Chernozukov, Hansen and Spindler (2016).
++ This package is a port of the `hdm` library in R. A collection of methods for estimation and quantification of uncertainty in high-dimensional approximately sparse models, based on: 
+
+Chernozhukov, V., Chetverikov, D., Demirer, M., Duflo, E., Hansen, C., & Newey, W. (2017). Double/debiased/neyman machine learning of treatment effects. American Economic Review, 107(5), 261-65.
 
 ### Getting started
 
