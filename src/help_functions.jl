@@ -54,7 +54,7 @@ function lambdaCalculation(; homoskedastic::Union{Bool, String} = false, X_depen
         sim = zeros(R, 1)
         
         psi = mean(x .^ 2, dims = 1)
-        tXtpsi = (x' ./ sqrt.(psi))'
+        tXtpsi = x ./ sqrt.(psi)
         
         for i in 1:R
             g = reshape(repeat(randn(n), inner = p),(p, n))'
