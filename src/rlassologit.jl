@@ -3,6 +3,9 @@ function rlassologit(x, y; model::Bool = true, c::Float64 = 1.1, post::Bool = tr
     lambda::Any = nothing, intercept::Bool = true, 
     threshold::Any = nothing)
     
+
+    
+
     n = size(x, 1)
     p = size(x, 2)
     if !isnothing(c)
@@ -86,11 +89,44 @@ function rlassologit(x, y; model::Bool = true, c::Float64 = 1.1, post::Bool = tr
         a0 = 0
         coefs = coefTemp
     end
+    
+    
+    ### === Output print
+    head1 = "
+    Post-Lasso estimation: $post
+    Intercept: $intercept
+    Control: $threshold
+    \n 
+    Total number of variables: $p\n
+    Number of selected variables: \n
+    "
+    print(head1)
+    if intercept names_columns = [] else names_columns = [] end
+    select_columns = []
 
+    for i in eachindex(coefs)
+        vl = "V $i"
+        push!(names_columns, vl)
+        if coefs[i] != 0
+            push!(select_columns, i)
+        end
+    end
+
+    table_lgt = hcat(names_columns, coefs)
+    @ptconf tf = tf_simple alignment = :r
+    header = ["Variable", "Estimate"]
+    @pt :header = header table_lgt
+
+    print("rlassologit")
+    # print("head")
+    ###
+    
     est = Dict("coefficients" => coefs, "beta" => coefTemp, "intercept" => a0, "index" => ind1,
-        "lambda0" => lambda0, "residuals" => e1, "sigma" => sqrt(var(e1)),
-        "options" => Dict("post" => post, "intercept" => intercept, "control" => threshold))
-    return est
+    "lambda0" => lambda0, "residuals" => e1, "sigma" => sqrt(var(e1)),
+    "options" => Dict("post" => post, "intercept" => intercept, "control" => threshold));
+
+
+    return est;
 end
 
 
