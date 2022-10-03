@@ -109,7 +109,7 @@ function rlassoEffects(x, y; index = 1:size(x, 2), I3 = nothing)
     x = Matrix(x)
     y = Matrix(y[:, :])
 
-    if Set(index) > 2
+    if length(Set(index)) > 2
         k = p = length(index)
         # all(all())
     else
