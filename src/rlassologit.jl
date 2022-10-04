@@ -128,14 +128,14 @@ function rlassologit(x, y; model::Bool = true, c::Float64 = 1.1, post::Bool = tr
 
 
     head1 = "
-------
-Post-Lasso estimation: $post
-Intercept: $intercept
-Control: $threshold
+    ------
+    Post-Lasso estimation: $post
+    Intercept: $intercept
+    Control: $threshold
 
-Total number of variables: $p
-Number of selected variables: $(length(select_columns) - intercept) 
-------
+    Total number of variables: $p
+    Number of selected variables: $(length(select_columns) - intercept) 
+    ------
     "
 
     println(head1)
@@ -176,11 +176,20 @@ function r_summary(result::rlassologit, all::Bool = false)
 end
 
 
-# mutable struct rlassologitEffect
-    
-# end
+mutable struct rlassologitEffect
+    result::Dict
+    head_msg
+end
 
 function rlassologitEffect(X, Y, D; I3::Any = nothing, post = true)
+
+    colnames = try
+        names(X)
+    catch
+        []
+    end
+
+    
 
     x = Matrix(X[:, :])
     d = D[:]
@@ -204,7 +213,7 @@ function rlassologitEffect(X, Y, D; I3::Any = nothing, post = true)
     w = copy(sigma2)
     f = sqrt.(sigma2)
 
-    I1 = l1["ind1ex"][Not(1)]
+    I1 = l1["index"][Not(1)]
 
     lambda = 2.2 * sqrt(n) * quantile(Normal(0, 1), 1 - 0.05 / max(n, p * log(n)))
     la2 = repeat([lambda], p)
@@ -213,7 +222,7 @@ function rlassologitEffect(X, Y, D; I3::Any = nothing, post = true)
     l2 = rlasso(xf, df, post = post, intercept = true, homoskedastic = false, lambda_start = la2, c = 1.1, gamma = 0.1)
     # return l2
     # include("hdmjl.jl")
-    I2 = l2["ind1ex"]
+    I2 = l2["index"]
     z = l2["residuals"] ./ sqrt.(sigma2)
 
     if isnothing(I3)
@@ -226,17 +235,18 @@ function rlassologitEffect(X, Y, D; I3::Any = nothing, post = true)
 
 
     ind1 = []
-    for i in eachind1ex(I)
+    for i in eachindex(I)
         if I[i] > 0 
             append!(ind1, i)
         end
     end
-    ind1
+
+    
 
     xselect = x[:, ind1]
     p3 = size(xselect, 2)
 
-    data3 = DataFrame(hcat(y, d, xselect))
+    data3 = DataFrame(hcat(y, d, xselect), :auto)
     rename!(data3, "x1" => "y")
 
 
@@ -257,7 +267,23 @@ function rlassologitEffect(X, Y, D; I3::Any = nothing, post = true)
     else
         no_select = 0
     end
+
+    ##-----
+    main_mssg = 
+    "
+    ---
+    post = $post
+
+    ----
+    se = $se
+    alpha = $alpha
+    sample_size = $n
+    ---
+    "
+
+    # main_table = hcat(coe)
     # GLM.residuals(l3)
+    print(main_mssg)
 
     res = Dict("epsilon" => y - g3, "v" => z)
     results = Dict(
@@ -265,18 +291,34 @@ function rlassologitEffect(X, Y, D; I3::Any = nothing, post = true)
         "no_select" => no_select, "coefficients" => alpha, "coefficient" => alpha,
         "residuals" => res, "sample_size" => n, "post" => post
     )
-    return results
+    return rlassologitEffect(results, main_mssg) 
 end
 
-function rlassologitEffects(x, y; ind1ex = 1:3, I3 = nothing, post = true)
-    x = Matrix(x)
+function r_summary(result::rlassologitEffect)
+    print(result.head_msg)
+end
+
+mutable struct rlassologitEffects
+    result
+    head_mssg
+    table
+end
+
+function rlassologitEffects(x, y; index = 1:size(x, 2), I3 = nothing, post = true)
+
+    names_col = try
+        names(x)
+    catch
+        nothing
+    end
+    x = Matrix(x[:, :])
     y = Matrix(y[:, :])
     n, p = size(x)
     
-    if Set(ind1ex) == 2
-        k = p1 = sum(ind1ex)
+    if Set(index) == 2
+        k = p1 = sum(index)
     else
-        k = p1 = length(ind1ex)
+        k = p1 = length(index)
     end
 
     coefficients = zeros(k)
@@ -287,33 +329,62 @@ function rlassologitEffects(x, y; ind1ex = 1:3, I3 = nothing, post = true)
 
     # print(k)
     for i in 1:k
-        d = x[:, ind1ex[i]]
-        xt = x[:, Not(ind1ex[i])]
+        d = x[:, index[i]]
+        xt = x[:, Not(index[i])]
         if isnothing(I3)
             I3m = I3
         else
-            I3m = I3[Not(ind1ex[i])]
+            I3m = I3[Not(index[i])]
         end
         
         lasso_regs[i] = try
-            rlassologitEffect(xt, y, d, I3 = I3m, post = post)
+            rlassologitEffect(xt, y, d, I3 = I3m, post = post);
         catch
             "try-error"
         end
         if lasso_regs[i] == "try-error"
             continue
         else
-            coefficients[i] = lasso_regs[i]["alpha"]
-            se[i] = lasso_regs[i]["se"]
-            t[i] = lasso_regs[i]["t"]
-            reside["epsilon"][i] = lasso_regs[i]["residuals"]["epsilon"]
-            reside["v"][i] = lasso_regs[i]["residuals"]["v"]
+            # print(lasso_regs[i])
+            coefficients[i] = lasso_regs[i].result["alpha"]
+            se[i] = lasso_regs[i].result["se"]
+            t[i] = lasso_regs[i].result["t"]
+            reside["epsilon"][i] = lasso_regs[i].result["residuals"]["epsilon"]
+            reside["v"][i] = lasso_regs[i].result["residuals"]["v"]
         end
     end
+    head_mssg = "
+    ---
+    post: $post
+    index: $(collect(index)')
+    ---
+    "
+
+    n_cl = []
+
+    if isnothing(names_col)
+        for i in 1:p
+            push!(n_cl, "V $i")
+        end
+    else
+        n_cl = names_col
+    end
+    main_table = hcat(n_cl[index], coefficients)
+    
+    header = ["Variable", "Estimate"]
+
+    print(head_mssg)
+
+
+    print("\n")
+
+    @ptconf tf = tf_simple alignment = :l
+    @pt :header = header main_table
+
     # residual = 
     res = Dict(
         "coefficients" => coefficients, "se" => se, "t" => t,
-        "lasso_regs" => lasso_regs, "ind1ex" => ind1ex, "sample_size" => n,
+        "lasso_regs" => lasso_regs, "index" => index, "sample_size" => n,
         "residuals" => reside
     )
     return res
