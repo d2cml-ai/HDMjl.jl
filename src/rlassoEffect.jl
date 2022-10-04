@@ -47,9 +47,9 @@ function rlassoEffect(
     
         v = GLM.residuals(reg2)
     
-        var = 1 / n * 1 /mean(v.^2) * mean(v.^2 .* xi.^2) * 1 / mean(v.^2)
+        var_r = 1 / n * 1 /mean(v.^2) * mean(v.^2 .* xi.^2) * 1 / mean(v.^2)
     
-        se = sqrt(var)
+        se = sqrt(var_r)
     
         tval = alpha / se
     
@@ -104,62 +104,82 @@ function rlassoEffect(
     
 end
 
-function rlassoEffects(x, y; index = 1:size(x, 2), I3 = nothing)
+function rlassoEffects(x, y; index = 1:size(x, 2), I3 = nothing, method = "partialling out", post = true)
 
-    x = Matrix(x)
-    y = Matrix(y[:, :])
+    # if method ∉ ["partialling out", "double selection"]
+        # print("Method not found, select from [partialling out, double selection")
+    # end
 
-    if length(Set(index)) > 2
-        k = p = length(index)
-        # all(all())
+    if length(Set(index)) == 2
+        k = p1 = sum(index)
     else
-        k = p = sum(index)
+        k = p1 = length(index)
     end
-    n, p0 = size(x, 1)
+
+    n, p = size(x)
+
+    names_x = try names(x)
+        catch
+            nothing
+        end
+    x0 = Matrix(x[:, :])
+    # y0 = Matrix(y[:, 1])
+
+    if isnothing(names_x)
+        names_x = []
+        for i in 1:p
+            push!(names_x, "V $i")
+        end
+    end
 
     coefficients = zeros(k)
     se = zeros(k)
     t = zeros(k)
-    lasso_reg = Dict()
+    pval = zeros(k)
 
+    lasso_reg = Dict()
     reside = zeros(n, p1)
     residv = zeros(n, p1)
-
-    selection_matrix = zeros(p0, k)
     coef_mat = Dict()
+    selection_matrix = zeros(n, k)
+
+#   names(coefficients) <- names(se) <- names(t) <- names(pval) <- names(lasso.regs) <- colnames(reside) <- colnames(residv) <- colnames(selection.matrix) <- colnames(x)[index]
     for i in 1:k
-        d = x[:, index[i]]
-        xt = x[:, Not(index[i])]
+        d = x0[:, i]
+        xt = x0[:, Not(i)]
+        # Variables de control
         if isnothing(I3)
             I3m = I3
         else
             I3m = I3[Not(index[i])]
-            lasso_reg[i] = try
-                rlassoEffect(xt, y, d, method = method, I3 = I3m, post = post)
-            catch
-                "try-error"
-            end
         end
-        if lasso_regs[i] == "try-error"
+        lasso_reg[i] = try
+            rlassoEffect(xt, y, d, method = method, I3 = I3m, post = post)
+        catch
+            "try-error"
+        end
+
+        if lasso_reg[i] == "try-error"
             continue
         else
-            coefficients[i] = lasso_regs[i]["alpha"]
-            se[i] = lasso_regs[i]["se"]
-            t[i] = lasso_regs[i]["t"]
-            coef_mat[i] = lasso_reg["coefficients_reg"]
-            reside[:, i] = lasso_regs[i]["residuals"]["epsilon"]
-            residv[:, i] = lasso_regs[i]["residuals"]["v"]
-            selection_matrix[Not(index[i]), i] = lasso_reg["selection_index"]
+            coefficients[i] = lasso_reg[i]["alpha"]
+            se[i] = lasso_reg[i]["se"]
+            t[i] = lasso_reg[i]["t"]
+            # pval[i] = lasso_reg[i]["p_value"]
+            reside[:, i] = lasso_reg[i]["residuals"]["epsilon"]
+            residv[:, i] = lasso_reg[i]["residuals"]["v"]
+            coef_mat[i] = lasso_reg[i]["coefficients_reg"]
+            selection_matrix[Not(index[i]), i] = lasso_reg[i]["selection_index"]
         end
     end
 
     residuals = Dict("e" => reside, "v" => residv)
     res = Dict(
         "coefficients" => coefficients, "se" => se, "t" => t, 
-        "lasso_regs" => lasso_reg, "index" => index, "sample_size" => n,
+        "lasso_reg" => lasso_reg, "index" => index, "sample_size" => n,
         "residuals" => residuals, "coef_mat" => coef_mat, "selection_matrix" => selection_matrix
     )
+
     return res
 
-    
 end

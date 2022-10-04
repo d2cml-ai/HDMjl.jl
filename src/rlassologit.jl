@@ -1,10 +1,21 @@
+mutable struct rlassologit
+    result::Dict
+    head_msg
+    select
+    table
+end
+
+
 function rlassologit(x, y; model::Bool = true, c::Float64 = 1.1, post::Bool = true, 
     n::Int64 = size(x, 1), gamma::Float64 = 0.1 / log(n), 
     lambda::Any = nothing, intercept::Bool = true, 
     threshold::Any = nothing)
     
+    x_0 = copy(x)
+    y_0 = copy(y)
 
-    
+    x = Matrix(x[:, :])
+    y = y[:, 1] 
 
     n = size(x, 1)
     p = size(x, 2)
@@ -90,32 +101,51 @@ function rlassologit(x, y; model::Bool = true, c::Float64 = 1.1, post::Bool = tr
         coefs = coefTemp
     end
     
+
     
     ### === Output print
-    head1 = "
-    Post-Lasso estimation: $post
-    Intercept: $intercept
-    Control: $threshold
-    \n 
-    Total number of variables: $p\n
-    Number of selected variables: \n
-    "
-    print(head1)
-    if intercept names_columns = [] else names_columns = [] end
+    
+    if intercept names_columns = ["Intercept"] else names_columns = [] end
     select_columns = []
 
-    for i in eachindex(coefs)
-        vl = "V $i"
-        push!(names_columns, vl)
+    # print(names(x_0))
+    if typeof(x_0) == DataFrame
+        names_columns = vcat(names_columns, names(x_0))
+        # print(names_columns)
+    else
+        for i in 1:p
+            vl = "V $i"
+            push!(names_columns, vl)
+        end
+        # print(names_columns)
+    end
+    
+    for i in 1:p
         if coefs[i] != 0
             push!(select_columns, i)
         end
     end
 
+
+    head1 = "
+------
+Post-Lasso estimation: $post
+Intercept: $intercept
+Control: $threshold
+
+Total number of variables: $p
+Number of selected variables: $(length(select_columns) - intercept) 
+------
+    "
+
+    println(head1)
+
+    println(" ")
+
     table_lgt = hcat(names_columns, coefs)
-    @ptconf tf = tf_simple alignment = :r
+    @ptconf tf = tf_simple alignment = :l
     header = ["Variable", "Estimate"]
-    @pt :header = header table_lgt
+    @pt :header = header table_lgt[select_columns, :]
 
     print("rlassologit")
     # print("head")
@@ -126,9 +156,29 @@ function rlassologit(x, y; model::Bool = true, c::Float64 = 1.1, post::Bool = tr
     "options" => Dict("post" => post, "intercept" => intercept, "control" => threshold));
 
 
-    return est;
+    return rlassologit(est, head1, select_columns, table_lgt);
 end
 
+function r_summary(result::rlassologit, all::Bool = false)
+    println(result.head_msg)
+    @ptconf tf = tf_simple alignment = :l
+    if all
+        table_print = result.table
+    # end
+    else
+        
+        table_print = result.table
+        table_print = table_print[result.select, :]
+    end
+    # print("")
+    @pt :header = ["Variable", "Estimate"] table_print 
+    # @pt :header = ["Variable", "Estimate"] result.table
+end
+
+
+# mutable struct rlassologitEffect
+    
+# end
 
 function rlassologitEffect(X, Y, D; I3::Any = nothing, post = true)
 
