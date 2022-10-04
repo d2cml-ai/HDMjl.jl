@@ -1,17 +1,17 @@
 function rlassoIV(x, d, y, z; select_Z::Bool = true, select_X::Bool = true, post::Bool = true)
 if !select_Z & !select_X
     res = tsls(d, y, z, x, homoskedastic = false)
-    #res["sample_size"] = size(x)[1]
+    res["sample_size"] = size(x)[1]
     return res
     
 elseif select_Z & !select_X
     res = rlassoIVselectZ(x, d, y, z, post = post)
-    #res["sample_size"] = size(x)[1]
+    res["sample_size"] = size(x)[1]
     return res
     
 elseif !select_Z & select_X
     res = rlassoIVselectX(x, d, y, z, post = post)
-    #res["sample_size"] = size(x)[1]
+    res["sample_size"] = size(x)[1]
     return res
     
 elseif select_Z & select_X
@@ -48,7 +48,7 @@ elseif select_Z & select_X
     end
     
     res = tsls(Dr, Yr, Zr, intercept = false, homoscedastic = false)
-    #res["sample_size"] = size(x)[1]
+    res["sample_size"] = size(x)[1]
     return res
 end
 end
