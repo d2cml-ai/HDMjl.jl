@@ -100,9 +100,9 @@ function rlassoEffect(
 
     return results
 
-
-    
 end
+
+
 
 function rlassoEffects(x, y; index = 1:size(x, 2), I3 = nothing, method = "partialling out", post = true)
 
@@ -169,7 +169,7 @@ function rlassoEffects(x, y; index = 1:size(x, 2), I3 = nothing, method = "parti
             reside[:, i] = lasso_reg[i]["residuals"]["epsilon"]
             residv[:, i] = lasso_reg[i]["residuals"]["v"]
             coef_mat[i] = lasso_reg[i]["coefficients_reg"]
-            selection_matrix[Not(index[i]), i] = lasso_reg[i]["selection_index"]
+            # selection_matrix[Not(index[i]), i] = lasso_reg[i]["selection_index"]
         end
     end
 
