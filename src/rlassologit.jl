@@ -205,16 +205,16 @@ function rlassologitEffect(X, Y, D; I3::Any = nothing, post = true)
     dx = hcat(d, x)
 
     l1 = rlassologit(dx, y, post = post, intercept = true, lambda = la1)
-    x1 = l1["residuals"]
+    x1 = l1.result["residuals"]
 
-    t = hcat(ones(n), dx) * l1["coefficients"]
+    t = hcat(ones(n), dx) * l1.result["coefficients"]
 
     sigma2 = exp.(t) ./ (1 .+ exp.(t)).^2
 
     w = copy(sigma2)
     f = sqrt.(sigma2)
 
-    I1 = l1["index"][Not(1)]
+    I1 = l1.result["index"][Not(1)]
 
     lambda = 2.2 * sqrt(n) * quantile(Normal(0, 1), 1 - 0.05 / max(n, p * log(n)))
     la2 = repeat([lambda], p)
@@ -388,5 +388,6 @@ function rlassologitEffects(x, y; index = 1:size(x, 2), I3 = nothing, post = tru
         "lasso_regs" => lasso_regs, "index" => index, "sample_size" => n,
         "residuals" => reside
     )
-    return res
+    return rlassoEffects(res, head_mssg, main_table)
 end
+

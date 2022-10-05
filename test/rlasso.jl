@@ -16,3 +16,8 @@ beta = vcat(repeat([5], s), repeat([0], p - s))
 using DataFrames
 x1 = DataFrame(x, :auto)
 
+include("../src/HDMjl.jl")
+
+ss = HDMjl.rlasso(x1, y)
+x1
+HDMjl.r_summary(ss)
