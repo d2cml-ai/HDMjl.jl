@@ -181,6 +181,7 @@ mutable struct rlassologitEffect
     head_msg
 end
 
+
 function rlassologitEffect(X, Y, D; I3::Any = nothing, post = true)
 
     colnames = try
