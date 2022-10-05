@@ -252,13 +252,13 @@ function r_print(object::rlassoEffects1, digits = 3)
         if length(object.coefficients) <= 10
             
             println("Coefficients:\n")
-            pretty_table(a[2,:]', tf = tf_borderless, header = a[1,:])
+            pretty_table(a[2,:]', tf = tf_borderless, header = a[1,:], nosubheader = true, equal_columns_width = true, columns_width = 9, alignment=:c) #, header_crayon =crayon"blue")
         else 
             for i in 1:trunc(length(object.coefficients)/10)
-                pretty_table(a[2,10*(i-1)+1:10*i]', tf = tf_borderless, header = a[1,10*(i-1)+1:10*i])
+                pretty_table(a[2,10*(i-1)+1:10*i]', tf = tf_borderless, header = a[1,10*(i-1)+1:10*i], nosubheader = true, equal_columns_width = true, columns_width = 9, alignment=:c)#, header_crayon =crayon"green")
             end
-        pretty_table(a[2,10*trunc(length(object.coefficients)/10)+1:length(object.coefficients)]',
-                            tf = tf_borderless, header = a[1,10*trunc(length(object.coefficients)/10)+1:length(object.coefficients)])
+        pretty_table(a[2,10*trunc(length(object.coefficients)/10)+1:length(object.coefficients)]', alignment=:c, nosubheader = true, equal_columns_width = true, columns_width = 9,
+                            tf = tf_borderless, header = a[1,10*trunc(length(object.coefficients)/10)+1:length(object.coefficients)])#, header_crayon =crayon"green")
         end
     else 
         print("No coefficients\n")

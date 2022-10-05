@@ -7,19 +7,19 @@ mutable struct rlassoIV1
 end
 
 function rlassoIV(x, d, y, z; select_Z::Bool = true, select_X::Bool = true, post::Bool = true)
-    if !select_Z & !select_X
-        res = tsls(d, y, z, x, homoskedastic = false)
+    if select_Z == true && select_X == false
+        res = tsls(d, y, z, x, homoscedastic = false)
         se = res["se"]
         
-    elseif select_Z & !select_X
+    elseif select_Z == true && select_X == false
         res = rlassoIVselectZ(x, d, y, z, post = post)
         res["sample_size"] = size(x)[1]
         
-    elseif !select_Z & select_X
+    elseif select_Z == false && select_X == true
         res = rlassoIVselectX(x, d, y, z, post = post)
         res["sample_size"] = size(x)[1]
         
-    elseif select_Z & select_X
+    elseif select_Z == true && select_X == true
         
         Z = hcat(z, x)
         lasso_d_zx = rlasso(Z, d, post = post)
@@ -62,28 +62,30 @@ function rlassoIV(x, d, y, z; select_Z::Bool = true, select_X::Bool = true, post
     return res1;
 end
 
+#using Crayons
 function r_print(object::rlassoIV1, digits = 3)
     if length(object.coefficients) !=  0
-        b = ["X$y" for y = length(object.coefficients)]
+        b = ["X$y" for y = 1:length(object.coefficients)]
         b = reshape(b,(1,length(b)))
-        a = vcat(b, round.(object.coefficients', digits = 3))
+        a = vcat(b, round.(object.coefficients', digits = digits))
         if length(object.coefficients) <= 10
             
             println("Coefficients:\n")
-            pretty_table(a[2,:]', tf = tf_borderless, header = a[1,:])
+            pretty_table(a[2,:]', tf = tf_borderless, header = a[1,:], nosubheader = true, equal_columns_width = true, columns_width = 9, alignment=:c) #, header_crayon =crayon"blue")
         else 
-            for i in 1:trunc(length(object.coefficients)/10)
-                pretty_table(a[2,10*(i-1)+1:10*i]', tf = tf_borderless, header = a[1,10*(i-1)+1:10*i])
+            for i in 1:convert(Int, trunc(length(object.coefficients)/10, digits =0))
+                pretty_table(a[2,10*(i-1)+1:10*i]', tf = tf_borderless, header = a[1,10*(i-1)+1:10*i], nosubheader = true, equal_columns_width = true, columns_width = 9, alignment=:c)#, header_crayon =crayon"green")
+                print("\n")
             end
-        pretty_table(a[2,10*trunc(length(object.coefficients)/10)+1:length(object.coefficients)]',
-                            tf = tf_borderless, header = a[1,10*trunc(length(object.coefficients)/10)+1:length(object.coefficients)])
+        pretty_table(a[2,10*convert(Int, trunc(length(object.coefficients)/10, digits =0))+1:length(object.coefficients)]', alignment=:c, nosubheader = true, equal_columns_width = true, columns_width = 9,
+                            tf = tf_borderless, header = a[1,10*convert(Int, trunc(length(object.coefficients)/10, digits =0))+1:length(object.coefficients)]) #, header_crayon =crayon"green")
         end
     else 
         print("No coefficients\n")
     end
 end
 
-using Distributions
+#using Distributions
 function r_summary(object::rlassoIV1)
     if length(object.coefficients) != 0
         k = length(object.coefficients)
