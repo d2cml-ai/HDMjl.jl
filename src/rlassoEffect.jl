@@ -13,7 +13,7 @@ function rlassoEffect(
     method = "double selection",
     I3 = nothing,
     post = true
-)
+ )
 
 #= x = Matrix(x)
 y = Matrix(y[:, :])
@@ -200,7 +200,7 @@ function rlassoEffects(x, y; index = 1:size(x, 2), I3 = nothing, method = "parti
     coef_mat = Dict()
     selection_matrix = zeros(n, k)
 
-#   names(coefficients) <- names(se) <- names(t) <- names(pval) <- names(lasso.regs) <- colnames(reside) <- colnames(residv) <- colnames(selection.matrix) <- colnames(x)[index]
+
     for i in 1:k
         d = x0[:, i]
         xt = x0[:, Not(i)]
