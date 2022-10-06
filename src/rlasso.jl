@@ -32,6 +32,11 @@ function rlasso(x, y; post = true, intercept = true, model = true,
     else
         n_cl = names_col
     end
+
+    if post == false
+        c = .5
+    end
+
     # print(n_cl)
     
     if intercept

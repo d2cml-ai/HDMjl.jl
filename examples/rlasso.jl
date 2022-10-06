@@ -8,7 +8,7 @@ function r_data(n = 1)
 end
 
 reload() = include("../src/HDMjl.jl")
-
+### 59 Pass
 dta = r_data(1)
 n, p = size(dta)
 s = 3
@@ -17,27 +17,35 @@ beta = vcat(fill(3, s), zeros(p - s));
 p = p-1
 X = dta[:, Not(1)]
 Y = dta[:, 1];
-
-# Y
-
 reload()
 lasso_reg = HDMjl.rlasso(X, Y, post = false)
 HDMjl.r_summary(lasso_reg)
 
 #------
-using Pkg, Pkg.rm("HDMjl"); Pkg.add("https://github.com/d2cml-ai/HDMjl.jl#printing")
-using  DataFrames, CSV, HDMjl
+yhat_lasso = HDMjl.r_predict(lasso_reg)
+Xnew = r_data("1.1xnew")
+yhat_lasso_new = HDMjl.r_predict(lasso_reg, xnew = Matrix(Xnew))
+post_lasso_reg = rlasso(X, Y, post = true)
+y_hat_postlasso = r_predict(post_lasso_reg, xnew = Matrix(Xnew))
+## TODO: Implementar la funcion print para rlasso
+r_summary(post_lasso_reg)
 
-url = "https://raw.githubusercontent.com/d2cml-ai/HDMjl.jl/printing/examples/r_1.csv"
-dta = CSV.read(download(url), DataFrame)
-n, p = size(dta)
-s = 3
-beta = vcat(fill(3, s), zeros(p - s));
+ynew = r_data("1.1ynew")
 
-p = p-1
-X = Matrix(dta[:, Not(1)])
-Y = dta[:, 1];
-lasso_reg = rlasso(X, Y, post = false)
-# HDMjl.r_summary(lasso_reg)
+y_hat_postlasso
+using Statistics
+# ynew
+mean(abs.(ynew[:, 1] - yhat_lasso_new)); mean(abs.(ynew[:, 1] - y_hat_postlasso))
 
-e1
+#### ----------------
+
+dat2 = r_data(2)
+
+y = dat2[:, 1]
+d = dat2[:, 2]
+x0 = dat2[:, Not(1, 2)]
+
+rlasso(x0, y)
+rlasso(x0, d)
+
+
