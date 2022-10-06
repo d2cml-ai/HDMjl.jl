@@ -21,3 +21,10 @@ include("../src/HDMjl.jl")
 ss = HDMjl.rlasso(x1, y)
 x1
 HDMjl.r_summary(ss)
+
+D = rand(Normal(), (n, p))
+using Pipe
+@pipe DataFrame(D, :auto) |> rename(_, :x1 => :d)
+
+using GLM
+GLM.residuals

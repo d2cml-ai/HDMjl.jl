@@ -3,7 +3,7 @@ mutable struct rlassoEffect1
     se
     sample_size
     coefficients
-    dict
+    result
 end
 
 function rlassoEffect(
@@ -158,7 +158,7 @@ mutable struct rlassoEffects1
     sample_size
     index
     coefficients
-    dict
+    result
 end
 
 function rlassoEffects(x, y; index = 1:size(x, 2), I3 = nothing, method = "partialling out", post = true)
@@ -219,13 +219,13 @@ function rlassoEffects(x, y; index = 1:size(x, 2), I3 = nothing, method = "parti
         if lasso_reg[i] == "try-error"
             continue
         else
-            coefficients[i] = lasso_reg[i].dict["alpha"]
-            se[i] = lasso_reg[i].dict["se"]
-            t[i] = lasso_reg[i].dict["t"]
+            coefficients[i] = lasso_reg[i].result["alpha"]
+            se[i] = lasso_reg[i].result["se"]
+            t[i] = lasso_reg[i].result["t"]
             # pval[i] = lasso_reg[i]["p_value"]
-            reside[:, i] = lasso_reg[i].dict["residuals"]["epsilon"]
-            residv[:, i] = lasso_reg[i].dict["residuals"]["v"]
-            coef_mat[i] = lasso_reg[i].dict["coefficients_reg"]
+            reside[:, i] = lasso_reg[i].result["residuals"]["epsilon"]
+            residv[:, i] = lasso_reg[i].result["residuals"]["v"]
+            coef_mat[i] = lasso_reg[i].result["coefficients_reg"]
             # selection_matrix[Not(index[i]), i] = lasso_reg[i]["selection_index"]
         end
     end
@@ -312,3 +312,4 @@ function r_confint(object::rlassoEffects1, level = 0.95)
     ci = pretty_table(c_i; header = pct, show_row_number = false, tf = tf_borderless, row_names = ["X$y" for y = object.index])
     #return c_i;;
 end
+
