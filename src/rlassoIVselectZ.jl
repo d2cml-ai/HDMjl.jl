@@ -1,8 +1,12 @@
-function rlassoIVselectZ(x, y, d, z; post::Bool = true, intercept::Bool = true)
+function rlassoIVselectZ(x, d, y, z; post::Bool = true, intercept::Bool = true)
     
     n = size(y, 1)
     kex = size(x, 2)
     ke = size(d, 2)
+    
+    d_names = ["d$y" for y = 1:ke]
+    x_names = ["x$y" for y  = 1:kex];
+    coef_names = append!(d_names,x_names);
     
     Z = hcat(z, x)
     kiv = size(Z, 2)
@@ -40,7 +44,7 @@ function rlassoIVselectZ(x, y, d, z; post::Bool = true, intercept::Bool = true)
         if isempty(Dhat)
             Dhat = append!(Dhat, dihat)
         else
-            Dhat = hcat(Dhat, digat)
+            Dhat = hcat(Dhat, dihat)
         end
     end
     
@@ -52,6 +56,7 @@ function rlassoIVselectZ(x, y, d, z; post::Bool = true, intercept::Bool = true)
     Omega_hat = Dhat' * (Dhat .* (residuals .^ 2))
     Q_hat_inv = pinv(d' * Dhat)
     vcov = Q_hat_inv * Omega_hat * Q_hat_inv'
+    alpha_hat = hcat(coef_names, alpha_hat)
     res = Dict("coefficients" => alpha_hat[1:ke, :], "se" => sqrt.(diag(vcov))[1:ke], "residuals" => residuals, "samplesize" => n)
     return res
 end

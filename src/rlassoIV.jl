@@ -7,8 +7,9 @@ mutable struct rlassoIV1
 end
 
 function rlassoIV(x, d, y, z; select_Z::Bool = true, select_X::Bool = true, post::Bool = true)
-    if select_Z == true && select_X == false
+    if select_Z == false && select_X == false
         res = tsls(d, y, z, x, homoscedastic = false)
+        #res["coefficients"] = hcat(["d$y" for y = 1:size(d[:,:],2)], res["coefficients"])
         se = res["se"]
         
     elseif select_Z == true && select_X == false
@@ -17,7 +18,7 @@ function rlassoIV(x, d, y, z; select_Z::Bool = true, select_X::Bool = true, post
         
     elseif select_Z == false && select_X == true
         res = rlassoIVselectX(x, d, y, z, post = post)
-        res["sample_size"] = size(x)[1]
+        #res["sample_size"] = size(x)[1]
         
     elseif select_Z == true && select_X == true
         
@@ -53,6 +54,7 @@ function rlassoIV(x, d, y, z; select_Z::Bool = true, select_X::Bool = true, post
         end
         
         res = tsls(Dr, Yr, Zr, intercept = false, homoscedastic = false)
+        #res["coefficients"] = hcat(["d$y" for y = 1:size(d[:,:],2)], res["coefficients"])
     end
     se = res["se"]
     sample_size = res["sample_size"]
@@ -63,22 +65,23 @@ function rlassoIV(x, d, y, z; select_Z::Bool = true, select_X::Bool = true, post
 end
 
 #using Crayons
-function r_print(object::rlassoIV1, digits = 3)
-    if length(object.coefficients) !=  0
-        b = ["X$y" for y = 1:length(object.coefficients)]
-        b = reshape(b,(1,length(b)))
-        a = vcat(b, round.(object.coefficients', digits = digits))
-        if length(object.coefficients) <= 10
+function r_print(object::rlassoIV1, n_digits = 3)
+    if size([object.coefficients])[1] !=  0
+        # b = ["X$y" for y = 1:length(object.coefficients)]
+        # b = reshape(b,(1,length(b)))
+        # a = vcat(b, round.(object.coefficients', digits = digits))
+        a = hcat(object.coefficients[:,1], round.(object.coefficients[:,2], digits = n_digits))
+        if size(object.coefficients, 1) <= 10
             
             println("Coefficients:\n")
-            pretty_table(a[2,:]', tf = tf_borderless, header = a[1,:], nosubheader = true, equal_columns_width = true, columns_width = 9, alignment=:c) #, header_crayon =crayon"blue")
+            pretty_table(a[:, 2]', tf = tf_borderless, header = a[:, 1], nosubheader = true, equal_columns_width = true, columns_width = 10, alignment=:c) #, header_crayon =crayon"blue")
         else 
-            for i in 1:convert(Int, trunc(length(object.coefficients)/10, digits =0))
-                pretty_table(a[2,10*(i-1)+1:10*i]', tf = tf_borderless, header = a[1,10*(i-1)+1:10*i], nosubheader = true, equal_columns_width = true, columns_width = 9, alignment=:c)#, header_crayon =crayon"green")
+            for i in 1:convert(Int, trunc(size(object.coefficients, 1)/10, digits =0))
+                pretty_table(a[10*(i-1)+1:10*i, 2]', tf = tf_borderless, header = a[10*(i-1)+1:10*i, 1], nosubheader = true, equal_columns_width = true, columns_width = 10, alignment=:c)#, header_crayon =crayon"green")
                 print("\n")
             end
-        pretty_table(a[2,10*convert(Int, trunc(length(object.coefficients)/10, digits =0))+1:length(object.coefficients)]', alignment=:c, nosubheader = true, equal_columns_width = true, columns_width = 9,
-                            tf = tf_borderless, header = a[1,10*convert(Int, trunc(length(object.coefficients)/10, digits =0))+1:length(object.coefficients)]) #, header_crayon =crayon"green")
+        pretty_table(a[10*convert(Int, trunc(size(object.coefficients, 1)/10, digits =0))+1:size(object.coefficients, 1), 2]', alignment=:c, nosubheader = true, equal_columns_width = true, columns_width = 10,
+                            tf = tf_borderless, header = a[10*convert(Int, trunc(size(object.coefficients, 1)/10, digits =0))+1:size(object.coefficients, 1), 1]) #, header_crayon =crayon"green")
         end
     else 
         print("No coefficients\n")
@@ -87,18 +90,18 @@ end
 
 #using Distributions
 function r_summary(object::rlassoIV1)
-    if length(object.coefficients) != 0
-        k = length(object.coefficients)
+    if size([object.coefficients])[1] != 0
+        k = length(object.coefficients[:,2])
         table = zeros(k, 4)
-        table[:, 1] .= object.coefficients
+        table[:, 1] .= vec(object.coefficients[:,2])
         table[:, 2] .= object.se
         table[:, 3] .= table[:, 1]./table[:, 2]
         table[:, 4] .= 2 * cdf(Normal(), -abs.(table[:, 3]))
-        table1 = DataFrame(table, :auto)
-        table1 = rename(table1, ["coeff.", "se.", "t-value", "p-value"])
+        table1 = DataFrame(hcat(object.coefficients[:,1], table), :auto)
+        table1 = rename(table1, [" ", "coeff.", "se.", "t-value", "p-value"])
         print("Estimates and Significance Testing of the effect of target variables in the IV regression model", 
                 "\n")
-        pretty_table(table, show_row_number = true, header = ["coeff.", "se.", "t-value", "p-value"], tf = tf_borderless)
+        pretty_table(table1, show_row_number = false, header = [" ", "coeff.", "se.", "t-value", "p-value"], tf = tf_borderless)
         print("---", "\n", "Signif. codes:","\n", "0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1")
         print("\n")
         return table1;
@@ -112,7 +115,7 @@ end
 function r_confint(object::rlassoIV1, level = 0.95)
     n = object.sample_size
     k = length(object.coefficients)
-    cf = object.coefficients
+    cf = object.coefficients[:,2:end]
     #pnames <- names(cf)
     # if (missing(parm)) 
     #     parm <- pnames else if (is.numeric(parm)) 
@@ -130,9 +133,8 @@ function r_confint(object::rlassoIV1, level = 0.95)
             c_i = vcat(c_i, (cf[i] .+ ses[i] .* fac)[:,:]')
         end
     end
-    table1 = DataFrame(c_i, :auto)
-    table1 = rename(table1, pct)
-    #ci = NamedArray(c_i, (1:size(c_i)[1], pct))
-    ci = pretty_table(c_i; header = pct, show_row_number = true, tf = tf_borderless)
+    table1 = DataFrame(hcat(object.coefficients[:,1],c_i), :auto)
+    table1 = rename(table1, append!([" "],pct))
+    ci = pretty_table(table1; header = append!([" "],pct), show_row_number = false, tf = tf_borderless)
     return table1;
 end

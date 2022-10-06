@@ -12,11 +12,11 @@ function rlassoIVselectX(x, d, y, z; post::Bool = true)
         Zr[:, i] = lasso_z_x["residuals"]
     end
     
-    result = tsls(Dr, Yr, Zr, intercept = false)
+    result = tsls(Dr, Yr, Zr, nothing,intercept = false)
     se = result["se"]
     vcov = result["vcov"]
     coef = result["coefficients"]
     # coefnames = result["coefnames"]
-    res = Dict("coefficients" => coef, "vcov" => vcov, "se" => se)
+    res = Dict("coefficients" => coef, "vcov" => vcov, "se" => se, "sample_size" => n)
     return res
 end

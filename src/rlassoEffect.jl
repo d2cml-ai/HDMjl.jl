@@ -134,7 +134,7 @@ end
 
 function r_print(object::rlassoEffect1, digits = 3)
     if length(object.coefficients) !=  0
-        b = ["X$y" for y = length(object.coefficients)]
+        b = ["$y" for y = 1:length(object.coefficients)]
         b = reshape(b,(1,length(b)))
         a = vcat(b, round.(object.coefficients', digits = 3))
         if length(object.coefficients) <= 10
