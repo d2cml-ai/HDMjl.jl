@@ -39,7 +39,7 @@ end
 function lambdaCalculation(; homoskedastic::Union{Bool, String} = false, X_dependent_lambda::Bool = false, lambda_start = nothing, c::Float64 = 1.1, gamma::Float64 = 0.1, numSim::Int = 5000, y = nothing, x = nothing)
     
     # homoskedastic and X-independent
-    if homoskedastic == true & !X_dependent_lambda
+    if (homoskedastic == true) & !X_dependent_lambda
         p = size(x, 2)
         n = size(x, 1)
         lambda0 = 2 * c * sqrt(n) * quantile(Normal(0.0, 1.0), 1 - gamma / (2 * p))
@@ -47,7 +47,7 @@ function lambdaCalculation(; homoskedastic::Union{Bool, String} = false, X_depen
         lambda = zeros(p) .+ lambda0 * Ups0
     
     # homoskedastic and X-dependent
-    elseif homoskedastic == true & X_dependent_lambda
+    elseif (homoskedastic == true) & X_dependent_lambda
         p = size(x, 2)
         n = size(x, 1)
         R = numSim
@@ -66,7 +66,7 @@ function lambdaCalculation(; homoskedastic::Union{Bool, String} = false, X_depen
         lambda = lambda0 * Ups0
         
     # heteroskeddastic and X-independent
-    elseif homoskedastic == false & !X_dependent_lambda
+    elseif (homoskedastic == false) & !X_dependent_lambda
         p = size(x, 2)
         n = size(x, 1)
         lambda0 = 2 * c * sqrt(n) * quantile(Normal(0.0, 1.0), 1 - gamma / (2 * p))
@@ -74,7 +74,7 @@ function lambdaCalculation(; homoskedastic::Union{Bool, String} = false, X_depen
         lambda = lambda0 * Ups0
         
     # heteroskedastic and X-dependent
-    elseif homoskedastic == false & X_dependent_lambda
+    elseif (homoskedastic == false) & X_dependent_lambda
         p = size(x, 2)
         n = size(x, 1)
         R = numSim
