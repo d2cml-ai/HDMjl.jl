@@ -202,8 +202,8 @@ function rlassoEffects(x, y; index = 1:size(x, 2), I3 = nothing, method = "parti
 
 
     for i in 1:k
-        d = x0[:, i]
-        xt = x0[:, Not(i)]
+        d = x0[:, index[i]]
+        xt = x0[:, Not(index[i])]
         # Variables de control
         if isnothing(I3)
             I3m = I3

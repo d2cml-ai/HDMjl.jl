@@ -9,7 +9,7 @@ r_data = function (name = "nn", ...){
     print(nn)
 }
 set.seed(12345)
-n = 200
+n = 100
 #sample size
 p = 50
 # number of variables
