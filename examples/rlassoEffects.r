@@ -27,7 +27,6 @@ print(lasso.effect)
 library(hdm)
 
 cps2012 = head(hdm::cps2012, 2000)
-
 X <- model.matrix(~-1 + female + female:(widowed + divorced + separated +nevermarried +
 hsd08 + hsd911 + hsg + cg + ad + mw + so + we + exp1 + exp2 + exp3) + +(widowed+
 divorced + separated + nevermarried + hsd08 + hsd911 + hsg + cg + ad + mw + so +
@@ -43,11 +42,12 @@ X <- X[, which(apply(X, 2, var) != 0)]
 index.gender <- grep("female", colnames(X))
 y <- cps2012$lnw
 
-index.gender
+# index.gender
 options(scipen = 999)
-r_data("cps", y, X)
+# r_data("cps", y, X)
+# dim(cbind(y, X))
 
-effects.female <- rlassoEffects(x = X, y = y, index = c(1, 2))
+effects.female <- rlassoEffects(x = as.matrix(X), y = y, index = c(1, 2))
 summary(effects.female)
 dim(X)
 
@@ -69,3 +69,34 @@ Y = D[, 1] * 5 + W[, 1] * 5 + rnorm(n)
 r_data("cnt", Y, X)
 
 rlassoEffects(X, Y, index = c(1:p1))
+
+
+
+
+## --- 
+library(hdm)
+growth <- GrowthData
+attach(growth)
+
+Y <- growth[, 1, drop = F] # output variable
+W <- as.matrix(growth)[, -c(1, 2,3)] # controls
+D <- growth[, 3, drop = F] # target regressor
+r.Y <- rlasso(x=W,y=Y)$res # creates the "residual" output variable
+r.D <- rlasso(x=W,y=D)$res # creates the "residual" target regressor
+partial.lasso <- lm(r.Y ~ r.D)
+est_lasso <- partial.lasso$coef[2]
+std_lasso <- summary(partial.lasso)$coef[2,2]
+ci_lasso <- confint(partial.lasso)[2,]
+
+table <- matrix(0, 1, 4)
+table[1,1:4]   <- c(est_lasso,std_lasso,ci_lasso[1],ci_lasso[2])
+colnames(table) <-c("estimator","standard error", "lower bound CI", "upper bound CI")
+rownames(table) <-c("Double Lasso")
+
+
+lasso.effect = rlassoEffect(x = W, y = Y, d = D, method = "partialling out")
+lasso.effect
+
+summary(rlassoEffects(x = W, y = Y, index = 1:5))
+
+W[1:5, 1:5]

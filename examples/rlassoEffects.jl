@@ -41,6 +41,6 @@ dta4 = r_data("cnt")
 y = dta4[:, 1]
 x = dta4[:, Not(1)]
 
-eff3 = HDMjl.rlassoEffects(x, y, index = 1:21)
+eff3 = HDMjl.rlassoEffects(Matrix(x), y)
 HDMjl.r_summary(eff3)
 

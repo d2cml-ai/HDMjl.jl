@@ -8,6 +8,11 @@ function r_data(n = 1)
 end
 
 reload() = include("../src/HDMjl.jl")
+
+
+
+
+#############################333----
 ### 59 Pass
 dta = r_data(1)
 n, p = size(dta)
@@ -48,4 +53,23 @@ x0 = dat2[:, Not(1, 2)]
 rlasso(x0, y)
 rlasso(x0, d)
 
+using CodecXz, RData
+url = "https://github.com/cran/hdm/raw/master/data/GrowthData.rda";
+GrowthData = load(download(url))["GrowthData"];
+GrowthData
+y = GrowthData[:, 1];
+d = GrowthData[:, 3];
+X = Matrix(GrowthData[:, Not(1, 2, 3)]);
+x1 = X[:, :]
+# size(X)
+# reload()
+lasso_effects = HDMjl.rlassoEffect(X, y, d, method = "partialling out");
+HDMjl.r_summary(lasso_effects);
+double_selection = HDMjl.rlassoEffect(x1, y, d, method = "double selection");
+HDMjl.r_summary(double_selection);
 
+
+reffs = HDMjl.rlassoEffects(X, y, );
+HDMjl.r_summary(reffs);
+
+X[1:5, 1:5]
