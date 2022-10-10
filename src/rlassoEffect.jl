@@ -132,20 +132,25 @@ function r_summary(object::rlassoEffect1)
     return table1
 end
 
-function r_print(object::rlassoEffect1, digits = 3)
+function r_print(object::rlassoEffect1; digits = 3)
     if length(object.coefficients) !=  0
         b = ["$y" for y = 1:length(object.coefficients)]
         b = reshape(b,(1,length(b)))
-        a = vcat(b, round.(object.coefficients', digits = 3))
+        a = vcat(b, round.(object.coefficients', digits = digits))
         if length(object.coefficients) <= 10
             
             println("Coefficients:\n")
             pretty_table(a[2,:]', tf = tf_borderless, header = a[1,:])
-        else 
-            for i in 1:trunc(length(object.coefficients)/10)
+
+        elseif string(length(object.coefficients))[count("", string(length(object.coefficients)))-1:count("", string(length(object.coefficients)))-1] == "0"
+            for i in 1:convert(Int, trunc(length(object.coefficients)/10))
                 pretty_table(a[2,10*(i-1)+1:10*i]', tf = tf_borderless, header = a[1,10*(i-1)+1:10*i])
             end
-        pretty_table(a[2,10*trunc(length(object.coefficients)/10)+1:length(object.coefficients)]',
+        else
+            for i in 1:convert(Int, trunc(length(object.coefficients)/10))
+                pretty_table(a[2,10*(i-1)+1:10*i]', tf = tf_borderless, header = a[1,10*(i-1)+1:10*i])
+            end
+            pretty_table(a[2,10*trunc(length(object.coefficients)/10)+1:length(object.coefficients)]',
                             tf = tf_borderless, header = a[1,10*trunc(length(object.coefficients)/10)+1:length(object.coefficients)])
         end
     else 
@@ -244,20 +249,27 @@ function rlassoEffects(x, y; index = 1:size(x, 2), I3 = nothing, method = "parti
 
 end
 
-function r_print(object::rlassoEffects1, digits = 3)
+function r_print(object::rlassoEffects1; digits = 3)
     if length(object.coefficients) !=  0
         b = ["X$y" for y = object.index]
         b = reshape(b,(1,length(b)))
         a = vcat(b, round.(object.coefficients', digits = digits))
         if length(object.coefficients) <= 10
-            
+    
             println("Coefficients:\n")
             pretty_table(a[2,:]', tf = tf_borderless, header = a[1,:], nosubheader = true, equal_columns_width = true, columns_width = 9, alignment=:c) #, header_crayon =crayon"blue")
-        else 
-            for i in 1:trunc(length(object.coefficients)/10)
+        
+        elseif string(length(object.coefficients))[count("", string(length(object.coefficients)))-1:count("", string(length(object.coefficients)))-1] == "0"
+            for i in 1:convert(Int, trunc(length(object.coefficients)/10))
                 pretty_table(a[2,10*(i-1)+1:10*i]', tf = tf_borderless, header = a[1,10*(i-1)+1:10*i], nosubheader = true, equal_columns_width = true, columns_width = 9, alignment=:c)#, header_crayon =crayon"green")
+                print("\n")
             end
-        pretty_table(a[2,10*trunc(length(object.coefficients)/10)+1:length(object.coefficients)]', alignment=:c, nosubheader = true, equal_columns_width = true, columns_width = 9,
+        else
+            for i in 1:convert(Int, trunc(length(object.coefficients)/10))
+                pretty_table(a[2,10*(i-1)+1:10*i]', tf = tf_borderless, header = a[1,10*(i-1)+1:10*i], nosubheader = true, equal_columns_width = true, columns_width = 9, alignment=:c)#, header_crayon =crayon"green")
+                print("\n")
+            end
+            pretty_table(a[2,10*trunc(length(object.coefficients)/10)+1:length(object.coefficients)]', alignment=:c, nosubheader = true, equal_columns_width = true, columns_width = 9,
                             tf = tf_borderless, header = a[1,10*trunc(length(object.coefficients)/10)+1:length(object.coefficients)])#, header_crayon =crayon"green")
         end
     else 
@@ -274,18 +286,19 @@ function r_summary(object::rlassoEffects1)
         table[:, 3] .= table[:, 1]./table[:, 2]
         table[:, 4] .= 2 * cdf(Normal(), -abs.(table[:, 3]))
         table1 = DataFrame(hcat(["X$y" for y = object.index], table), :auto)
-        rename(table1, ["index", "Estimate.", "Std. Error", "t value", "Pr(>|t|)"])
+        table1 = rename(table1, ["index", "Estimate.", "Std. Error", "t value", "Pr(>|t|)"])
         print("Estimates and significance testing of the effect of target variables", 
                 "\n")
         pretty_table(table, show_row_number = false, header = ["Estimate.", "Std. Error", "t value", "Pr(>|t|)"], tf = tf_borderless, row_names = ["X$y" for y = object.index])
         print("---", "\n", "Signif. codes:","\n", "0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1")
         print("\n")
+        return table1
     else
         print("No coefficients\n")
     end
 end
 
-function r_confint(object::rlassoEffects1, level = 0.95)
+function r_confint(object::rlassoEffects1, level = 0.95; joint = false)
     n = object.sample_size
     k = length(object.coefficients)
     cf = object.coefficients
@@ -293,22 +306,54 @@ function r_confint(object::rlassoEffects1, level = 0.95)
     # if (missing(parm)) 
     #     parm <- pnames else if (is.numeric(parm)) 
     #       parm <- pnames[parm]
-    a = (1 - level)/2
-    a = [a, 1 - a]
-    fac = quantile.(Normal(), a)
-    pct = string.(round.(a; digits = 3)*100, "%")
-    ses = object.se
-    c_i = []
-    for i in 1:length(cf)
-        if i == 1
-            c_i = (cf[i] .+ ses[i] .* fac)[:,:]'
-        else
-            c_i = vcat(c_i, (cf[i] .+ ses[i] * fac)[:,:]')
+    if !joint
+        a = (1 - level)/2
+        a = [a, 1 - a]
+        fac = quantile.(Normal(), a)
+        pct = string.(round.(a; digits = 3)*100, "%")
+        ses = object.se
+        c_i = []
+        for i in 1:length(cf)
+            if i == 1
+                c_i = (cf[i] .+ ses[i] .* fac)[:,:]'
+            else
+                c_i = vcat(c_i, (cf[i] .+ ses[i] * fac)[:,:]')
+            end
         end
+        table1 = DataFrame(hcat(["X$y" for y = object.index], c_i), :auto)
+        table1 = rename(table1, vcat("index", pct))
+        #ci = NamedArray(c_i, (1:size(c_i)[1], pct))
+        ci = pretty_table(c_i; header = pct, show_row_number = false, tf = tf_borderless, row_names = ["X$y" for y = object.index])
+        return table1
     end
-    table1 = DataFrame(hcat(["X$y" for y = object.index], c_i), :auto)
-    rename(table1, vcat("index", pct))
-    #ci = NamedArray(c_i, (1:size(c_i)[1], pct))
-    ci = pretty_table(c_i; header = pct, show_row_number = false, tf = tf_borderless, row_names = ["X$y" for y = object.index])
-    #return c_i;;
+    if joint
+        B = 500
+        e = object.dict["residuals"]["e"]
+        v = object.dict["residuals"]["v"]
+        ev = e .* v
+        Ev2 = mean(v.^2, dims = 1)
+        Omegahat = zeros(k, k);
+        for j in 1:k
+            for l in 1:k
+                Omegahat[j,l] = Omegahat[l,j] = 1/(Ev2[j]*Ev2[l]) .* mean(ev[:,j].*ev[:,l])
+            end
+        end
+        var = diag(Omegahat)
+        sim = zeros(B);;
+        for i in 1:B
+            beta_i = rand(MvNormal(zeros(k), Omegahat./n));
+            sim[i] = maximum(abs.(beta_i ./ sqrt.(var)))
+        end
+        a = (1 - level) #not dividing by 2!
+        ab = [a/2, 1 - a/2]
+        pct = string.(round.(ab; digits = 3)*100, "%");
+        c_i = zeros(length(cf), 2)
+        hatc  = quantile(sim, 1-a)
+        c_i[:, 1] = cf .- hatc .* sqrt.(var)
+        c_i[:, 2] = cf .+ hatc .* sqrt.(var)
+        table1 = DataFrame(hcat(["X$y" for y = object.index], c_i), :auto)
+        table1 = rename(table1, vcat("index", pct))
+        ci = pretty_table(c_i; header = pct, show_row_number = false, tf = tf_borderless, row_names = ["X$y" for y = object.index])
+        return table1
+    end
 end

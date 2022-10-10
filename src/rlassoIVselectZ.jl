@@ -1,3 +1,17 @@
+function ginv(X, tol = sqrt(eps(Float64)))
+    Xsvd =  svd(X);
+    Positive = Xsvd.S .> maximum(tol * Xsvd.S[1]);
+    if all(Positive)
+        b = Xsvd.V *(1 ./ Xsvd.S .* (Xsvd.U'));
+    elseif (!any(Positive))
+        b = zeros(size(X)[2],size(X)[1])
+    else
+        c1 = Xsvd.V[:,Positive]
+        c2 = (Xsvd.U[:, Positive])';
+        b = c1 * ((1 ./ Xsvd.S[Positive]) .* c2)
+    end
+end
+
 function rlassoIVselectZ(x, d, y, z; post::Bool = true, intercept::Bool = true)
     
     n = size(y, 1)
@@ -51,7 +65,7 @@ function rlassoIVselectZ(x, d, y, z; post::Bool = true, intercept::Bool = true)
     Dhat = hcat(Dhat, x)
     d = hcat(d, x)
     
-    alpha_hat = pinv(Dhat' * d) * (Dhat' * y)
+    alpha_hat = ginv(Dhat' * d) * (Dhat' * y)
     residuals = y - d * alpha_hat
     Omega_hat = Dhat' * (Dhat .* (residuals .^ 2))
     Q_hat_inv = pinv(d' * Dhat)
