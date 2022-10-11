@@ -68,7 +68,7 @@ function rlassoIVselectZ(x, d, y, z; post::Bool = true, intercept::Bool = true)
     alpha_hat = ginv(Dhat' * d) * (Dhat' * y)
     residuals = y - d * alpha_hat
     Omega_hat = Dhat' * (Dhat .* (residuals .^ 2))
-    Q_hat_inv = pinv(d' * Dhat)
+    Q_hat_inv = ginv(d' * Dhat)
     vcov = Q_hat_inv * Omega_hat * Q_hat_inv'
     alpha_hat = hcat(coef_names, alpha_hat)
     res = Dict("coefficients" => alpha_hat[1:ke, :], "se" => sqrt.(diag(vcov))[1:ke], "residuals" => residuals, "samplesize" => n)
