@@ -195,7 +195,7 @@ function rlasso(x, y; post = true, intercept = true, model = true,
     return est
 end
 
-function Base.r_summary(rlasso_obj::Dict; all = false)
+function r_summary(rlasso_obj::Dict; all = false)
     select_cl = []
     
     for i in eachindex(rlasso_obj["coefficients"])
