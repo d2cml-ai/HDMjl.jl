@@ -132,7 +132,6 @@ function rlassologit(x, y; model::Bool = true, c::Float64 = 1.1, post::Bool = tr
 Post-Lasso estimation: $post
 Intercept: $intercept
 Control: $threshold
-
 Total number of variables: $p
 Number of selected variables: $(length(select_columns) - intercept) 
 ------
