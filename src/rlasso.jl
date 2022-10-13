@@ -156,3 +156,64 @@ function rlasso(x, y; post = true, intercept = true, model = true,
     est["dev"] = y .- mean(y)
     return est
 end
+
+
+function r_summary(rlasso_obj::Dict; all = false)
+    select_cl = []
+    
+    for i in eachindex(rlasso_obj["coefficients"])
+        if rlasso_obj["coefficients"][i] != 0
+            push!(select_cl, i)
+        end
+    end
+    if rlasso_obj["intercept"] != 0
+        intercept = 1
+    else
+        intercept = 0
+    end
+
+    if all
+        tbl = rlasso_obj["main_tbl"]
+    else
+        tbl = rlasso_obj["main_tbl"][select_cl, :]
+    end
+    head_msg = "
+    Post-Lasso Estimation: $(rlasso_obj["options"]["post"])
+    Total number of variables: $(rlasso_obj["covariates"])
+    Number of selected variables: $(sum(rlasso_obj["index"]))
+    ---
+    "
+    # Selected variables: ((tbl[select_cl, 1])')
+
+    
+    print(head_msg)
+    
+    print(" \n")
+
+    @ptconf tf = tf_simple alignment = :l
+
+    @pt :header = ["Variable", "Estimate"] tbl
+    
+
+    n = size(rlasso_obj["model"], 1)
+    r_squared = 1 - rlasso_obj["rss"] / rlasso_obj["tss"]
+    r_squared_adj = 1 - (1 - r_squared) * ((n - intercept) / (n - sum(rlasso_obj["index"]) - intercept))
+    foot_msg = "
+    ----
+    Multiple R-squared: $r_squared
+    Adjusted R-squared: $r_squared_adj
+    "
+    print(foot_msg)
+    # print(rlasso_obj.head_msg)
+    # print(rlasso_obj.foot_msg)
+end
+
+function r_predict(rlasso; xnew = rlasso["model"])
+    n, p = size(xnew)
+    if rlasso["intercept"] != 0
+        y_hat = hcat(ones(n), xnew)  * rlasso["coefficients"]
+    else
+        y_hat = xnew * rlasso["coefficients"]
+    end
+    return y_hat
+end
