@@ -75,12 +75,18 @@ function r_print(object::rlassoIV1, n_digits = 3)
             
             println("Coefficients:\n")
             pretty_table(a[:, 2]', tf = tf_borderless, header = a[:, 1], nosubheader = true, equal_columns_width = true, columns_width = 10, alignment=:c) #, header_crayon =crayon"blue")
-        else 
+        
+        elseif string(length(object.coefficients))[count("", string(length(object.coefficients)))-1:count("", string(length(object.coefficients)))-1] == "0" 
             for i in 1:convert(Int, trunc(size(object.coefficients, 1)/10, digits =0))
                 pretty_table(a[10*(i-1)+1:10*i, 2]', tf = tf_borderless, header = a[10*(i-1)+1:10*i, 1], nosubheader = true, equal_columns_width = true, columns_width = 10, alignment=:c)#, header_crayon =crayon"green")
                 print("\n")
             end
-        pretty_table(a[10*convert(Int, trunc(size(object.coefficients, 1)/10, digits =0))+1:size(object.coefficients, 1), 2]', alignment=:c, nosubheader = true, equal_columns_width = true, columns_width = 10,
+        else
+            for i in 1:convert(Int, trunc(size(object.coefficients, 1)/10, digits =0))
+                pretty_table(a[10*(i-1)+1:10*i, 2]', tf = tf_borderless, header = a[10*(i-1)+1:10*i, 1], nosubheader = true, equal_columns_width = true, columns_width = 10, alignment=:c)#, header_crayon =crayon"green")
+                print("\n")
+            end
+            pretty_table(a[10*convert(Int, trunc(size(object.coefficients, 1)/10, digits =0))+1:size(object.coefficients, 1), 2]', alignment=:c, nosubheader = true, equal_columns_width = true, columns_width = 10,
                             tf = tf_borderless, header = a[10*convert(Int, trunc(size(object.coefficients, 1)/10, digits =0))+1:size(object.coefficients, 1), 1]) #, header_crayon =crayon"green")
         end
     else 
