@@ -74,11 +74,11 @@ function rlassoLATE(x, d, y, z; bootstrap = "none", n_rep = 100, always_takers =
         if all([always_takers, never_takers])
 
             g_d_z1 = rlassologit(x_z1, d[indz1], post = post, intercept = intercept, lambda = lambda, c = penalty_c, gamma = penalty_gamma)
-            yp1 = get_mtrx(x1) * g_d_z1.result["coefficients"]
+            yp1 = get_mtrx(x1) * g_d_z1["coefficients"]
             md_z1x = 1 ./ (1 .+ exp.(-1 .* (yp1)))
 
             g_d_z0 = rlassologit(x_z0, d[indz0], post = post, intercept = intercept, lambda = lambda, c = penalty_c, gamma = penalty_gamma)
-            yp0 = get_mtrx(x1) * g_d_z0.result["coefficients"]
+            yp0 = get_mtrx(x1) * g_d_z0["coefficients"]
             md_z0x = 1 ./ (1 .+ exp.(-1 .* (yp0)))
 
         elseif always_takers == false & never_takers == true
@@ -178,7 +178,7 @@ function rlassoLATET(x, d, y, z; bootstrap::String = "none", n_rep::Int64 = 500,
         if always_takers
             g_d_z0 = rlassologit(x[indz0, :], d[indz0], post = post, intercept = intercept, c = 1.1, gamma = 0.1, lambda = lambda)
             if intercept
-                md_z0x = hcat(ones(n), x) * g_d_z0.result["coefficients"]
+                md_z0x = hcat(ones(n), x) * g_d_z0["coefficients"]
             elseif !intercept
                 md_z0x = x * g_d_z0["coefficients"]
             end
