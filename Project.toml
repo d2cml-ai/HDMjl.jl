@@ -4,7 +4,9 @@ authors = ["Jhon Flores Rojas", "Rodrigo Grijalba", "Alexander Quispe", "Anzony 
 version = "0.0.11"
 
 [deps]
+Crayons = "a8cc5b0e-0ffa-5ad4-8c14-923d3ee1735f"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 GLM = "38e38edf-8417-5370-95a0-9cbb8c7f171a"
 GLMNet = "8d5ece8b-de18-5317-b113-243142960cc6"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
