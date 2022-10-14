@@ -25,7 +25,7 @@ The methods which are implemented in this package are distinct from already avai
 Julia is an open source software project and can be freely downloaded from the [julialang.org](julialang.org) website along with its associated documentation. The Julia package `HDMjl` can be downloaded from juliahub. To install the `HDMjl` package from Julia we simply type.
 
 ```julia; eval = false
-] add HDMjl
+# ] add HDMjl
 ```
 
 The most current version of the package (development version) can installed by
@@ -38,7 +38,7 @@ You may also install the dev version of the package by directly acquiring it fro
 
 
 ```julia; eval = false
-] add https://github.com/d2cml-ai/HDMjl.jl
+# ] add https://github.com/d2cml-ai/HDMjl.jl
 ```
 
 or 
@@ -178,60 +178,40 @@ $$
 S^*=\left\|\sqrt{n} \mathbb{E}_n\left[\left(y_i-\hat{a}_0\right) x_i g_i\right]\right\|_{\infty}
 $$
 
-where $g_i$ 's are iid $N(0,1)$, conditional on the data. The $(1-\alpha)$-quantile of $S^*$ serves as the critical value, $c(1-\alpha)$. We reject the null if $S>c(1-\alpha)$ in favor of statistical significant, and we keep the null of non-significance otherwise. This test procedure is implemented in the package when calling the summary-method of rlasso-objects.
+where $g_i$ 's are iid $N(0,1)$, conditional on the data. The $(1-\alpha)$-quantile of $S^*$ serves as the critical value, $c(1-\alpha)$. We reject the null if $S>c(1-\alpha)$ in favor of statistical significant, and we keep the null of non-significance otherwise. This test procedure is implemented in the package when calling the `r_summary`-method of `rlasso-constructor`.
+
+**Julia Implementation** The function `rlasso` implements Lasso and post-Lasso, where the prefix “r” signifies that these are theoretically rigorous versions of Lasso and post-Lasso. The default option is post-Lasso, `post=true`. This function returns an `constructor` of `rlasso` for which methods like `r_predict`, `r_print`, `r_summary` are provided.
+
+lassoShooting.fit is the computational algorithm that underlies the estimation procedure, which
+implements a version of the Shooting Lasso Algorithm (Fu, 1998). The user has several options for
+choosing the non-default options. Specifically, the user can decide if an unpenalized intercept should be included (`true` by default). The option penalty of the function rlasso allows different choices for the penalization parameter and loadings. It allows for homoskedastic or heteroskedastic errors with default `homoscedastic = false`. Moreover, the dependence structure of the design matrix might be taken into consideration for calculation of the penalization parameter with `X_dependent_lambda = true`. In combination with these options, the option `lambda_start` allows the user to set a starting value for $\lambda$ for the different algorithms. Moreover, the user can provide her own fixed value for the penalty level – instead of the data-driven methods discussed above – by setting `homoscedastic = "none"` and supplying the value via `lambda_start`.
+
+The constants c and γ from above can be set in the option penalty. The quantities $\hat\varepsilon$, $\hat\psi$, $\hat\sigma$ are calculated in a iterative manner. The maximum number of iterations and the tolerance when the algorithms should stop can be set with control.
+
+The method `r_summary` of rlasso-objects displays additionally for model diagnosis the R2 value, the
+adjusted R2 with degrees of freedom equal to the number of selected parameters, and the sup-score
+statistic for joint significance – described above – with corresponding p-value.
+
+
 
 **Example.** (Prediction Using Lasso and Post-Lasso) Consider generated data from a sparse linear model:
 
-```
-using Random
-Random.seed!(1234);
-n = 100;
-p = 100;
-s = 3;
-X = randn(n, p);
-beta = vcat(fill(5, s), zeros(p - s));
-Y = X * beta + randn(n);
+```julia
+using CodecXz, RData, DataFrames, StatsModels, Statistics, Distributions, PrettyTables, GLM, CSV
+url = "https://raw.githubusercontent.com/d2cml-ai/HDMjl.jl/prueba/data/3_2.csv"
+dta = DataFrame(CSV.read(download(url), DataFrame));
+n, p = size(dta);
+Y = dta[:,1];
+X = Matrix(dta[:,2:end]);
 ```
 
-The Post-Lasso procedure fits an OLS regression excluding the variables not previously selected by Lasso. The rlasso algorithm uses the standard errors of the residuals from this regression to evaluate whether there has been a gain in the goodness of the fit in the current iteration. Just like most of the functions in the package, rlasso returns a dictionary with the results of the regression.
+The Post-Lasso procedure fits an OLS regression excluding the variables not previously selected by Lasso. The rlasso algorithm uses the standard errors of the residuals from this regression to evaluate whether there has been a gain in the goodness of the fit in the current iteration. Just like most of the functions in the package, `rlasso` returns a `struct` with the results of the regression.
 
 We can estimate the models using Lasso
 
-```
-rlasso(X, Y, post = true)
-
-Dict{String, Any} with 15 entries:
-  "tss"          => 8466.4
-  "dev"          => [8.56479, -6.50463, -1.51601, 8.77722,
-                    -5.1338, -7.07815, 7...
-  "model"        => [0.970656 0.262456 ... 1.86802 -0.460151;
-                    -0.979218 -0.022244...
-  "loadings"     => [1.99904, 1.58734, 1.67152, 1.86208, 1.859,
-                    1.8311, 1.45692...
-  "sigma"        => 1.56664
-  "lambda0"      => 81.3601
-  "lambda"       => [162.642, 129.146, 135.995, 151.499,
-                    151.248, 148.978, 118....
-  "intercept"    => -0.196115
-  "iter"         => 16
-  "residuals"    => [0.119342, -0.25299, -1.17148, 0.282269,
-                    -0.643579, -0.5525...
-  "rss"          => 242.981
-  "index"        => Bool[1, 1, 1, 0, 0, 0, 0, 0, 0, 0  ...  0,
-                    0, 0, 0, 0, 0, 0, ...
-  "beta"         => [4.31658, 4.39195, 4.45657, 0.0, 0.0, 0.0,
-                    0.0, 0.0, 0.0, 0...
-  "options"      => Dict{String, Any}("intercept"=>true,
-                    "post"=>false, "meanx"...
-  "coefficients" => [-0.196115, 4.31658, 4.39195, 4.45657, 0.0,
-                    0.0, 0.0, 0.0, ...
-
-post_lasso_reg = rlasso(X, Y, post = true) #now use post-lasso
-post_lasso_reg["coefficients"]'
-
-1x101 adjoint(::Vector{Float64}) with eltype Float64:
-    -0.00682754  5.00958  4.93178  5.17705  ...  0.0  0.0
-    0.0  0.0  0.0  0.0  0.0
+```julia
+lasso_reg = rlasso(X, Y, post = false);
+sum_lasso = r_summary(lasso_reg)
 ```
 
 # Inference on Target Regression Coefficient
@@ -246,9 +226,7 @@ $$
 
 Here $d_i$ is a target regressor such as treatment, policy or other variable whose regression coefficient $\alpha_0$ we would like to learn (Belloni, Chernozhukov, and Hansen, 2014). If we are interested in coefficients of several or even many variables, we can simply write the model in the above form treating each variable of interest as $d_i$ in turn and then applying the estimation and inference procedures described below.
 
-We assume approximate sparsity for $x'_i\beta_0$ with sufficient speed of decay of the sorted components of
-$\beta_0$, namely $\mathrm a(\beta_0) > 1$. This condition translates into having a sparsity index $s \ll \sqrt{n}$. In general $d_i$ is
-correlated to $x_i$, so $\alpha_0$ cannot be consistently estimated by the regression of $y_i$ on $d_i$. To keep track of the relationship of $d_i$ to $x_i$, write
+We assume approximate sparsity for $x'_i\beta_0$ with sufficient speed of decay of the sorted components of $\beta_0$, namely $\mathrm a(\beta_0) > 1$. This condition translates into having a sparsity index $s \ll \sqrt{n}$. In general $d_i$ is correlated to $x_i$, so $\alpha_0$ cannot be consistently estimated by the regression of $y_i$ on $d_i$. To keep track of the relationship of $d_i$ to $x_i$, write
 
 $$
 d_i = x'_i \pi_0^d + \rho_i^d, \quad \mathbb E\rho_i^dx_i = 0
@@ -342,17 +320,14 @@ DataFrame(
 
 Another way to estimate $alpha_0$ is to first partial out the x-variables from $y_i$ and $d_i$, and run least squares on the residuals:
 
-```
+```julia
 rY_1 = lm(hcat(ones(length(y)), Matrix(dta[:,3:end])), y);
 rY = y - predict(rY_1)
 rD_1 = lm(hcat(ones(length(y)), Matrix(dta[:,3:end])), d);
 rD = d - predict(rD_1);
 
 partial_fit_ls = lm(hcat(ones(length(y)), rD), rY)
-DataFrame(
-    Estimate = coef(partial_fit_ls)[2], 
-    Std_Error = stderror(partial_fit_ls)[2]
-    )
+DataFrame(Estimate = coef(partial_fit_ls)[2], Std_Error = stderror(partial_fit_ls)[2])
 ```
 
 
@@ -363,16 +338,13 @@ equations associated with the partialling out approach.
 
 **In high-dimensional settings**, we can no longer rely on the full least-squares and instead may rely on Lasso or Post-Lasso for partialling out. This amounts to using orthogonal estimating equations, where we estimate the nuisance parameters by Lasso or Post-Lasso. Let’s try this in the above example, using Post-Lasso for partialling out:
 
-```
-rY_1 = HDMjl.rlasso(hcat(ones(length(y)), Matrix(dta[:,3:end])), y);
+```julia
+rY_1 = rlasso(hcat(ones(length(y)), Matrix(dta[:,3:end])), y);
 rY = rY_1["residuals"]
-rD_1 = HDMjl.rlasso(hcat(ones(length(y)), Matrix(dta[:,3:end])), d);
+rD_1 = rlasso(hcat(ones(length(y)), Matrix(dta[:,3:end])), d);
 rD = rD_1["residuals"]
-partial_fit_postlasso = lm(hcat(ones(length(y)), rD), rY)
-DataFrame(
-    Estimate = coef(partial_fit_postlasso)[2],
-    Std_Error = stderror(partial_fit_postlasso)[2]
-    )
+partial_fit_postlasso = lm(hcat(ones(length(y)), rD), vec(rY))
+DataFrame(Estimate = coef(partial_fit_postlasso)[2], Std_Error = stderror(partial_fit_postlasso)[2])
 ```
 
 
@@ -384,9 +356,9 @@ high-dimensional settings.
 
 The orthogonal estimating equations method – based on partialling out via Lasso or post-Lasso – is implemented by the function `rlassoEffect`, using `method= "partialling out"`:
 
-```
-Eff = HDMjl.rlassoEffect(x, y, d, method = "partialling out");
-HDMjl.r_summary(Eff);
+```julia
+Eff = rlassoEffect(x, y, d, method = "partialling out");
+r_summary(Eff);
 ```
 
 
@@ -399,9 +371,9 @@ Another orthogonal estimating equations method – based on the double selection
 1. Run OLS of $y_i$ on $d_i$ and the union of controls selected in steps 1 and 2.
 
 
-```
-Eff = HDMjl.rlassoEffect(x, y, d, method = "double selection");
-HDMjl.r_summary(Eff);
+```julia
+Eff = rlassoEffect(x, y, d, method = "double selection");
+r_summary(Eff);
 ```
 
 
@@ -412,7 +384,7 @@ The function `rlassoEffects` does inference – namely construction of confidenc
 
 Here is an example of the use.
 
-```
+```julia
 url = "https://raw.githubusercontent.com/d2cml-ai/HDMjl.jl/prueba/data/4_2.csv"
 data = DataFrame(CSV.read(download(url), DataFrame));
 n, p = size(data);
@@ -426,35 +398,41 @@ x = Matrix(data[:,2:end]);
 We can do inference on a set of variables of interest, e.g. the first, second, third, and the fiftieth:
 
 
+```julia
+lasso_effects = rlassoEffects(x, y, index = [1,2,3,50]);
 ```
-lasso_effects = HDMjl.rlassoEffects(x, y, index = [1,2,3,50]);
+
+```julia
 HDMjl.r_print(lasso_effects, digits = 4)
+```
+
+```julia
 HDMjl.r_summary(lasso_effects);
+```
+
+```julia
 HDMjl.r_confint(lasso_effects);
 ```
 
 
 The two methods are first-order equivalent in both low-dimensional and high-dimensional settings
-under regularity conditions. Not surprisingly we see that in the numerical example of this section, the
-estimates and standard errors produced by the two methods are very close to each other.
+under regularity conditions. Not surprisingly we see that in the numerical example of this section, the estimates and standard errors produced by the two methods are very close to each other.
 
-It is also possible to estimate joint confidence intervals. The method relies on a multiplier bootstrap
-method as described in Belloni, Chernozhukov, and Kato (2014). Joint confidence intervals can be
+It is also possible to estimate joint confidence intervals. The method relies on a multiplier bootstrap method as described in Belloni, Chernozhukov, and Kato (2014). Joint confidence intervals can be
 invoked by setting the option joint to `true` in the method `confint` for objects of class `rlassoEffects`.
 
+```julia
+r_confint(lasso_effects, joint = true);
 ```
-HDMjl.r_confint(lasso_effects, joint = true);
-```
 
 
-We will also demonstrate the application of joint confidence intervals in an empirical application in
-the next section.
+We will also demonstrate the application of joint confidence intervals in an empirical application in the next section.
 
-Finally, we can also plot the estimated effects with their confidence intervals:
+<!-- Finally, we can also plot the estimated effects with their confidence intervals:
 
 ```
 plot
-```
+``` -->
 
 For logistic regression we provide the functions `rlassologit` and `rlassologitEffects`.
 
@@ -466,18 +444,19 @@ In Labour Economics an important question is how the wage is related to the gend
 First, we load and prepare the data.
 
 
-```
+```julia
 url = "https://github.com/cran/hdm/raw/master/data/cps2012.rda"
 cps2012 = load(download(url))["cps2012"];
 n, p = size(cps2012);
 size(cps2012)
+
 x_formula = @formula(lnw ~ -1 + female + female*widowed + female*divorced + female*separated + female*nevermarried +
                     female*hsd08 + female*hsd911 + female*hsg + female*cg + female*ad + female*mw + female*so + female*we + female*exp1 + female*exp2 + female*exp3)
 x_dframe = ModelFrame( x_formula, cps2012)
 x1 = ModelMatrix(x_dframe)
 X = x1.m[:,Not(1:16)];
 X = hcat(x1.m[:,1:16], X)
-
+size(X)
 fom_1 =     ["widowed", "divorced", "separated", "nevermarried", "hsd08", "hsd911", "hsg", "cg", "ad", "mw", "so",
             "we", "exp1", "exp2", "exp3"];
 data = cps2012[:,fom_1];
@@ -501,15 +480,17 @@ y = cps2012.lnw;
 The parameter estimates for the target parameters, i.e. all coefficients related to gender (i.e. by interaction with other variables) are calculated and summarized by the following commands
 
 
-```
-effects_female = HDMjl.rlassoEffects(x, y, index = index_gender);
-HDMjl.r_summary(effects_female);
+```julia
+effects_female = rlassoEffects(x, y, index = index_gender);
+r_summary(effects_female);
 ```
 
 Finally, we estimate and plot confident intervals, first ”pointwise” and then the joint confidence intervals.
-% --------------
-```
-joint_CI = HDMjl.r_confint(effects_female, 0.95, joint = true);
+
+<!-- % -------------- -->
+
+```julia
+joint_CI = r_confint(effects_female, 0.95, joint = true);
 joint_CI;
 ```
 
@@ -533,7 +514,7 @@ where $y_i$ is the growth rate of GDP over a specified decade in country $i$, $d
 First, we load and prepare the data
 
 
-```
+```julia
 url = "https://github.com/cran/hdm/raw/master/data/GrowthData.rda";
 GrowthData = load(download(url))["GrowthData"];
 y = GrowthData[:, 1];
@@ -545,34 +526,46 @@ X_1 = Matrix(GrowthData[:, Not(1, 2)]);
 
 Now we can estimate the effect of the initial GDP level. First, we estimate by OLS:
 
+```julia
+Q, R = qr(hcat(ones(length(y)), X_1))
+β = pinv(hcat(ones(length(y)), X_1)) * y
 
+res = y - hcat(ones(length(y)), X_1) * β;
+n = size(hcat(ones(length(y)), X_1))[1]
+k = size(hcat(ones(length(y)), X_1))[2]
+
+sigma2_hat = (res' * res) / (n - k)
+vcov_beta_hat = sigma2_hat .* inv(hcat(ones(length(y)), X_1)' * hcat(ones(length(y)), X_1));
+se = sqrt.(diag(vcov_beta_hat))
+
+ls_effect = DataFrame(Estimate = β, stderror = se);
 ```
-ls_effect = lm(hcat(ones(length(y)), X_1)[:, 1:42], y);
-```
+
 
 Second, we estimate the effect by the partialling out by Post-Lasso:
 
-```
-lasso_effect = HDMjl.rlassoEffect(X, y, d, method = "partialling out");
-HDMjl.r_summary(lasso_effect);
+```julia
+lasso_effect = rlassoEffect(X, y, d, method = "partialling out");
+r_summary(lasso_effect);
 ```
 
 Third, we estimate the effect by the double selection method:
 
-```
-doublesel_effect = HDMjl.rlassoEffect(X, y, d, method = "double selection");
-HDMjl.r_summary(doublesel_effect);
+```julia
+doublesel_effect = rlassoEffect(X, y, d, method = "double selection");
+r_summary(doublesel_effect);
 ```
 
-We then collect results in a nice latex table:
+We then collect results in a nice table:
 
-```
-using PrettyTables
-# table = zeros(4,2)
-# table[1,:] = [coef(ED_ols)[2], stderror(ED_ols)[2]]
-# table[2,:] = [ED_2sls["coefficients"][1,2], ED_2sls["se"][1]]
-# table[3,:] = Matrix(HDMjl.r_summary(lasso_IV_Z)[:,2:3]);
-# table[4, :] = Matrix(HDMjl.r_summary(lasso_IV_XZ)[:, 2:3]);
+```julia
+table = zeros(3,2)
+table[1,:] = [round(Matrix(ls_effect)[2,1], digits = 2), round.(Matrix(ls_effect)[2,2], digits = 5)]
+table[2,:] = [round(lasso_effect.coefficients, digits =2), round(lasso_effect.se, digits = 5)]
+table[3,:] = [round(doublesel_effect.coefficients, digits =2), round(doublesel_effect.se, digits = 5)];
+index = ["full reg via ols", "partial reg
+via post-lasso ", "partial reg via double selection"]
+pretty_table(hcat(index, table), show_row_number = false, header = [" ", "Estimate", "Std. Error"], tf = tf_simple, nosubheader = true)
 ```
 
 
@@ -625,8 +618,8 @@ In this application, we consider the problem of selecting controls. The input ra
 
 First, we process the data
 
-```
-using Statistics, StatsModels, RData
+```julia
+using RData
 url = "https://github.com/cran/hdm/raw/master/data/AJR.rda";
 AJR = load(download(url))["AJR"];
 y = AJR[!,"GDP"]
@@ -641,24 +634,29 @@ x_formula = @formula(GDP ~ -1 + Latitude + Latitude2 + Africa + Asia + Namer + S
 x_dframe = ModelFrame( x_formula, AJR)
 x1 = ModelMatrix(x_dframe)
 x = x1.m
+size(x)
 ```
 
 Then we estimate an IV model with selection on the X
 
 
-```
-AJR_Xselect  = HDMjl.rlassoIV(x, d, y, z, select_X=true, select_Z=false);
-HDMjl.r_print(AJR_Xselect)
-HDMjl.r_summary(AJR_Xselect);
+```julia
+AJR_Xselect  = rlassoIV(x, d, y, z, select_X=true, select_Z=false);
 ```
 
+```julia
+r_summary(AJR_Xselect);
+```
+
+```julia
+r_confint(AJR_Xselect);
+```
 
 It is interesting to understand what the procedure above is doing. In essence, it partials out $x_i$ from $y_i$, $d_i$ and $z_i$ using Post-Lasso and applies the 2SLS to the residual quantities.
-
 Let us investigate partialling out in more detail in this example. We can first try to use OLS for partialling out:
 
 
-```
+```julia
 rY_1 = lm(@formula(GDP ~ Latitude + Latitude2 + Africa + Asia + Namer + Samer + Latitude*Latitude2 + Latitude*Africa + Latitude*Asia + Latitude*Namer + Latitude*Samer
           + Latitude2*Africa + Latitude2*Asia + Latitude2*Namer + Latitude2*Samer + Africa*Asia + Africa*Namer + Africa*Samer
           + Asia*Namer + Asia*Samer + Namer*Samer), AJR)
@@ -673,8 +671,10 @@ rZ_1 = lm(@formula(logMort ~ Latitude + Latitude2 + Africa + Asia + Namer + Same
           + Latitude2*Africa + Latitude2*Asia + Latitude2*Namer + Latitude2*Samer + Africa*Asia + Africa*Namer + Africa*Samer
           + Asia*Namer + Asia*Samer + Namer*Samer), AJR)
 rZ = z - predict(rZ_1);
+```
 
-ivfit_lm = HDMjl.tsls(rD, rY, rZ, nothing, intercept=true)
+```julia
+ivfit_lm = tsls(rD, rY, rZ, nothing, intercept=false)
 DataFrame(Estimate = ivfit_lm["coefficients"][1,2], Std_Error = ivfit_lm["se"])
 ```
 
@@ -683,7 +683,7 @@ We see that the estimates exhibit large standard errors. The imprecision is expe
 
 Next, we replace the OLS operator by post-Lasso for partialling out
 
-```
+```julia
 x_formula1 = @formula(GDP ~ Latitude + Latitude2 + Africa + Asia + Namer + Samer
     + Latitude*Latitude2 + Latitude*Africa + Latitude*Asia + Latitude*Namer + Latitude*Samer
     + Latitude2*Africa + Latitude2*Asia + Latitude2*Namer + Latitude2*Samer
@@ -694,31 +694,19 @@ x_dframe1 = ModelFrame( x_formula, AJR)
 x1_1 = ModelMatrix(x_dframe)
 xx = x1.m;
 
-rY_1 = HDMjl.rlasso(xx, y);
+rY_1 = rlasso(xx, y);
 rY = rY_1["residuals"]
-rD_1 = HDMjl.rlasso(xx, d);
+rD_1 = rlasso(xx, d);
 rD = rD_1["residuals"]
-rZ_1 = HDMjl.rlasso(xx, z);
+rZ_1 = rlasso(xx, z);
 rZ = rZ_1["residuals"]
 
-ivfit_lasso = HDMjl.tsls(rD, rY, rZ, intercept = true)
+ivfit_lasso = tsls(rD, rY, rZ)
 DataFrame(Estimate = ivfit_lasso["coefficients"][1,2], Std_Error = ivfit_lasso["se"][1])
 
 ```
 
 This is exactly what command `rlassoIV` is doing by calling the command `rlassoSelectX`, so the numbers we see are identical to those reported first. In comparison to OLS results, we see precision is improved by doing selection on the exogenous variables.
-
-```
-using Statistics, GLM
-url = "https://github.com/cran/hdm/raw/master/data/EminentDomain.rda";
-EminentDomain = load(download(url))["EminentDomain"];
-z = EminentDomain["logGDP"]["z"];
-x = EminentDomain["logGDP"]["x"];
-d = EminentDomain["logGDP"]["d"];
-y = EminentDomain["logGDP"]["y"];
-x = x[:, (mean(x, dims = 1) .> 0.05)'];
-z = z[:, (mean(z, dims = 1) .> 0.05)'];
-```
 
 
 ## Application: Impact of Eminent Domain Decisions on Economic Outcomes.
@@ -730,8 +718,7 @@ Under this random assignment, the characteristics of judges serving on federal a
 First, we load the data an construct the matrices with the controls (x), instruments (z), outcome (y),and treatment variables (d). Here we consider regional GDP as the outcome variable.
 
 
-```
-using Statistics, GLM
+```julia
 url = "https://github.com/cran/hdm/raw/master/data/EminentDomain.rda";
 EminentDomain = load(download(url))["EminentDomain"];
 z = EminentDomain["logGDP"]["z"];
@@ -748,42 +735,43 @@ As mentioned above, $y$ is the economic outcome, the logarithm of the GDP, d the
 First, we estimate the effect of the treatment variable by simple OLS and 2SLS using two instruments:
 
 
-```
+```julia
 ED_ols = lm(hcat(ones(length(vec(y))), hcat(d, x)), vec(y));
-ED_2sls = HDMjl.tsls(d, y, z[:,1:2], x, intercept = false);
+ED_2sls = tsls(d, y, z[:,1:2], x, intercept = false);
 ```
 
 Next, we estimate the model with selection on the instruments
 
-```
-lasso_IV_Z = HDMjl.rlassoIV(x, d, y, z, select_X = false, select_Z = true);
-HDMjl.r_summary(lasso_IV_Z);
+```julia
+lasso_IV_Z = rlassoIV(x, d, y, z, select_X = false, select_Z = true);
+r_summary(lasso_IV_Z);
 ```
 
-% -----------
+```julia
+r_confint(lasso_IV_Z);
+```
+
+<!-- % ----------- -->
 Finally, we do selection on both the x and z variables.
-% -----------
+<!-- % ----------- -->
 
-```
-lasso_IV_XZ = HDMjl.rlassoIV(x, d, y, z, select_X = true, select_Z = true);
-HDMjl.r_summary(lasso_IV_XZ);
-HDMjl.r_confint(lasso_IV_XZ);
-HDMjl.r_print(lasso_IV_XZ)
+```julia
+lasso_IV_XZ = rlassoIV(x, d, y, z, select_X = true, select_Z = true);
+r_summary(lasso_IV_XZ)
+lasso_IV_XZ = rlassoIV(x, d, y, z, select_X = true, select_Z = true);
+r_summary(lasso_IV_XZ)
 ```
 
 Comparing the results we see, that the OLS estimates indicate that the influence of pro plaintiff appellate takings decisions in federal circuit court is significantly positive, but the 2SLS estimates which account for the potential endogeneity render the results insignificant. Employing selection on the instruments yields similar results. Doing selection on both the x- and z-variables results in extremely imprecise estimates.
 
 Finally, we compare all results
 
-```
-using PrettyTables
+```julia
 table = zeros(4,2)
 table[1,:] = [coef(ED_ols)[2], stderror(ED_ols)[2]]
 table[2,:] = [ED_2sls["coefficients"][1,2], ED_2sls["se"][1]]
-table[3,:] = Matrix(HDMjl.r_summary(lasso_IV_Z)[:,2:3]);
-table[4, :] = Matrix(HDMjl.r_summary(lasso_IV_XZ)[:, 2:3]);
-
-
+table[3,:] = Matrix(r_summary(lasso_IV_Z)[:,2:3]);
+table[4, :] = Matrix(r_summary(lasso_IV_XZ)[:, 2:3]);
 index = ["ols regression", "IV estimation ", "selection on Z", "selection on X and Z"]
 pretty_table(hcat(index, table), show_row_number = false, header = [" ", "Estimate", "Std. Error"], tf = tf_simple, nosubheader = true)
 ```
@@ -837,7 +825,7 @@ We consider the estimation of the effect of an endogenous binary treatment, $D$,
 
 When trying to estimate treatment effects, the researcher has to decide what conditioning variables to include. In the case of a non-randomly assigned treatment or instrumental variable, the researcher must select the conditioning variables so that the instrument or treatment is plausibly exogenous. Even in the case of random assignment, for a precise estimation of the policy variable selection of control variables is necessary to absorb residual variation, but overfitting should be avoided. For uniformly valid post-selection inference, “orthogonal ”estimating equations as described above are they key to the efficient estimation and valid inference. We refer to Belloni, Chernozhukov, Fernandez-Val, and Hansen (2013) for details.
 
-% R Implementation. The package contains the functions rlassoATE, rlassoATET, rlassoLATE, and rlassoLATE to estimate the corresponding treatment effects. All functions have as arguments the outcome variable y, the treatment variable d, and the conditioning variables x. The functions rlassoLATE, and rlassoLATE have additionally the argument z for the binary instrumental variable. For the calculation of the standard errors bootstrap methods are implemented, with options to use Bayes, normal, or wild bootstrap. The number of repetitions can be specified with the argument nRep and the default is set to 500. By default no bootstrap standard errors are provided (bootstrap="none"). For the functions the logicals intercept and post can be specified to include an intercept and to do Post-Lasso at the selection steps. The family of treatment functions returns an object of class rlassoTE for which the methods print, summary, and confint are available.
+<!----R Implementation. The package contains the functions rlassoATE, rlassoATET, rlassoLATE, and rlassoLATE to estimate the corresponding treatment effects. All functions have as arguments the outcome variable y, the treatment variable d, and the conditioning variables x. The functions rlassoLATE, and rlassoLATE have additionally the argument z for the binary instrumental variable. For the calculation of the standard errors bootstrap methods are implemented, with options to use Bayes, normal, or wild bootstrap. The number of repetitions can be specified with the argument nRep and the default is set to 500. By default no bootstrap standard errors are provided (bootstrap="none"). For the functions the logicals intercept and post can be specified to include an intercept and to do Post-Lasso at the selection steps. The family of treatment functions returns an object of class rlassoTE for which the methods print, summary, and confint are available.--->
 
 
 ## Application: 401(k) plan participation.
@@ -847,33 +835,53 @@ Though it is clear that 401(k) plans are widely used as vehicles for retirement 
 Again, we start first with the data preparation:
 
 
-```
-using CSV
-url = "https://raw.githubusercontent.com/d2cml-ai/HDMjl.jl/prueba/data/7_.csv"
-data = DataFrame(CSV.read(download(url), DataFrame));
-n, p = size(data);
-p1 = 20;
-X = data[:,2:end]
-Y = data[:,1];
+```julia
+url = "https://github.com/cran/hdm/raw/master/data/pension.rda";
+pension = load(download(url))["pension"];
+y = pension[:, "tw"];
+d = pension[:, "p401"];
+z = pension[:, "e401"];
+X = Matrix(pension[:, ["i2", "i3", "i4", "i5", "i6", "i7", "a2", "a3", "a4", "a5", "fsize", "hs", "smcol", "col", "marr", "twoearn", "db", "pira", "hown"]]);
 ```
 
 
 Now we can compute the estimates of the target treatment effect parameters. For ATE and ATET we report the the effect of eligibility for 401(k)
 
-```
-rls_eff = HDMjl.rlassoEffects(X, Y, index = [1:p1;]);
+```julia
+pension_ate = rlassoATE(X, d, y);
+r_summary(pension_ate);
 ```
 
+```julia
+pension_atet = rlassoATET(X, d, y);
+r_summary(pension_atet);
+```
 
 
 For LATE and LATET we estimate the effect of 401(k) participation (d) with plan eligibility (z) as instrument.
 
+```julia
+pension_late = rlassoLATE(X, d, y, z);
+r_summary(pension_late);
+```
 
+```julia
+pension_latet = rlassoLATET(X, d, y, z);
+r_summary(pension_latet);
+```
 
 The results are summarized into a table, which is then processed using xtable to produce the latex output:
 
+```julia
+table = zeros(4, 2)
+table[1,:] = r_summary(pension_ate)[:, 1:2]
+table[2,:] = r_summary(pension_atet)[:, 1:2]
+table[3,:] = r_summary(pension_late)[:, 1:2]
+table[4,:] = r_summary(pension_latet)[:, 1:2];
+pretty_table(hcat(index, table), show_row_number = false, 
+            header = [" ", "Estimate", "Std. Error"], tf = tf_simple, nosubheader = true)
+```
 
-Finally, we estimate a model including all interaction effects:
 
 
 # The Lasso Methods for Discovery of Significant Causes amongst Many Potential Causes, with Many Controls
@@ -890,3 +898,16 @@ $$
 where the number of potential causes $p_1$ could be very large and the number of controls $p_2$ could also be very large. The causes are randomly assigned conditional on controls. Under approximate sparsity of $\alpha = (\alpha_l)_{l_1}^{p1}$ and $\beta = (\beta_l)_{l=1}^{p2}$, we can use Lasso-based method of Belloni, Chernozhukov, and Kato (2014) for estimating $(\alpha_l)_{l=1}^{p1}$ and constructing a joint confidence band on $(\alpha_l)_{l=1}^{p1}$ and then checking which $\alpha$l’s are significantly different from zero. The approach is based on buliding orthogonal estimating equations for each of $(\alpha_l)_{l=1}^{p_1}$, and can be interpreted as doing Frisch-Waugh procedure for each coefficient of interest, where we do partialling out via Lasso or OLS-after-Lasso.
 
 This procedure is implemented in the `Julia` package `hdm`. Here is an example in which $n = 100$, $p_1 = 20$, and $p_2 = 20$, so that total number of regressors is $p = p_1 + p_2 = 40$. In this example $\alpha_1 = 5$ and $\beta_1 = 5$, i.e. there is only one true cause $D_{i1}$, among the large number of causes, $D_{i1}, \dots, D_{i20}$, and only one true control $W_{i1}$. This example is made super-simple for clarity sake. The Belloni, Chernozhukov, and Kato (2014) procedure, implemented by rlassoEffects function in Julia package HDMjl.
+
+```julia
+url = "https://raw.githubusercontent.com/d2cml-ai/HDMjl.jl/prueba/data/7_.csv"
+data = DataFrame(CSV.read(download(url), DataFrame));
+n, p = size(data);
+p1 = 20;
+X = data[:,2:end]
+Y = data[:,1];
+
+r_confint(rlassoEffects(X, Y, index = [1:p1;]), joint = true);
+```
+
+As you can see the procedure correctly tells that only the first cause $D_{i1}, among the large number of causes, $D{i1}, \dots D_{i20}$, is a statistically significant cause of $Y$ (see the confidence interval for variable V1).
