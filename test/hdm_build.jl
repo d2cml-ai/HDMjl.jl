@@ -8,6 +8,7 @@
 # - correr en el bash o la terminal de vscode `julia test/hdm_build.jl`
 
 ########## Code 
+
 using Weave, Highlights
 
 # @time weave("hdm.jmd"; doctype = "md2pdf", highlight_theme = Highlights.Themes.MonokaiMiniTheme, pandoc_options = ["--toc", "--toc-depth= 3", "--number-sections", "--self-contained"])

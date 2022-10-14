@@ -197,7 +197,9 @@ statistic for joint significance – described above – with corresponding p-va
 **Example.** (Prediction Using Lasso and Post-Lasso) Consider generated data from a sparse linear model:
 
 ```julia
-using CodecXz, RData, DataFrames, StatsModels, Statistics, Distributions, PrettyTables, GLM, CSV
+using CodecXz, RData, DataFrames, StatsModels
+using Statistics, Distributions, PrettyTables, GLM, CSV
+
 url = "https://raw.githubusercontent.com/d2cml-ai/HDMjl.jl/prueba/data/3_2.csv"
 dta = DataFrame(CSV.read(download(url), DataFrame));
 n, p = size(dta);
@@ -327,7 +329,8 @@ rD_1 = lm(hcat(ones(length(y)), Matrix(dta[:,3:end])), d);
 rD = d - predict(rD_1);
 
 partial_fit_ls = lm(hcat(ones(length(y)), rD), rY)
-DataFrame(Estimate = coef(partial_fit_ls)[2], Std_Error = stderror(partial_fit_ls)[2])
+DataFrame(Estimate = coef(partial_fit_ls)[2], 
+    Std_Error = stderror(partial_fit_ls)[2])
 ```
 
 
@@ -344,7 +347,8 @@ rY = rY_1["residuals"]
 rD_1 = rlasso(hcat(ones(length(y)), Matrix(dta[:,3:end])), d);
 rD = rD_1["residuals"]
 partial_fit_postlasso = lm(hcat(ones(length(y)), rD), vec(rY))
-DataFrame(Estimate = coef(partial_fit_postlasso)[2], Std_Error = stderror(partial_fit_postlasso)[2])
+DataFrame(Estimate = coef(partial_fit_postlasso)[2], 
+    Std_Error = stderror(partial_fit_postlasso)[2])
 ```
 
 
@@ -450,15 +454,21 @@ cps2012 = load(download(url))["cps2012"];
 n, p = size(cps2012);
 size(cps2012)
 
-x_formula = @formula(lnw ~ -1 + female + female*widowed + female*divorced + female*separated + female*nevermarried +
-                    female*hsd08 + female*hsd911 + female*hsg + female*cg + female*ad + female*mw + female*so + female*we + female*exp1 + female*exp2 + female*exp3)
+x_formula = @formula(
+    lnw ~ -1 + female + female*widowed + female*divorced + 
+    female*separated + female*nevermarried + female*hsd08 + 
+    female*hsd911 + female*hsg + female*cg + female*ad + 
+    female*mw + female*so + female*we + female*exp1 + 
+    female*exp2 + female*exp3
+)
 x_dframe = ModelFrame( x_formula, cps2012)
 x1 = ModelMatrix(x_dframe)
 X = x1.m[:,Not(1:16)];
 X = hcat(x1.m[:,1:16], X)
 size(X)
-fom_1 =     ["widowed", "divorced", "separated", "nevermarried", "hsd08", "hsd911", "hsg", "cg", "ad", "mw", "so",
-            "we", "exp1", "exp2", "exp3"];
+fom_1 = ["widowed", "divorced", "separated", "nevermarried", 
+        "hsd08", "hsd911", "hsg", "cg", "ad", "mw", "so",
+        "we", "exp1", "exp2", "exp3"];
 data = cps2012[:,fom_1];
 sub_data = ones(size(data)[1])
 for i in 1:size(data)[2]
@@ -535,7 +545,8 @@ n = size(hcat(ones(length(y)), X_1))[1]
 k = size(hcat(ones(length(y)), X_1))[2]
 
 sigma2_hat = (res' * res) / (n - k)
-vcov_beta_hat = sigma2_hat .* inv(hcat(ones(length(y)), X_1)' * hcat(ones(length(y)), X_1));
+vcov_beta_hat = sigma2_hat .* inv(hcat(ones(length(y)), X_1)' * 
+    hcat(ones(length(y)), X_1));
 se = sqrt.(diag(vcov_beta_hat))
 
 ls_effect = DataFrame(Estimate = β, stderror = se);
@@ -560,12 +571,24 @@ We then collect results in a nice table:
 
 ```julia
 table = zeros(3,2)
-table[1,:] = [round(Matrix(ls_effect)[2,1], digits = 2), round.(Matrix(ls_effect)[2,2], digits = 5)]
-table[2,:] = [round(lasso_effect.coefficients, digits =2), round(lasso_effect.se, digits = 5)]
-table[3,:] = [round(doublesel_effect.coefficients, digits =2), round(doublesel_effect.se, digits = 5)];
+table[1,:] = [
+    round(Matrix(ls_effect)[2,1], digits = 2), 
+    round.(Matrix(ls_effect)[2,2], digits = 5)
+    ]
+table[2,:] = [
+    round(lasso_effect.coefficients, digits =2), 
+    round(lasso_effect.se, digits = 5)
+    ]
+table[3,:] = [
+    round(doublesel_effect.coefficients, digits =2), 
+    round(doublesel_effect.se, digits = 5)
+    ];
 index = ["full reg via ols", "partial reg
 via post-lasso ", "partial reg via double selection"]
-pretty_table(hcat(index, table), show_row_number = false, header = [" ", "Estimate", "Std. Error"], tf = tf_simple, nosubheader = true)
+pretty_table(
+    hcat(index, table), show_row_number = false, 
+    header = [" ", "Estimate", "Std. Error"], tf = tf_simple,
+    nosubheader = true)
 ```
 
 
@@ -625,12 +648,13 @@ AJR = load(download(url))["AJR"];
 y = AJR[!,"GDP"]
 d = AJR[!,"Exprop"]
 z = AJR[!,"logMort"];
-x_formula = @formula(GDP ~ -1 + Latitude + Latitude2 + Africa + Asia + Namer + Samer
-    + Latitude*Latitude2 + Latitude*Africa + Latitude*Asia + Latitude*Namer + Latitude*Samer
-    + Latitude2*Africa + Latitude2*Asia + Latitude2*Namer + Latitude2*Samer
-    + Africa*Asia + Africa*Namer + Africa*Samer
-    + Asia*Namer + Asia*Samer
-    + Namer*Samer)
+x_formula = @formula(GDP ~ -1 + Latitude + Latitude2 + Africa + Asia + 
+    Namer + Samer + Latitude*Latitude2 + Latitude*Africa + 
+    Latitude*Asia + Latitude*Namer + Latitude*Samer + Latitude2*Africa +
+    Latitude2*Asia + Latitude2*Namer + Latitude2*Samer + Africa*Asia 
+    + Africa*Namer + Africa*Samer + Asia*Namer + Asia*Samer
+    + Namer*Samer
+    )
 x_dframe = ModelFrame( x_formula, AJR)
 x1 = ModelMatrix(x_dframe)
 x = x1.m
@@ -657,25 +681,41 @@ Let us investigate partialling out in more detail in this example. We can first 
 
 
 ```julia
-rY_1 = lm(@formula(GDP ~ Latitude + Latitude2 + Africa + Asia + Namer + Samer + Latitude*Latitude2 + Latitude*Africa + Latitude*Asia + Latitude*Namer + Latitude*Samer
-          + Latitude2*Africa + Latitude2*Asia + Latitude2*Namer + Latitude2*Samer + Africa*Asia + Africa*Namer + Africa*Samer
-          + Asia*Namer + Asia*Samer + Namer*Samer), AJR)
+rY_1 = lm(@formula(
+    GDP ~ Latitude + Latitude2 + Africa + Asia + Namer + Samer + 
+    Latitude*Latitude2 + Latitude*Africa + Latitude*Asia + 
+    Latitude*Namer + Latitude*Samer + Latitude2*Africa + 
+    Latitude2*Asia + Latitude2*Namer + Latitude2*Samer + 
+    Africa*Asia + Africa*Namer + Africa*Samer + Asia*Namer + 
+    Asia*Samer + Namer*Samer), AJR
+    )
 rY = y - predict(rY_1)
 
-rD_1 = lm(@formula(Exprop ~ Latitude + Latitude2 + Africa + Asia + Namer + Samer + Latitude*Latitude2 + Latitude*Africa + Latitude*Asia + Latitude*Namer + Latitude*Samer
-          + Latitude2*Africa + Latitude2*Asia + Latitude2*Namer + Latitude2*Samer + Africa*Asia + Africa*Namer + Africa*Samer
-          + Asia*Namer + Asia*Samer + Namer*Samer), AJR)
+rD_1 = lm(@formula(
+    Exprop ~ Latitude + Latitude2 + Africa + Asia + Namer + Samer + 
+    Latitude*Latitude2 + Latitude*Africa + Latitude*Asia + 
+    Latitude*Namer + Latitude*Samer + Latitude2*Africa + 
+    Latitude2*Asia + Latitude2*Namer + Latitude2*Samer + 
+    Africa*Asia + Africa*Namer + Africa*Samer + Asia*Namer + 
+    Asia*Samer + Namer*Samer), AJR
+    )
 rD = d - predict(rD_1)
 
-rZ_1 = lm(@formula(logMort ~ Latitude + Latitude2 + Africa + Asia + Namer + Samer + Latitude*Latitude2 + Latitude*Africa + Latitude*Asia + Latitude*Namer + Latitude*Samer
-          + Latitude2*Africa + Latitude2*Asia + Latitude2*Namer + Latitude2*Samer + Africa*Asia + Africa*Namer + Africa*Samer
-          + Asia*Namer + Asia*Samer + Namer*Samer), AJR)
+rZ_1 = lm(@formula(
+    logMort ~ Latitude + Latitude2 + Africa + Asia + Namer + Samer + 
+    Latitude*Latitude2 + Latitude*Africa + Latitude*Asia + 
+    Latitude*Namer + Latitude*Samer + Latitude2*Africa + 
+    Latitude2*Asia + Latitude2*Namer + Latitude2*Samer + 
+    Africa*Asia + Africa*Namer + Africa*Samer + Asia*Namer + 
+    Asia*Samer + Namer*Samer), AJR
+    )
 rZ = z - predict(rZ_1);
 ```
 
 ```julia
 ivfit_lm = tsls(rD, rY, rZ, nothing, intercept=false)
-DataFrame(Estimate = ivfit_lm["coefficients"][1,2], Std_Error = ivfit_lm["se"])
+DataFrame(Estimate = ivfit_lm["coefficients"][1,2], 
+    Std_Error = ivfit_lm["se"])
 ```
 
 
@@ -684,12 +724,13 @@ We see that the estimates exhibit large standard errors. The imprecision is expe
 Next, we replace the OLS operator by post-Lasso for partialling out
 
 ```julia
-x_formula1 = @formula(GDP ~ Latitude + Latitude2 + Africa + Asia + Namer + Samer
-    + Latitude*Latitude2 + Latitude*Africa + Latitude*Asia + Latitude*Namer + Latitude*Samer
-    + Latitude2*Africa + Latitude2*Asia + Latitude2*Namer + Latitude2*Samer
-    + Africa*Asia + Africa*Namer + Africa*Samer
-    + Asia*Namer + Asia*Samer
-    + Namer*Samer)
+x_formula1 = @formula(GDP ~ Latitude + Latitude2 + Africa + Asia + 
+    Namer + Samer + Latitude*Latitude2 + Latitude*Africa + 
+    Latitude*Asia + Latitude*Namer + Latitude*Samer + 
+    Latitude2*Africa + Latitude2*Asia + Latitude2*Namer + 
+    Latitude2*Samer + Africa*Asia + Africa*Namer + Africa*Samer
+    + Asia*Namer + Asia*Samer + Namer*Samer
+    )
 x_dframe1 = ModelFrame( x_formula, AJR)
 x1_1 = ModelMatrix(x_dframe)
 xx = x1.m;
@@ -768,12 +809,15 @@ Finally, we compare all results
 
 ```julia
 table = zeros(4,2)
-table[1,:] = [coef(ED_ols)[2], stderror(ED_ols)[2]]
-table[2,:] = [ED_2sls["coefficients"][1,2], ED_2sls["se"][1]]
+table[1,:] = [coef(ED_ols)[2], stderror(ED_ols)[2]];
+table[2,:] = [ED_2sls["coefficients"][1,2], ED_2sls["se"][1]];
 table[3,:] = Matrix(r_summary(lasso_IV_Z)[:,2:3]);
 table[4, :] = Matrix(r_summary(lasso_IV_XZ)[:, 2:3]);
 index = ["ols regression", "IV estimation ", "selection on Z", "selection on X and Z"]
-pretty_table(hcat(index, table), show_row_number = false, header = [" ", "Estimate", "Std. Error"], tf = tf_simple, nosubheader = true)
+pretty_table(
+    hcat(index, table), 
+    show_row_number = false, header = [" ", "Estimate", "Std. Error"],
+    tf = tf_simple, nosubheader = true)
 ```
 
 
@@ -841,7 +885,10 @@ pension = load(download(url))["pension"];
 y = pension[:, "tw"];
 d = pension[:, "p401"];
 z = pension[:, "e401"];
-X = Matrix(pension[:, ["i2", "i3", "i4", "i5", "i6", "i7", "a2", "a3", "a4", "a5", "fsize", "hs", "smcol", "col", "marr", "twoearn", "db", "pira", "hown"]]);
+X = Matrix(pension[:, 
+        ["i2", "i3", "i4", "i5", "i6", "i7", "a2", "a3", 
+        "a4", "a5", "fsize", "hs", "smcol", "col", "marr", 
+        "twoearn", "db", "pira", "hown"]]);
 ```
 
 
@@ -874,12 +921,13 @@ The results are summarized into a table, which is then processed using xtable to
 
 ```julia
 table = zeros(4, 2)
-table[1,:] = r_summary(pension_ate)[:, 1:2]
-table[2,:] = r_summary(pension_atet)[:, 1:2]
-table[3,:] = r_summary(pension_late)[:, 1:2]
+table[1,:] = r_summary(pension_ate)[:, 1:2];
+table[2,:] = r_summary(pension_atet)[:, 1:2];
+table[3,:] = r_summary(pension_late)[:, 1:2];
 table[4,:] = r_summary(pension_latet)[:, 1:2];
 pretty_table(hcat(index, table), show_row_number = false, 
-            header = [" ", "Estimate", "Std. Error"], tf = tf_simple, nosubheader = true)
+            header = [" ", "Estimate", "Std. Error"], tf = tf_simple, 
+            nosubheader = true)
 ```
 
 
