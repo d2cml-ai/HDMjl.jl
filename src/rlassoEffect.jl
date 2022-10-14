@@ -115,21 +115,32 @@ function r_summary(object::rlassoEffect1)
     if length(object.coefficients) != 0
         k = length(object.coefficients)
         table = zeros(k, 4)
-        table[:, 1] .= object.coefficients
-        table[:, 2] .= object.se
-        table[:, 3] .= table[:, 1]./table[:, 2]
-        table[:, 4] .= 2 * cdf(Normal(), -abs.(table[:, 3]))
+        table[:, 1] .= round.(object.coefficients, digits = 5)
+        table[:, 2] .= round.(object.se, digits = 5)
+        table[:, 3] .= round.(table[:, 1]./table[:, 2], digits = 5)
+        table[:, 4] .= round.(2 * cdf(Normal(), -abs.(table[:, 3])), digits = 5)
         table1 = DataFrame(table, :auto)
         table1 = rename(table1, ["Estimate.", "Std. Error", "t value", "Pr(>|t|)"])
+        table2 = string.(copy(table))
+        a = table2[:, 4];
+        b = string.(zeros(length(a)))
+        b[parse.(Float64, a) .>= 0 .&& parse.(Float64, a).< 0.001] .= a[parse.(Float64, a) .>= 0 .&& parse.(Float64, a).< 0.001] .* " ***"
+        b[parse.(Float64, a) .>= 0.001 .&& parse.(Float64, a).< 0.01] .= a[parse.(Float64, a) .>= 0.001 .&& parse.(Float64, a).< 0.01] .* " **"
+        b[parse.(Float64, a) .>= 0.01 .&& parse.(Float64, a).< 0.05] .= a[parse.(Float64, a) .>= 0.01 .&& parse.(Float64, a).< 0.05] .* " *"
+        b[parse.(Float64, a) .>= 0.05 .&& parse.(Float64, a).< 0.1] .= a[parse.(Float64, a) .>= 0.05 .&& parse.(Float64, a).< 0.1] .* " ."
+        b[parse.(Float64, a) .>= 0.1 .&& parse.(Float64, a).< 1] .= a[parse.(Float64, a) .>= 0.1 .&& parse.(Float64, a).< 1] .* " "
+        b = vec(b)
+        table2[:, 4] .= b
+        table2 = DataFrame(table2, :auto)
+        table2 = rename(table2, ["coeff.", "se.", "t-value", "p-value"])
         print("""Estimates and significance testing of the effect of target variables""", 
                 "\n")
-        pretty_table(table, show_row_number = true, header = ["Estimate.", "Std. Error", "t value", "Pr(>|t|)"], tf = tf_borderless)
+        pretty_table(table2, show_row_number = true, header = ["Estimate.", "Std. Error", "t value", "Pr(>|t|)"], tf = tf_borderless)
         print("---", "\n", "Signif. codes:","\n", "0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1")
         print("\n")
     else
         print("No coefficients\n")
     end
-    return table1
 end
 
 function r_print(object::rlassoEffect1; digits = 3)
@@ -281,15 +292,27 @@ function r_summary(object::rlassoEffects1)
     if length(object.coefficients) != 0
         k = length(object.coefficients)
         table = zeros(k, 4)
-        table[:, 1] .= object.coefficients
-        table[:, 2] .= object.se
-        table[:, 3] .= table[:, 1]./table[:, 2]
-        table[:, 4] .= 2 * cdf(Normal(), -abs.(table[:, 3]))
+        table[:, 1] .= round.(object.coefficients, digits = 5)
+        table[:, 2] .= round.(object.se, digits = 5)
+        table[:, 3] .= round.(table[:, 1]./table[:, 2], digits = 5)
+        table[:, 4] .= round.(2 * cdf(Normal(), -abs.(table[:, 3])), digits = 5)
         table1 = DataFrame(hcat(["X$y" for y = object.index], table), :auto)
         table1 = rename(table1, ["index", "Estimate.", "Std. Error", "t value", "Pr(>|t|)"])
+        table2 = string.(copy(table))
+        a = table2[:, 4];
+        b = string.(zeros(length(a)))
+        b[parse.(Float64, a) .>= 0 .&& parse.(Float64, a).< 0.001] .= a[parse.(Float64, a) .>= 0 .&& parse.(Float64, a).< 0.001] .* " ***"
+        b[parse.(Float64, a) .>= 0.001 .&& parse.(Float64, a).< 0.01] .= a[parse.(Float64, a) .>= 0.001 .&& parse.(Float64, a).< 0.01] .* " **"
+        b[parse.(Float64, a) .>= 0.01 .&& parse.(Float64, a).< 0.05] .= a[parse.(Float64, a) .>= 0.01 .&& parse.(Float64, a).< 0.05] .* " *"
+        b[parse.(Float64, a) .>= 0.05 .&& parse.(Float64, a).< 0.1] .= a[parse.(Float64, a) .>= 0.05 .&& parse.(Float64, a).< 0.1] .* " ."
+        b[parse.(Float64, a) .>= 0.1 .&& parse.(Float64, a).< 1] .= a[parse.(Float64, a) .>= 0.1 .&& parse.(Float64, a).< 1] .* " "
+        b = vec(b)
+        table2[:, 4] .= b
+        table2 = DataFrame(hcat(object.coefficients[:,1], table2), :auto)
+        table2 = rename(table2, [" ", "coeff.", "se.", "t-value", "p-value"])
         print("Estimates and significance testing of the effect of target variables", 
                 "\n")
-        pretty_table(table, show_row_number = false, header = ["Estimate.", "Std. Error", "t value", "Pr(>|t|)"], tf = tf_borderless, row_names = ["X$y" for y = object.index])
+        pretty_table(table2, show_row_number = false, header = [" ","Estimate.", "Std. Error", "t value", "Pr(>|t|)"], tf = tf_borderless, row_names = ["X$y" for y = object.index])
         print("---", "\n", "Signif. codes:","\n", "0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1")
         print("\n")
         return table1
