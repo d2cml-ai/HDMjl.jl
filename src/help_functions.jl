@@ -8,6 +8,8 @@ function init_values(x, y; number::Int64 = 5, intercept::Bool = true)
         append!(corr, abs.(cor(y, x[:, i])))
     end
 
+    print(corr)
+
     index = sortperm(corr, rev = true)[1 : min(number, p)]
     coefficients = zeros(p)
     data = hcat(y, ones(n), Matrix(x)[:, index])

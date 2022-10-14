@@ -20,6 +20,18 @@ function intercept(X)
     return Matrix(X1)
 end
 
+using CSV
+url = "https://raw.githubusercontent.com/d2cml-ai/HDMjl.jl/prueba/data/3_2.csv"
+dta = DataFrame(CSV.read(download(url), DataFrame));
+n, p = size(dta);
+Y = dta[:,1];
+X = Matrix(dta[:,2:end]);
+
+reload()
+lasso_reg = hdm.rlasso(X, Y, post = false);
+hdm.r_summary(lasso_reg)
+
+
 r_32 = r_data("3.2")
 
 y = r_32[:, 1]
@@ -118,3 +130,105 @@ hdm.r_summary(lassoeffect)
 hdm.r_confint(lassoeffect)
 
 
+using Highlights.Tokens, Highlights.Themes
+abstract type ct <: AbstractTheme end
+
+
+@theme ct Dict(
+    # :name => "Tango",
+    # :description => "A theme inspired by the Tango Icon Theme Guidelines.",
+    # :comments => "Based on Tango theme from Pygments.",
+    :style => S"fg: 990000",
+    :tokens => Dict(
+        COMMENT                => S"italic; fg: 8f5902",
+        COMMENT_MULTILINE      => S"italic; fg: 8f5902",
+        COMMENT_PREPROC        => S"italic; fg: 8f5902",
+        COMMENT_SINGLE         => S"italic; fg: 8f5902",
+        COMMENT_SPECIAL        => S"italic; fg: 8f5902",
+
+        ERROR                  => S"fg: a40000; bg: ef2929",
+
+        GENERIC                => S"fg: 000000",
+        GENERIC_DELETED        => S"fg: a40000",
+        GENERIC_EMPH           => S"italic; fg: 000000",
+        GENERIC_ERROR          => S"fg: ef2929",
+        GENERIC_HEADING        => S"bold; fg: 000080",
+        GENERIC_INSERTED       => S"fg: 00a000",
+        GENERIC_OUTPUT         => S"italic; fg: 16537e",
+        GENERIC_PROMPT         => S"fg: 8f5902",
+        GENERIC_STRONG         => S"bold; fg: 000000",
+        GENERIC_SUBHEADING     => S"bold; fg: 800080",
+        GENERIC_TRACEBACK      => S"bold; fg: a40000",
+
+        KEYWORD                => S"bold; fg: 204a87",
+        KEYWORD_CONSTANT       => S"bold; fg: 204a87",
+        KEYWORD_DECLARATION    => S"bold; fg: 204a87",
+        KEYWORD_NAMESPACE      => S"bold; fg: 204a87",
+        KEYWORD_PSEUDO         => S"bold; fg: 204a87",
+        KEYWORD_RESERVED       => S"bold; fg: 204a87",
+        KEYWORD_TYPE           => S"bold; fg: 204a87",
+
+        LITERAL                => S"fg: 000000",
+        LITERAL_DATE           => S"fg: 000000",
+
+        NAME                   => S"fg: 000000",
+        NAME_ATTRIBUTE         => S"fg: c4a000",
+        NAME_BUILTIN           => S"fg: 204a87",
+        NAME_BUILTIN_PSEUDO    => S"fg: 3465a4",
+        NAME_CLASS             => S"fg: 000000",
+        NAME_CONSTANT          => S"fg: 000000",
+        NAME_DECORATOR         => S"bold; fg: 5c35cc",
+        NAME_ENTITY            => S"fg: ce5c00",
+        NAME_EXCEPTION         => S"bold; fg: cc0000",
+        NAME_FUNCTION          => S"bold; fg: 16537e",
+        NAME_LABEL             => S"fg: f57900",
+        NAME_NAMESPACE         => S"fg: 000000",
+        NAME_OTHER             => S"fg: 000000",
+        NAME_PROPERTY          => S"fg: 000000",
+        NAME_TAG               => S"bold; fg: 204a87",
+        NAME_VARIABLE          => S"fg: 000000",
+        NAME_VARIABLE_CLASS    => S"fg: 000000",
+        NAME_VARIABLE_GLOBAL   => S"fg: 000000",
+        NAME_VARIABLE_INSTANCE => S"fg: 000000",
+
+        NUMBER                 => S"bold; fg: 0000cf",
+        NUMBER_FLOAT           => S"bold; fg: 0000cf",
+        NUMBER_HEX             => S"bold; fg: 0000cf",
+        NUMBER_INTEGER         => S"bold; fg: 0000cf",
+        NUMBER_INTEGER_LONG    => S"bold; fg: 0000cf",
+        NUMBER_OCT             => S"bold; fg: 0000cf",
+
+        OPERATOR               => S"bold; fg: ce5c00",
+        OPERATOR_WORD          => S"bold; fg: 204a87",
+
+        OTHER                  => S"fg: 000000",
+
+        PUNCTUATION            => S"bold; fg: 16537e",
+
+        STRING                 => S"fg: 4e9a06",
+        STRING_BACKTICK        => S"fg: 4e9a06",
+        STRING_CHAR            => S"fg: 4e9a06",
+        STRING_DOC             => S"italic; fg: 8f5902",
+        STRING_DOUBLE          => S"fg: 4e9a06",
+        STRING_ESCAPE          => S"fg: 4e9a06",
+        STRING_HEREDOC         => S"fg: 4e9a06",
+        STRING_INTERPOL        => S"fg: 4e9a06",
+        STRING_OTHER           => S"fg: 4e9a06",
+        STRING_REGEX           => S"fg: 4e9a06",
+        STRING_SINGLE          => S"fg: 4e9a06",
+        STRING_SYMBOL          => S"fg: 4e9a06",
+
+        TEXT                   => S"",
+
+        WHITESPACE             => S"underline; fg: f8f8f8",
+    )
+)
+
+# bcbcbc
+
+# weave("hdm.jmd"; doctype = "md2pdf", highlight_theme = ct)
+# using Weave, Highlights
+
+# @time weave("hdm.jmd"; doctype = "md2pdf", highlight_theme = Highlights.Themes.MonokaiMiniTheme, pandoc_options = ["--toc", "--toc-depth= 3", "--number-sections", "--self-contained"])
+# @time weave("hdm.jmd"; doctype="pandoc2pdf", pandoc_options=["--toc", "--toc-depth= 1", "--number-sections", "--self-contained"], highlight_theme = Highlights.Themes.TangoTheme)
+@time weave("hdm.jmd"; doctype="pandoc2pdf", pandoc_options=["--toc", "--toc-depth= 1", "--number-sections", "--self-contained"], highlight_theme = ct)
