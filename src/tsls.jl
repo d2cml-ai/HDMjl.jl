@@ -9,11 +9,36 @@ end
 
 function tsls(d::Array, y::Array, z::Array, x::Union{Nothing, Array} = nothing; intercept::Bool = true, homoscedastic::Bool = true) # x::Union{Nothing, DataFrame, Array}
     n = size(y, 1)
+    # if intercept == true
+    #     d_names = ["d$y" for y = 1:size(d[:,:],2)]
+    #     x_names = ["x$y" for y  = 1:size(x,2)];
+    #     coef_names = append!(append!(d_names, ["intercept"]), x_names);
+    # else 
+    #     d_names = ["d$y" for y = 1:size(d[:,:],2)]
+    #     x_names = ["x$y" for y  = 1:size(x,2)];
+    #     coef_names = append!(d_names,x_names);
+    # end
     
-    if intercept && !isnothing(x)
+    if intercept == true && isnothing(x) == false
+        d_names = ["d$y" for y = 1:size(d[:,:],2)]
+        x_names = ["x$y" for y  = 1:size(x,2)];
+        coef_names = append!(append!(d_names, ["intercept"]), x_names);
         x = hcat(ones(n, 1), x)
-    elseif intercept && isnothing(x)
+    
+    elseif intercept == true && isnothing(x) == true
         x = ones(n, 1)
+        d_names = ["d$y" for y = 1:size(d[:,:],2)]
+        #x_names = ["x$y" for y  = 1:size(x,2)];
+        coef_names = append!(d_names, ["intercept"]);
+    
+    elseif intercept == false && isnothing(x) == true
+        d_names = ["d$y" for y = 1:size(d[:,:],2)]
+        #x_names = ["x$y" for y  = 1:size(x,2)];
+        coef_names = d_names;
+    elseif intercept == false && isnothing(x) == false
+        d_names = ["d$y" for y = 1:size(d[:,:],2)]
+        x_names = ["x$y" for y  = 1:size(x,2)];
+        coef_names = append!(d_names, x_names)
     end
     
     a1 = size(d, 2)
@@ -58,6 +83,7 @@ function tsls(d::Array, y::Array, z::Array, x::Union{Nothing, Array} = nothing; 
     else
         se = sqrt(VC1)
     end
+    b = hcat(coef_names, b)
     res = Dict("coefficients" => b, "vcov" => VC1, "se" => se, "residuals" => e, "sample_size" => n)
     return res
 end

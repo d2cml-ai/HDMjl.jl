@@ -67,44 +67,57 @@ The Post-Lasso procedure fits an OLS regression excluding the variables not prev
 We can estimate the models using Lasso
 
 ```julia
-julia> rlasso(X, Y, post = false)
-Dict{String, Any} with 15 entries:
-  "tss"          => 6512.49
-  "dev"          => [6.75884, -13.5819, -2.81122, -3.94462, 17.3342, -1.2805, 3.16503, -4.74853, 6.944, 15.2907  …  …
-  "model"        => [0.390896 0.179228 … 2.36678 2.01764; -0.720606 -1.12332 … 0.169248 -0.831435; … ; 1.2457 0.7669…
-  "loadings"     => [1.70326, 1.86338, 2.02143, 1.85829, 1.5416, 1.74625, 1.94735, 1.38887, 1.7228, 1.59366  …  1.65…
-  "sigma"        => 1.71111
-  "lambda0"      => 81.3601
-  "lambda"       => [138.577, 151.605, 164.464, 151.191, 125.424, 142.075, 158.436, 112.998, 140.167, 129.66  …  134…
-  "intercept"    => -0.118988
-  "iter"         => 16
-  "residuals"    => [1.8377, -2.33523, 0.707157, -0.0587436, 3.81226, 0.637385, 0.117754, -0.209206, 1.49168, 2.2032…
-  "rss"          => 289.863
-  "index"        => Bool[1, 1, 1, 0, 0, 0, 0, 0, 0, 0  …  0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-  "beta"         => [4.15731, 4.35612, 3.69875, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, …
-  "options"      => Dict{String, Any}("intercept"=>true, "post"=>false, "meanx"=>[-0.217494 0.000263084 … -0.0073734…
-  "coefficients" => [-0.118988, 4.15731, 4.35612, 3.69875, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0,…
+julia> lasso_reg = rlasso(X, Y, post = false)
+
+julia> r_summary(lasso_reg)
+    Post-Lasso Estimation: false
+    Total number of variables: 100
+    Number of selected variables: 9
+    ---
+     
+============ ==============
+  Variable    Estimate    
+============ ==============
+  Intercept   -0.0588327
+  V 1         4.84428
+  V 2         4.73331
+  V 3         4.99116
+  V 4         -0.0166025
+  V 43        -0.10963
+  V 64        0.000400857
+  V 69        -0.0359718
+  V 94        0.00666321
+  V 100       0.166262
+============ ==============
+
+    ----
+    Multiple R-squared: 0.9883821717933302
+    Adjusted R-squared: 0.9872203889726632
 ```
 and Post-Lasso
 
 ```julia
-julia> rlasso(X, Y, post = true)
-Dict{String, Any} with 15 entries:
-  "tss"          => 6512.49
-  "dev"          => [6.75884, -13.5819, -2.81122, -3.94462, 17.3342, -1.2805, 3.16503, -4.74853, 6.944, 15.2907  …  …
-  "model"        => [0.390896 0.179228 … 2.36678 2.01764; -0.720606 -1.12332 … 0.169248 -0.831435; … ; 1.2457 0.7669…
-  "loadings"     => [0.93007, 0.992403, 0.863634, 1.00966, 0.876833, 0.858748, 1.00182, 0.892263, 1.07537, 1.01695  …
-  "sigma"        => 0.925277
-  "lambda0"      => 81.3601
-  "lambda"       => [75.6706, 80.7419, 70.2653, 82.1458, 71.3392, 69.8678, 81.5081, 72.5946, 87.4919, 82.7389  …  68…
-  "intercept"    => 0.0258985
-  "iter"         => 5
-  "residuals"    => [0.733002, 0.22571, 1.06845, 1.34666, 0.818648, 0.575327, -0.519747, 0.985208, -0.000283277, -0.…
-  "rss"          => 84.7576
-  "index"        => Bool[1, 1, 1, 0, 0, 0, 0, 0, 0, 0  …  0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-  "beta"         => [4.94557, 5.14366, 4.8095, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0…
-  "options"      => Dict{String, Any}("intercept"=>true, "post"=>true, "meanx"=>[-0.217494 0.000263084 … -0.00737349…
-  "coefficients" => [0.0258985, 4.94557, 5.14366, 4.8095, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, …
+julia> post_lasso_reg = rlasso(X, Y, post = true)
+
+julia> r_summary(post_lasso_reg)
+    Post-Lasso Estimation: true
+    Total number of variables: 100
+    Number of selected variables: 3
+    ---
+     
+============ ==============
+  Variable    Estimate    
+============ ==============
+  Intercept   -0.00682754
+  V 1         5.00958
+  V 2         4.93178
+  V 3         5.17705
+============ ==============
+
+    ----
+    Multiple R-squared: 0.9878595381779292
+    Adjusted R-squared: 0.9874801487459894
+
 ```
 
 ### Inference on Target Coefficients through Orthogonal Estimating Equations
@@ -130,34 +143,31 @@ julia> d = GrowthData[:, 3];
 
 julia> X = Matrix(GrowthData[:, Not(1, 2, 3)]);
 
-julia> rlassoEffect(X, y, d, method = "double selection")
-Dict{String, Any} with 10 entries:
-  "alpha"            => -0.0500059
-  "t"                => -3.16666
-  "se"               => 0.0157914
-  "no_select"        => 0
-  "coefficients_reg" => [-0.406451, -0.0500059, -0.0782423, -0.574676, 0.0511529, -0.0470218, 0.212279, -0.000376038, 0…
-  "sample_size"      => 90
-  "coefficient"      => -0.0500059
-  "selection_index"  => Bool[1, 0, 1, 0, 1, 0, 0, 0, 0, 0  …  0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-  "residuals"        => Dict("v"=>[0.497555, 0.183798, 0.0705184, -0.123959, 0.0872214, 0.311811, 0.273583, 0.800463, -…
-  "coefficients"     => -0.0500059
+julia> doublesel_effect = rlassoEffect(X, y, d, method = "double selection");
+
+julia> r_summary(doublesel_effect);
+Estimates and significance testing of the effect of target variables
+  Row   Estimate.   Std. Error    t value     Pr(>|t|) 
+
+    1    -0.05001      0.01579   -3.16719   0.00154 **
+---
+Signif. codes:
+0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
 We can also use `partialling out` for the orthogonal estimating equations.
 
 ```julia
-julia> rlassoEffect(X, y, d, method = "partialling out")
-Dict{String, Any} with 9 entries:
-  "alpha"            => -0.0498115
-  "t"                => -3.57421
-  "se"               => 0.0139364
-  "coefficients_reg" => [0.0581009, -0.0755655, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0  …  0.0, 0.0, 0.0, 0.0, 0.0, 0.0…
-  "sample_size"      => 90
-  "coefficient"      => -0.0498115
-  "selection_index"  => Any[true, false, true, false, true, false, false, false, false, false  …  false, false, false, …
-  "residuals"        => Dict("v"=>[0.522248, 0.130278, 0.072321, -0.131969, 0.0984047, 0.357306, 0.294098, 0.797784, -0…
-  "coefficients"     => -0.0498115
+julia> lasso_effect   = rlassoEffect(X, y, d, method = "partialling out")
+
+julia> r_summary(lasso_effect);
+Estimates and significance testing of the effect of target variables
+  Row   Estimate.   Std. Error    t value      Pr(>|t|) 
+
+    1    -0.04981      0.01394   -3.57317   0.00035 ***
+---
+Signif. codes:
+0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
 ### Instrumental Variable Estimation in High-Dimentional Settings
@@ -185,13 +195,16 @@ julia> x = x[:, (mean(x, dims = 1) .> 0.05)'];
 
 julia> z = z[:, (mean(z, dims = 1) .> 0.05)'];
 
-julia> rlassoIV(x, d, y, z)
-Dict{String, Any} with 5 entries:
-  "se"           => [0.128507]
-  "sample_size"  => 312
-  "vcov"         => [0.0165139;;]
-  "residuals"    => [-0.20468; 0.0311701; … ; 0.252309; 0.335146;;]
-  "coefficients" => [-0.0238347;;]
+julia> lasso_IV_XZ  = rlassoIV(x, d, y, z)
+
+julia> r_summary(lasso_IV_XZ);
+Estimates and Significance Testing of the effect of target variables in the IV regression model
+         coeff.       se.    t-value    p-value 
+
+  d1   -0.02383   0.12851   -0.18543   0.85289
+---
+Signif. codes:
+0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
 ### Inference on Treatment Effects on a High-Dimensional Setting
@@ -211,37 +224,141 @@ julia> z = pension[:, "e401"];
 
 julia> X = Matrix(pension[:, ["i2", "i3", "i4", "i5", "i6", "i7", "a2", "a3", "a4", "a5", "fsize", "hs", "smcol", "col", "marr", "twoearn", "db", "pira", "hown"]]);
 
-julia> rlassoATE(X, d, y)
-Dict{String, Any} with 5 entries:
-  "se"          => 1930.68
-  "individual"  => [-30618.3, -57537.6, -71442.9, 21383.3, -2.32925e5, 3.40765e5, 97143.9, -286.995, 21439.9, 99072.0  …
-  "sample_size" => 9915
-  "te"          => 10180.1
-  "type"        => "ATE"
+julia> pension_ate  = rlassoATE(X, d, y)
 
-julia> rlassoATET(X, d, y)
-Dict{String, Any} with 6 entries:
-  "se"          => 2944.43
-  "individual"  => [-21536.4, -52877.2, -1.44867e5, -2739.29, -307741.0, 7.3912e5, 1.73107e5, 12929.3, -2569.57, 62331.…
-  "sample_size" => 9915
-  "te"          => 12628.5
-  "type"        => "ATET"
+julia> r_summary(pension_ate);
+    ------
+    Post-Lasso estimation: true
+    Intercept: true
+    Control: 0
+    Total number of variables: 19
+    Number of selected variables: 9 
+    ------
+    
+ 
+============ ============
+  Variable    Estimate  
+============ ============
+  Intercept   -2.07033
+  V 1         -0.237913
+  V 3         0.618819
+  V 4         0.846136
+  V 5         1.10569
+  V 6         1.34217
+  V 10        -0.33151
+  V 16        0.0382348
+  V 17        0.620232
+  V 18        0.335563
+============ ============
+rlassologit
+...
+  Coeff     SE        t.value 
+========== ========= ==========
+  10180.1   1930.68   5.2728
+========== ========= ==========
 
-julia> rlassoLATE(X, d, y, z)
-Dict{String, Any} with 5 entries:
-  "se"          => 2326.9
-  "individual"  => [-50526.8, -1.39158e5, -1.37102e5, 38508.0, -6.5644e5, 7.94317e5, 2.50222e5, 71721.0, 39272.5, 1.440…
-  "sample_size" => 9915
-  "te"          => 12992.1
-  "type"        => "LATE"
+julia> pension_atet  = rlassoATET(X, d, y)
 
-julia> rlassoLATET(X, d, y, z)
-Dict{String, Any} with 6 entries:
-  "se"          => 3645.28
-  "individual"  => [-35580.5, -90558.0, -1.83628e5, -5303.13, -8.0766e5, 1.88668e6, 4.94743e5, 18436.0, -4847.72, 74008…
-  "sample_size" => 9915
-  "te"          => 15323.2
-  "type"        => "LATET"
+julia> r_summary(pension_atet);
+    ------
+    Post-Lasso estimation: true
+    Intercept: true
+    Control: 0
+    Total number of variables: 19
+    Number of selected variables: 6 
+    ------
+    
+ 
+============ ============
+  Variable    Estimate  
+============ ============
+  Intercept   -1.79587
+  V 1         -0.608675
+  V 5         0.622942
+  V 6         0.839653
+  V 16        0.199394
+  V 17        0.643286
+  V 18        0.374925
+============ ============
+rlassologit
+    Estimation and significance tesing of the treatment effect
+    Type: ATET
+    Bootstrap: none
+...
+  Coeff     SE        t.value 
+========== ========= ==========
+  12628.5   2944.43   4.28893
+========== ========= ==========
+
+julia> pension_late = rlassoLATE(X, d, y, z)
+
+julia> r_summary(pension_late);
+    ------
+    Post-Lasso estimation: true
+    Intercept: true
+    Control: 0
+    Total number of variables: 19
+    Number of selected variables: 10 
+    ------
+    
+ 
+============ ============
+  Variable    Estimate  
+============ ============
+  Intercept   -1.58403
+  V 1         -0.329602
+  V 3         0.657641
+  V 4         0.836492
+  V 5         1.11528
+  V 6         1.21348
+  V 8         0.142622
+  V 10        -0.299557
+  V 16        0.0516196
+  V 17        1.03219
+  V 18        0.135758
+============ ============
+rlassologit
+    Estimation and significance tesing of the treatment effect
+    Type: LATE
+    Bootstrap: none
+    
+========== ======== ==========
+  Coeff     SE       t.value 
+========== ======== ==========
+  12992.1   2326.9   5.58344
+========== ======== ==========
+
+julia> pension_latet  = rlassoLATET(X, d, y, z)
+
+julia> r_summary(pension_latet);
+    ------
+    Post-Lasso estimation: true
+    Intercept: true
+    Control: 0
+    Total number of variables: 19
+    Number of selected variables: 5 
+    ------
+    
+ 
+============ ============
+  Variable    Estimate  
+============ ============
+  Intercept   -1.25636
+  V 1         -0.714199
+  V 5         0.677564
+  V 6         0.794049
+  V 16        0.212127
+  V 17        1.05388
+============ ============
+rlassologit
+    Estimation and significance tesing of the treatment effect
+    Type: LATET
+    Bootstrap: none
+    
+========== ========= ==========
+  Coeff     SE        t.value 
+========== ========= ==========
+  15323.2   3645.28   4.20357
 
 ```
 
