@@ -70,7 +70,6 @@ We can estimate the models using Lasso
 julia> lasso_reg = rlasso(X, Y, post = false)
 
 julia> r_summary(lasso_reg)
-
     Post-Lasso Estimation: false
     Total number of variables: 100
     Number of selected variables: 9
@@ -101,7 +100,6 @@ and Post-Lasso
 julia> post_lasso_reg = rlasso(X, Y, post = true)
 
 julia> r_summary(post_lasso_reg)
-
     Post-Lasso Estimation: true
     Total number of variables: 100
     Number of selected variables: 3
