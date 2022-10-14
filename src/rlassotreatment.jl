@@ -1,3 +1,10 @@
+mutable struct rlassoTE
+    result::Dict
+    # main_tbl
+    type
+end
+
+
 function rlassoLATE(x, d, y, z; bootstrap = "none", n_rep = 100, always_takers = true, 
     post = true, intercept = true, never_takers = true)
 
@@ -102,7 +109,7 @@ function rlassoLATE(x, d, y, z; bootstrap = "none", n_rep = 100, always_takers =
     end
 
     b_z_xl = rlassologit(x1, z, post = post, intercept = intercept)
-    yp_b = get_mtrx(x1) * b_z_xl["coefficients"]
+    yp_b = get_mtrx(x1) * b_z_xl.result["coefficients"]
     mz_x = 1 ./ (1 .+ exp.(-1 .* (yp_b)))
 
     mz_x = mz_x .* ((mz_x .> 1e-12) .& (mz_x .< (1 - 1e-12))) .+ (1 - 1e-12) .* (
@@ -145,16 +152,19 @@ function rlassoLATE(x, d, y, z; bootstrap = "none", n_rep = 100, always_takers =
         object["type_boot"] = bootstrap
         object["boot_n"] = n_rep
     end
-    object
+    object["type_boot"] = bootstrap
 
-    return object
+    return rlassoTE(object, object["type"])
 end
+
 
 function rlassoATE(x, d, y; bootstrap = "none", n_rep = 500)
     z = copy(d)
     res = rlassoLATE(x, d, y, z, bootstrap = bootstrap, n_rep = n_rep)
-    res["type"] = "ATE"
-    return res
+    type = "ATE"
+    # res.result["type"] = type
+    res.result["type_boot"] = bootstrap
+    return rlassoTE(res.result, type)
 end
 
 function rlassoLATET(x, d, y, z; bootstrap::String = "none", n_rep::Int64 = 500, post::Bool = true, always_takers::Bool = true, never_takers::Bool = true, intercept::Bool = true)
@@ -190,7 +200,7 @@ function rlassoLATET(x, d, y, z; bootstrap::String = "none", n_rep::Int64 = 500,
 
     b_z_xl = rlassologit(x, z, post = post, intercept = intercept, c = 1.1, gamma = 0.1, lambda = lambda)
     if intercept
-        mz_x = hcat(ones(n), x) * b_z_xl["coefficients"]
+        mz_x = hcat(ones(n), x) * b_z_xl.result["coefficients"]
     elseif !intercept
         mz_x = x * b_z_xl["coefficients"]
     end
@@ -224,16 +234,44 @@ function rlassoLATET(x, d, y, z; bootstrap::String = "none", n_rep::Int64 = 500,
             boot[i] = mean(weights .* ((y - my_z0x) - (ones(n) - z) .* (y - my_z0x) ./ (ones(n) - mz_x))) / mean(weights .* ((d - md_z0x) - (ones(n) - z) .* (d - md_z0x) ./ (ones(n) - mz_x)))
         end
         res["boot_se"] = sqrt(var(boot))
-        res["type_boot"] = bootstrap
         
+        res["type_boot"] = bootstrap
         return res
     end
-    return res
+
+    res["type_boot"] = bootstrap
+    type = "LATET"
+    return rlassoTE(res, type)
 end
 
 function rlassoATET(x, d, y, bootstrap::String = "none", n_rep::Int64 = 500)
     z = copy(d)
     res = rlassoLATET(x, d, y, z, bootstrap = bootstrap, n_rep = n_rep)
-    res["type"] = "ATET"
-    return res
+    type = "ATET"
+    return rlassoTE(res.result, type)
+end
+
+function r_summary(rlasso_TE::rlassoTE)
+    # boot_strap = rlasso_TE[""]
+    print("
+    Estimation and significance tesing of the treatment effect
+    Type: $(rlasso_TE.type)
+    Bootstrap: $(rlasso_TE.result["type_boot"])
+    ") 
+
+    print("\n")
+
+    results = rlasso_TE.result
+
+    coef = results["te"]
+    se = results["se"]
+    std_ = coef / se
+
+    header = ["Coeff", "SE", "t.value"]
+    tbl = [coef se std_]
+
+
+    @ptconf tf = tf_simple
+    @pt :header = header tbl
+    return tbl
 end
