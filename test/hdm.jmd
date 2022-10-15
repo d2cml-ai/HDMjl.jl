@@ -929,7 +929,34 @@ pension_latet = rlassoLATET(X, d, y, z);
 r_summary(pension_latet);
 ```
 
-The results are summarized into a table, which is then processed using xtable to produce the latex output:
+The results are summarized into a table:
+
+```julia
+using PrettyTables
+table = zeros(4,2)
+table[1,:] = round.(vec(r_summary(pension_ate)[:, 1:2]), digits = 2);
+table[2,:] = round.(vec(r_summary(pension_atet)[:, 1:2]), digits = 2);
+table[3,:] = round.(vec(r_summary(pension_late)[:, 1:2]), digits = 2);
+table[4,:] = round.(vec(r_summary(pension_latet)[:, 1:2]), digits = 2);
+index = ["ATE", "ATET ", "LATE", "LATET"];
+```
+
+
+```julia
+pretty_table(hcat(index, table), show_row_number = false, 
+            header = [" ", "Estimate", "Std. Error"], tf = tf_simple, nosubheader = true)
+```
+
+
+Finally, we estimate a model including all interaction effects:
+
+```julia
+pension_ate = rlassoATE(X, z, y);
+pension_atet = rlassoATET(X, z, y);
+pension_late = rlassoLATE(X, d, y, z);
+pension_latet = rlassoLATET(X, d, y, z);
+```
+
 
 ```julia
 table = zeros(4, 2)
@@ -937,9 +964,9 @@ table[1,:] = r_summary(pension_ate)[:, 1:2];
 table[2,:] = r_summary(pension_atet)[:, 1:2];
 table[3,:] = r_summary(pension_late)[:, 1:2];
 table[4,:] = r_summary(pension_latet)[:, 1:2];
+index = ["ATE", "ATET ", "LATE", "LATET"]
 pretty_table(hcat(index, table), show_row_number = false, 
-            header = [" ", "Estimate", "Std. Error"], tf = tf_simple, 
-            nosubheader = true)
+            header = [" ", "Estimate", "Std. Error"], tf = tf_simple, nosubheader = true)
 ```
 
 
