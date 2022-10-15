@@ -182,15 +182,11 @@ where $g_i$ 's are iid $N(0,1)$, conditional on the data. The $(1-\alpha)$-quant
 
 **Julia Implementation** The function `rlasso` implements Lasso and post-Lasso, where the prefix “r” signifies that these are theoretically rigorous versions of Lasso and post-Lasso. The default option is post-Lasso, `post=true`. This function returns an `constructor` of `rlasso` for which methods like `r_predict`, `r_print`, `r_summary` are provided.
 
-lassoShooting.fit is the computational algorithm that underlies the estimation procedure, which
-implements a version of the Shooting Lasso Algorithm (Fu, 1998). The user has several options for
-choosing the non-default options. Specifically, the user can decide if an unpenalized intercept should be included (`true` by default). The option penalty of the function rlasso allows different choices for the penalization parameter and loadings. It allows for homoskedastic or heteroskedastic errors with default `homoscedastic = false`. Moreover, the dependence structure of the design matrix might be taken into consideration for calculation of the penalization parameter with `X_dependent_lambda = true`. In combination with these options, the option `lambda_start` allows the user to set a starting value for $\lambda$ for the different algorithms. Moreover, the user can provide her own fixed value for the penalty level – instead of the data-driven methods discussed above – by setting `homoscedastic = "none"` and supplying the value via `lambda_start`.
+`lassoShooting_fit` is the computational algorithm that underlies the estimation procedure, which implements a version of the Shooting Lasso Algorithm (Fu, 1998). The user has several options for choosing the non-default options. Specifically, the user can decide if an unpenalized intercept should be included (`true` by default). The option penalty of the function rlasso allows different choices for the penalization parameter and loadings. It allows for homoskedastic or heteroskedastic errors with default `homoscedastic = false`. Moreover, the dependence structure of the design matrix might be taken into consideration for calculation of the penalization parameter with `X_dependent_lambda = true`. In combination with these options, the option `lambda_start` allows the user to set a starting value for $\lambda$ for the different algorithms. Moreover, the user can provide her own fixed value for the penalty level - instead of the data-driven methods discussed above - by setting `homoscedastic = "none"` and supplying the value via `lambda_start`.
 
-The constants c and γ from above can be set in the option penalty. The quantities $\hat\varepsilon$, $\hat\psi$, $\hat\sigma$ are calculated in a iterative manner. The maximum number of iterations and the tolerance when the algorithms should stop can be set with control.
+The constants c and $γ$ from above can be set in the option penalty. The quantities $\hat\varepsilon$, $\hat\psi$, $\hat\sigma$ are calculated in a iterative manner. The maximum number of iterations and the tolerance when the algorithms should stop can be set with control.
 
-The method `r_summary` of rlasso-objects displays additionally for model diagnosis the R2 value, the
-adjusted R2 with degrees of freedom equal to the number of selected parameters, and the sup-score
-statistic for joint significance – described above – with corresponding p-value.
+The method `r_summary` of rlasso-objects displays additionally for model diagnosis the R2 value, the adjusted R2 with degrees of freedom equal to the number of selected parameters, and the sup-score statistic for joint significance - described above - with corresponding p-value.
 
 
 
@@ -207,13 +203,27 @@ Y = dta[:,1];
 X = Matrix(dta[:,2:end]);
 ```
 
-The Post-Lasso procedure fits an OLS regression excluding the variables not previously selected by Lasso. The rlasso algorithm uses the standard errors of the residuals from this regression to evaluate whether there has been a gain in the goodness of the fit in the current iteration. Just like most of the functions in the package, `rlasso` returns a `struct` with the results of the regression.
+Next we estimate the model, print the results, and make in-sample and out-of sample predictions. We can use methods print and summarize to print the results, where the option all can be set to `false` to limit the print only to the non-zero coefficients.
 
 We can estimate the models using Lasso
 
 ```julia
 lasso_reg = rlasso(X, Y, post = false);
 sum_lasso = r_summary(lasso_reg)
+
+url = "https://raw.githubusercontent.com/d2cml-ai/HDMjl.jl/main/data/3_2_2.csv"
+new_dta = DataFrame(CSV.read(download(url), DataFrame));
+Xnew = new_dta[:, Not(1)]
+ynew = new_dta[:, 1]
+yhat_lasso_new = r_predict(lasso_reg, xnew = Matrix(Xnew))
+post_lasso_reg = rlasso(X, Y, post = true)
+y_hat_postlasso = r_predict(post_lasso_reg, xnew = Matrix(Xnew))
+r_summary(post_lasso_reg)
+```
+
+```julia
+rlasso_result = mean(abs.(ynew[:, 1] - yhat_lasso_new)), mean(abs.(ynew[:, 1] - y_hat_postlasso))
+print("rlasso Post = false: ", rlasso_result[1], "\nrlasso post = true: ", rlasso_result[2])
 ```
 
 # Inference on Target Regression Coefficient
@@ -358,7 +368,7 @@ above. In fact they are asymptotically equivalent to the previous estimates in t
 settings, with the advantage that, unlike the previous estimates, they will continue to be valid in the
 high-dimensional settings.
 
-The orthogonal estimating equations method – based on partialling out via Lasso or post-Lasso – is implemented by the function `rlassoEffect`, using `method= "partialling out"`:
+The orthogonal estimating equations method ' based on partialling out via Lasso or post-Lasso ' is implemented by the function `rlassoEffect`, using `method= "partialling out"`:
 
 ```julia
 Eff = rlassoEffect(x, y, d, method = "partialling out");
@@ -366,7 +376,7 @@ r_summary(Eff);
 ```
 
 
-Another orthogonal estimating equations method – based on the double selection of covariates – is implemented by the the function `rlassoEffect`, using `method= "double selection"`. Algorithmically the method is as follows:
+Another orthogonal estimating equations method ' based on the double selection of covariates ' is implemented by the the function `rlassoEffect`, using `method= "double selection"`. Algorithmically the method is as follows:
 
 
 
@@ -384,7 +394,7 @@ r_summary(Eff);
 
 ## Inference: Confidence Intervals and Significance Testing.
 
-The function `rlassoEffects` does inference – namely construction of confidence intervals and significance testing – for target variables. Those can be specified either by the variable names, an integer valued vector giving their position in $x$ or by a logical vector indicating the variables for which inference should be conducted. It returns an object of S3 class `rlassoEffects` for which the methods `r_summary`, `r_print`, and `r_confint` are provided. `rlassoEffects` is a wrap function for the function `rlassoEffect` which does inference for a single target regressor. The theoretical underpinning is given in Belloni, Chernozhukov, and Hansen (2014) and for a more general class of models in Belloni, Chernozhukov, and Kato (2014). The function `rlassoEffects` might either be used in the form `rlassoEffects(x, y, index)` where $\mathbf x$ is a matrix, $\mathbf y$ denotes the outcome variable and index specifies the variables of $\mathbf x$ for which inference is conducted. This can done by an integer vector (postion of the variables), a logical vector or the name of the variables. An alternative usage is as `rlassoEffects(formula, data, I)` where I is a one-sided formula which specifies the variables for which is inference is conducted. For further details we refer to the help page of the function and the following examples where both methods for usage are shown.
+The function `rlassoEffects` does inference ' namely construction of confidence intervals and significance testing ' for target variables. Those can be specified either by the variable names, an integer valued vector giving their position in $x$ or by a logical vector indicating the variables for which inference should be conducted. It returns an object of S3 class `rlassoEffects` for which the methods `r_summary`, `r_print`, and `r_confint` are provided. `rlassoEffects` is a wrap function for the function `rlassoEffect` which does inference for a single target regressor. The theoretical underpinning is given in Belloni, Chernozhukov, and Hansen (2014) and for a more general class of models in Belloni, Chernozhukov, and Kato (2014). The function `rlassoEffects` might either be used in the form `rlassoEffects(x, y, index)` where $\mathbf x$ is a matrix, $\mathbf y$ denotes the outcome variable and index specifies the variables of $\mathbf x$ for which inference is conducted. This can done by an integer vector (postion of the variables), a logical vector or the name of the variables. An alternative usage is as `rlassoEffects(formula, data, I)` where I is a one-sided formula which specifies the variables for which is inference is conducted. For further details we refer to the help page of the function and the following examples where both methods for usage are shown.
 
 Here is an example of the use.
 
@@ -758,7 +768,7 @@ Here we investigate the effect of pro-plaintiff decisions in cases of eminent do
 
 Under this random assignment, the characteristics of judges serving on federal appellate panels can only be related to property prices through the judges’ decisions; thus the judge’s characteristics will plausibly satisfy the instrumental variable exclusion restriction. For further information on this application and the data set we refer to Chen and Yeh (2010) and Belloni, Chen, Chernozhukov, and Hansen (2012).
 
-First, we load the data an construct the matrices with the controls (x), instruments (z), outcome (y),and treatment variables (d). Here we consider regional GDP as the outcome variable.
+First, we load the data a construct the matrices with the controls (x), instruments (z), outcome (y),and treatment variables (d). Here we consider regional GDP as the outcome variable.
 
 
 ```julia
@@ -826,10 +836,10 @@ pretty_table(
 # Inference on Treatment Effects in a High-Dimensional Setting
 
 
-In this section, we consider estimation and inference on treatment effects when the treatment variable $d$ enters non-separably in determination of the outcomes. This case is more complicated than the additive case, which is covered as a special case of Section 3. However, the same underlying principle – the orthogonality principle – applies for the estimation and inference on the treatment effect parameters. Estimation and inference of treatment effects in a high-dimensional setting is analysed in Belloni, Chernozhukov, Fern´andez-Val, and Hansen (2013).
+In this section, we consider estimation and inference on treatment effects when the treatment variable $d$ enters non-separably in determination of the outcomes. This case is more complicated than the additive case, which is covered as a special case of Section 3. However, the same underlying principle ' the orthogonality principle ' applies for the estimation and inference on the treatment effect parameters. Estimation and inference of treatment effects in a high-dimensional setting is analysed in Belloni, Chernozhukov, Fern´andez-Val, and Hansen (2013).
 
 
-## Treatment Effects Parameters – a short Introduction.
+## Treatment Effects Parameters ' a short Introduction.
 
 In many situations researchers are asked to evaluate the effect of a policy intervention. Examples are the effectiveness of a job related training program or the effect of a newly developed drug. We consider n units or individuals, $i = 1,\dots, n$. For each individual we observe the treatment status. The treatment variable $D_i$ takes the value 1, if the unit received (active) treatment, and 0, if it received the control treatment. For each individual we observe the outcome for only one of the two potential treatment states. Hence, the observed outcome depends on the treatment status and is denoted by $Y_i(D_i)$. One important parameter of interest is the average treatment effect (ATE):
 
@@ -853,7 +863,7 @@ $$
 E[Y (1) - Y (0)|D(1) >  D(0)].
 $$
 
-The random variables $D(1)$ and $D(0)$ indicate the potential participation decisions under the instrument states 1 and 0. LATE is the average treatment effect for the subpopulation of compliers – those units that respond to the change in the instrument. Another parameter of interest is the local average treatment effect of the treated (LATET):
+The random variables $D(1)$ and $D(0)$ indicate the potential participation decisions under the instrument states 1 and 0. LATE is the average treatment effect for the subpopulation of compliers ' those units that respond to the change in the instrument. Another parameter of interest is the local average treatment effect of the treated (LATET):
 
 
 $$
@@ -961,3 +971,42 @@ r_confint(rlassoEffects(X, Y, index = [1:p1;]), joint = true);
 ```
 
 As you can see the procedure correctly tells that only the first cause $D_{i1}, among the large number of causes, $D{i1}, \dots D_{i20}$, is a statistically significant cause of $Y$ (see the confidence interval for variable V1).
+
+
+\pagebreak
+
+# References
+
+Acemoglu, D., Johnson, S., & Robinson, J. A. (2001). The colonial origins of comparative development: An empirical investigation. American economic review, 91(5), 1369-1401.
+
+Barro, R. J., & Lee, J. W. (1994). Data set for a panel of 138 countries.
+
+Belloni, A., D. Chen, V. Chernozhukov, and C. Hansen (2012): “Sparse Models and Methods for Optimal Instruments with an Application to Eminent Domain,” Econometrica, 80, 2369-2429, Arxiv, 2010.
+
+Belloni, A., and V. Chernozhukov (2013): “Least Squares After Model Selection in High-dimensional Sparse Models,” Bernoulli, 19(2), 521-547, ArXiv, 2009
+
+Belloni, A., V. Chernozhukov, I. Fernández-Val, and C. Hansen (2013): “Program Evaluation with High-Dimensional Data,” arXiv:1311.2645, ArXiv, 2013
+
+
+Belloni, A., V. Chernozhukov, and C. Hansen (2010): “Inference for High-Dimensional Sparse Econometric Models,” Advances in Economics and Econometrics. 10th World Congress of Econometric Society. August 2010, III, 245-295, ArXiv, 2011.
+
+
+Belloni, A., V. Chernozhukov, and C. Hansen (2014): “Inference on Treatment Effects After Selection Amongst High-Dimensional Controls,” Review of Economic Studies, 81, 608'650, ArXiv, 2011
+
+
+Belloni, A., V. Chernozhukov, and K. Kato (2014): “Uniform post-selection inference for least absolute deviation regression and other Z-estimation problems,” Biometrika.
+
+
+Berry, S., J. Levinsohn, and A. Pakes (1995): “Automobile Prices in Market Equilibrium,” Econometrica, 63, 841'890
+
+Chen, D. L., & Yeh, S. (2010). The economic impacts of eminent domain. Unpublished Manuscript.[2373, 2403-2407].
+
+Chernozhukov, V., Chetverikov, D., & Kato, K. (2013). Gaussian approximations and multiplier bootstrap for maxima of sums of high-dimensional random vectors. The Annals of Statistics, 41(6), 2786-2819.
+
+Chernozhukov, V., & Hansen, C. (2004). The impact of 401 (k) participation on the wealth distribution: An instrumental quantile regression analysis. Review of Economics and statistics, 86(3), 735-751.
+
+Chernozhukov, V., Hansen, C., & Spindler, M. (2015). Valid post-selection and post-regularization inference: An elementary, general approach. Annu. Rev. Econ., 7(1), 649-688.
+
+Chernozhukov, V., Hansen, C., & Spindler, M. (2015). Post-selection and post-regularization inference in linear models with many controls and instruments. American Economic Review, 105(5), 486-90.
+
+Fu, W. J. (1998). Penalized regressions: the bridge versus the lasso. Journal of computational and graphical statistics, 7(3), 397-416.
