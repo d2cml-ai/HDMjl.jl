@@ -197,7 +197,7 @@ statistic for joint significance – described above – with corresponding p-va
 **Example.** (Prediction Using Lasso and Post-Lasso) Consider generated data from a sparse linear model:
 
 ```julia
-using CodecXz, RData, DataFrames, StatsModels
+using CodecXz, RData, DataFrames, StatsModels, LinearAlgebra
 using Statistics, Distributions, PrettyTables, GLM, CSV
 
 url = "https://raw.githubusercontent.com/d2cml-ai/HDMjl.jl/prueba/data/3_2.csv"
@@ -407,15 +407,15 @@ lasso_effects = rlassoEffects(x, y, index = [1,2,3,50]);
 ```
 
 ```julia
-HDMjl.r_print(lasso_effects, digits = 4)
+r_print(lasso_effects, digits = 4)
 ```
 
 ```julia
-HDMjl.r_summary(lasso_effects);
+r_summary(lasso_effects);
 ```
 
 ```julia
-HDMjl.r_confint(lasso_effects);
+r_confint(lasso_effects);
 ```
 
 
@@ -470,13 +470,16 @@ fom_1 = ["widowed", "divorced", "separated", "nevermarried",
         "hsd08", "hsd911", "hsg", "cg", "ad", "mw", "so",
         "we", "exp1", "exp2", "exp3"];
 data = cps2012[:,fom_1];
-sub_data = ones(size(data)[1])
+```
+
+```julia
+global sub_data = ones(size(data)[1])
 for i in 1:size(data)[2]
     if i <= (size(data)[2] -1)
-        sub_data = hcat(sub_data, Matrix(data[:, i] .* data[:, Not(1:i)]) )
+        global sub_data = hcat(sub_data, Matrix(data[:, i] .* data[:, Not(1:i)]) )
     end
 end
-sub_data = sub_data[:,2:end]
+global sub_data = sub_data[:,2:end]
 size(sub_data)
 x = hcat(X, sub_data)
 size(x)
@@ -537,10 +540,9 @@ X_1 = Matrix(GrowthData[:, Not(1, 2)]);
 Now we can estimate the effect of the initial GDP level. First, we estimate by OLS:
 
 ```julia
-Q, R = qr(hcat(ones(length(y)), X_1))
-β = pinv(hcat(ones(length(y)), X_1)) * y
-
-res = y - hcat(ones(length(y)), X_1) * β;
+Q, R = qr(hcat(ones(length(y)), X_1));
+beta_i = pinv(hcat(ones(length(y)), X_1)) * y
+res = y - hcat(ones(length(y)), X_1) * beta_i;
 n = size(hcat(ones(length(y)), X_1))[1]
 k = size(hcat(ones(length(y)), X_1))[2]
 
@@ -549,7 +551,7 @@ vcov_beta_hat = sigma2_hat .* inv(hcat(ones(length(y)), X_1)' *
     hcat(ones(length(y)), X_1));
 se = sqrt.(diag(vcov_beta_hat))
 
-ls_effect = DataFrame(Estimate = β, stderror = se);
+ls_effect = DataFrame(Estimate = beta_i, stderror = se);
 ```
 
 

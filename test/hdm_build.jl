@@ -4,7 +4,7 @@
 # - Tener `Latex`
 # - Instalar los siguientes paquetes `] add Weave Highlights`
 # - Ir a la carpeta principal (meidante julia, bash o VSCode)
-#     - asegurarse que se esta trabajando con el entorno general `] activate`
+#     - asegurarse que se esta trabajando con el entorno general β`] activate`
 # - correr en el bash o la terminal de vscode `julia test/hdm_build.jl`
 
 ########## Code 
