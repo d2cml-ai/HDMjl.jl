@@ -246,11 +246,13 @@ function r_summary(rlasso_obj::Dict; all = false)
 end
 
 function r_predict(rlasso::Dict; xnew = rlasso["model"])
+
+    xnew_mtrx = Matrix(xnew)
     n, p = size(xnew)
     if rlasso["intercept"] != 0
-        y_hat = hcat(ones(n), xnew)  * rlasso["coefficients"]
+        y_hat = hcat(ones(n), xnew_mtrx)  * rlasso["coefficients"]
     else
-        y_hat = xnew * rlasso["coefficients"]
+        y_hat = xnew_mtrx * rlasso["coefficients"]
     end
     return y_hat
 end
