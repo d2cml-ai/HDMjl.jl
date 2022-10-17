@@ -12,6 +12,9 @@ PrettyTables = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+RData = "df47a6cb-8c03-5eed-afd8-b6050d6c41da"
+CodecXz = "ba30903b-d9e8-5048-a5ec-d1f5b0d4b47b"
 
 [compat]
 DataFrames = "0.22.7, 1"
