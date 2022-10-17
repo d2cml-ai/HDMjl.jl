@@ -127,3 +127,19 @@ function as_logical(array)
     end
     return b
 end
+
+function get_data(x)
+    if x == "seed_100"|| x == "seed_200" || x == "seed_300"|| x == "seed_400" || x == "seed_500"
+        new_x = x * (".csv")
+        url = "https://raw.githubusercontent.com/d2cml-ai/HDMjl.jl/main/data/"
+        url  =  url * new_x
+        data1 = DataFrame(CSV.read(download(url), DataFrame));
+        #rm(new_x)
+    else
+        new_x = x * (".rda")
+        url = "https://raw.githubusercontent.com/d2cml-ai/HDMjl.jl/main/data/"
+        url  =  url * new_x
+        data1 = load(download(url))[x];
+        #rm(new_x)
+    end
+end

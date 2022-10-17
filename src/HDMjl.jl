@@ -1,8 +1,8 @@
 module HDMjl
 
-export lambdaCalculation, init_values, as_logical, LassoShooting_fit, rlasso, rlassoEffect, rlassoEffects, rlassoIVselectX, rlassoIVselectZ, rlassoIV, rlassologit, rlassologitEffect, rlassologitEffects, rlassoATE, rlassoATET, rlassoLATE, rlassoLATET, tsls, r_summary, r_print, r_confint, r_predict
+export lambdaCalculation, init_values, as_logical, LassoShooting_fit, rlasso, rlassoEffect, rlassoEffects, rlassoIVselectX, rlassoIVselectZ, rlassoIV, rlassologit, rlassologitEffect, rlassologitEffects, rlassoATE, rlassoATET, rlassoLATE, rlassoLATET, tsls, r_summary, r_print, r_confint, r_predict, get_data
 
-using Statistics, GLM, DataFrames, LinearAlgebra, GLMNet, Random, PrettyTables, Distributions
+using Statistics, GLM, DataFrames, LinearAlgebra, GLMNet, Random, PrettyTables, Distributions, CSV, RData, CodecXz
 
 include("help_functions.jl")
 include("LassoShooting_fit.jl")
