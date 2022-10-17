@@ -176,7 +176,7 @@ function r_summary(result::rlassologit, all::Bool = false)
         table_print = table_print[result.select, :]
     end
     # print("")
-    @pt :header = ["Variable", "Estimate"] table_print 
+    # @pt :header = ["Variable", "Estimate"] table_print 
     # @pt :header = ["Variable", "Estimate"] result.table
 end
 
