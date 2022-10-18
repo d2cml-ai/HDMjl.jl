@@ -181,6 +181,27 @@ function r_summary(result::rlassologit, all::Bool = false)
 end
 
 
+function r_predict(r_logit::rlassologit, x_new = x, type = "response")
+    x1 = Matrix(x_new)
+    n = size(x1, 1)
+    
+    if r_logit.result["intercept"]
+        x1 = hcat(ones(n), x1)
+    end
+
+    yp = x1 * r_logit.result["coefficients"]
+
+    if type == "response"
+        yhat = 1 ./ (1 .+ exp.(-yp))
+    elseif type == "link"
+        yhat = yp
+    end
+
+    return yhat
+
+end
+
+
 mutable struct rlassologitEffect
     result::Dict
     head_msg
