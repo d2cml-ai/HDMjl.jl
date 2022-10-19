@@ -11,9 +11,9 @@ function rlassoLATE(x, d, y, z; bootstrap = "none", n_rep = 100, always_takers =
 
 
     x1 = Matrix(x)
-    d = Matrix(d[:, :])
-    y = Matrix(y[:, :])
-    z = Matrix(z[:, :])
+    # d = Matrix(d[:, :])
+    # y = Matrix(y[:, :])
+    # z = Matrix(z[:, :])
 
     n, p = size(x1)
 
@@ -175,9 +175,9 @@ end
 
 function rlassoLATET(x, d, y, z; bootstrap::String = "none", n_rep::Int64 = 500, post::Bool = true, always_takers::Bool = true, never_takers::Bool = true, intercept::Bool = true)
     x = Matrix(x[:, :])
-    d = Matrix(d)
-    y = Matrix(y)
-    z = Matrix(z)
+    d = Matrix(d[:, :])
+    y = Matrix(y[:, :])
+    z = Matrix(z[:, :])
     
     n = size(x, 1)
     p = size(x, 2)
