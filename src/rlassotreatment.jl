@@ -8,7 +8,13 @@ end
 function rlassoLATE(x, d, y, z; bootstrap = "none", n_rep = 100, always_takers = true, 
     post = true, intercept = true, never_takers = true)
 
+
+
     x1 = Matrix(x)
+    d = Matrix(d)
+    y = Matrix(y)
+    z = Matrix(z)
+
     n, p = size(x1)
 
     function get_mtrx(x1, type = intercept)
