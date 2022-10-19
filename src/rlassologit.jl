@@ -147,7 +147,7 @@ function rlassologit(x, y; model::Bool = true, c::Float64 = 1.1, post::Bool = tr
 
     # println(" ")
 
-    # table_lgt = hcat(names_columns, coefs)
+    table_lgt = hcat(names_columns, coefs)
     # @ptconf tf = tf_simple alignment = :l
     # header = ["Variable", "Estimate"]
     # @pt :header = header table_lgt[select_columns, :]
