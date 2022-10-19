@@ -197,7 +197,7 @@ function rlassoLATET(x, d, y, z; bootstrap::String = "none", n_rep::Int64 = 500,
     b_y_z0xL = rlasso(x[indz0, :], y[indz0], post = post, intercept = intercept, homoskedastic = "none", c = 1.1, gamma = 0.1, lambda_start = lambda_str)
     # print(b_y_z0xL["coefficients"])
     if intercept
-        print(size(x))
+        # print(size(x))
         my_z0x = hcat(ones(n), x) * b_y_z0xL["coefficients"]
     elseif !intercept
         my_z0x = x * b_y_z0xL["coefficients"]
