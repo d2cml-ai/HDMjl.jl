@@ -5,6 +5,9 @@ mutable struct r_lasso
     main_tbl
 end
 
+
+
+
 function rlasso(x, y; post = true, intercept = true, model = true, 
         homoskedastic = false, X_dependent_lambda = false, lambda_start = nothing, 
         c = 1.1, maxIter = 15, tol::Float64 = 1e-5, n = size(y, 1), gamma = 0.1 / log(n), threshold = nothing)
@@ -195,6 +198,14 @@ function rlasso(x, y; post = true, intercept = true, model = true,
     return est
 end
 
+
+function rlasso(formula::FormulaTerm, Data::DataFrame;)# post = true, intercept = true, model = true, homoskedastic = false, X_dependent_lambda = false, lambda_start = nothing, c = 1.1, maxIter = 15, tol::Float64 = 1e-5, n = size(Data, 1) gamma = 0.1 / log(n), threshold = nothing)
+
+    y, x = data_formula(formula, Data)
+    
+    rlasso(x, y;)# post = post, intercept = intercept, model = model, homoskedastic = homoskedastic, X_dependent_lambda = X_dependent_lambda, lambda_start = lambda_start, c = c, maxIter = maxIter, tol = tol, n = size(y, 1), gamma = gamma, threshold = threshold)
+end
+
 function r_summary(rlasso_obj::Dict; all = false)
     select_cl = []
     
@@ -246,11 +257,13 @@ function r_summary(rlasso_obj::Dict; all = false)
 end
 
 function r_predict(rlasso::Dict; xnew = rlasso["model"])
+
+    xnew_mtrx = Matrix(xnew)
     n, p = size(xnew)
     if rlasso["intercept"] != 0
-        y_hat = hcat(ones(n), xnew)  * rlasso["coefficients"]
+        y_hat = hcat(ones(n), xnew_mtrx)  * rlasso["coefficients"]
     else
-        y_hat = xnew * rlasso["coefficients"]
+        y_hat = xnew_mtrx * rlasso["coefficients"]
     end
     return y_hat
 end
