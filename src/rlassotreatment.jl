@@ -178,14 +178,26 @@ function rlassoLATET(x, d, y, z; bootstrap::String = "none", n_rep::Int64 = 500,
     d = Matrix(d[:, :])
     y = Matrix(y[:, :])
     z = Matrix(z[:, :])
-    
     n = size(x, 1)
     p = size(x, 2)
     lambda = 2.2 * sqrt(n) * quantile(Normal(0.0, 1.0),  1 - (0.1 / log(n)) / (2 * (2 * p)))
-    indz1 = findall(z .== 1)
-    indz0 = findall(z .== 0)
-    b_y_z0xL = rlasso(x[indz0, :], y[indz0], post = post, intercept = intercept, homoskedastic = "none", c = 1.1, gamma = 0.1, lambda_start = lambda)
+    lambda_str = repeat([lambda], p)
+    # indz1 = findall(z .== 1)
+    
+    indz1, indz0 = [], []
+
+    for i in eachindex(z)
+        if z[i] == 1
+            append!(indz1, i)
+        else
+            append!(indz0, i)
+        end
+    end
+
+    b_y_z0xL = rlasso(x[indz0, :], y[indz0], post = post, intercept = intercept, homoskedastic = "none", c = 1.1, gamma = 0.1, lambda_start = lambda_str)
+    print(b_y_z0xL["coefficients"])
     if intercept
+        print(size(x))
         my_z0x = hcat(ones(n), x) * b_y_z0xL["coefficients"]
     elseif !intercept
         my_z0x = x * b_y_z0xL["coefficients"]
