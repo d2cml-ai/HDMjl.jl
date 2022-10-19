@@ -6,6 +6,7 @@ version = "0.0.12"
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 CodecXz = "ba30903b-d9e8-5048-a5ec-d1f5b0d4b47b"
+Combinatorics = "861a8166-3701-5b0c-9a16-15d98fcdc6aa"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 GLM = "38e38edf-8417-5370-95a0-9cbb8c7f171a"
