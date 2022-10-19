@@ -199,7 +199,7 @@ function rlasso(x, y; post = true, intercept = true, model = true,
 end
 
 
-function rlasso(formula::FormulaTerm, Data::DataFrame; post = true, intercept = true, model = true, homoskedastic = false, X_dependent_lambda = false, lambda_start = nothing, c = 1.1, maxIter = 15, tol::Float64 = 1e-5, n = size(Data, 1) gamma = 0.1 / log(n), threshold = nothing)
+function rlasso(formula::FormulaTerm, Data::DataFrame; post = true, intercept = true, model = true, homoskedastic = false, X_dependent_lambda = false, lambda_start = nothing, c = 1.1, maxIter = 15, tol::Float64 = 1e-5, n = size(Data, 1), gamma = 0.1 / log(n), threshold = nothing)
 
     y, x = data_formula(formula, Data)
     
