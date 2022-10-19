@@ -8,9 +8,56 @@ end
 
 function rlassoIV(x, d, y, z; select_Z::Bool = true, select_X::Bool = true, post::Bool = true)
     if select_Z == false && select_X == false
-        res = tsls(d, y, z, x, homoscedastic = false)
-        #res["coefficients"] = hcat(["d$y" for y = 1:size(d[:,:],2)], res["coefficients"])
+        intercept = true
+        d_names = try names(d)
+        catch
+            nothing
+        end
+        x_names = try names(x)
+        catch
+            nothing
+        end
+    
+        if !isnothing(d_names) && !isnothing(x_names)
+            if intercept == true && isnothing(x) == false
+                d_names = ["$y" for y = names(d)]
+                x_names = ["$y" for y  = names(x)];
+                coef_names = append!(append!(d_names, ["intercept"]), x_names);
+                # x = hcat(ones(n, 1), x)
+            
+            elseif intercept == true && isnothing(x) == true
+                x = ones(n, 1)
+                d_names = ["$y" for y = names(d)]
+                #x_names = ["x$y" for y  = 1:size(x,2)];
+                coef_names = append!(d_names, ["intercept"]);
+            
+            elseif intercept == false && isnothing(x) == true
+                d_names = ["$y" for y = names(d)]
+                #x_names = ["x$y" for y  = 1:size(x,2)];
+                coef_names = d_names;
+            elseif intercept == false && isnothing(x) == false
+                d_names = ["$y" for y = names(d)]
+                x_names = ["$y" for y  = names(x)];
+                coef_names = append!(d_names, x_names)
+            end
+        else 
+            res = 0
+        end
+    
+        x = Matrix(x[:,:])
+        y = Matrix(y[:,:])
+        d = Matrix(d[:,:])
+        z = Matrix(z[:,:])
+    
+        res = HDMjl.tsls(d, y, z, x, homoscedastic = false)
+        # res["coefficients"] = hcat(["$y" for y = coef_names])
         se = res["se"]
+    
+        if isnothing(d_names)
+            res = res
+        else
+            res["coefficients"][:,1] = hcat(["$y" for y = coef_names])
+        end
         
     elseif select_Z == true && select_X == false
         res = rlassoIVselectZ(x, d, y, z, post = post)
@@ -22,6 +69,11 @@ function rlassoIV(x, d, y, z; select_Z::Bool = true, select_X::Bool = true, post
         
     elseif select_Z == true && select_X == true
         
+        coef_names = try names(d)
+        catch
+            nothing
+        end
+        d = Matrix(d)
         Z = hcat(z, x)
         lasso_d_zx = rlasso(Z, d, post = post)
         lasso_y_x = rlasso(x, y, post = post)
@@ -54,6 +106,18 @@ function rlassoIV(x, d, y, z; select_Z::Bool = true, select_X::Bool = true, post
         end
         
         res = tsls(Dr, Yr, Zr, intercept = false, homoscedastic = false)
+        coef = res["coefficients"]
+        vcov = res["vcov"]
+        se = res["se"]
+        sample_size = res["sample_size"]
+        if isnothing(coef_names)
+            # coefnames = result["coefnames"]
+            res = Dict("coefficients" => coef, "vcov" => vcov, "se" => se, "sample_size" => sample_size)
+        else
+            # coef = res["coefficients"]
+            coef[:,1] = coef_names
+            res = Dict("coefficients" => coef, "vcov" => vcov, "se" => se, "sample_size" => sample_size)
+        end
         #res["coefficients"] = hcat(["d$y" for y = 1:size(d[:,:],2)], res["coefficients"])
     end
     se = res["se"]

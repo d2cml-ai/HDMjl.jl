@@ -13,14 +13,28 @@ function ginv(X, tol = sqrt(eps(Float64)))
 end
 
 function rlassoIVselectZ(x, d, y, z; post::Bool = true, intercept::Bool = true)
-    
-    n = size(y, 1)
     kex = size(x, 2)
     ke = size(d, 2)
+
+    d_names1 = try names(d)
+    catch
+        nothing
+    end
+    if isnothing(d_names1)
+        coef_names1 = nothing
+    else 
+        # d_names1 = names(d)
+        x_names1 = ["x$y" for y  = 1:kex]
+        coef_names1 = append!(d_names1,x_names1);
+    end
+
+    d = Matrix(d)
+    x = Matrix(x)
+    n = size(y, 1)
     
     d_names = ["d$y" for y = 1:ke]
     x_names = ["x$y" for y  = 1:kex];
-    coef_names = append!(d_names,x_names);
+    coef_names = append!(d_names,x_names);;
     
     Z = hcat(z, x)
     kiv = size(Z, 2)
@@ -70,7 +84,11 @@ function rlassoIVselectZ(x, d, y, z; post::Bool = true, intercept::Bool = true)
     Omega_hat = Dhat' * (Dhat .* (residuals .^ 2))
     Q_hat_inv = ginv(d' * Dhat)
     vcov = Q_hat_inv * Omega_hat * Q_hat_inv'
-    alpha_hat = hcat(coef_names, alpha_hat)
+    if isnothing(coef_names) || isnothing(coef_names1)
+        alpha_hat = hcat(coef_names, alpha_hat)
+    else
+        alpha_hat = hcat(coef_names1, alpha_hat)
+    end    
     res = Dict("coefficients" => alpha_hat[1:ke, :], "se" => sqrt.(diag(vcov))[1:ke], "residuals" => residuals, "samplesize" => n)
     return res
 end
