@@ -202,7 +202,7 @@ end
 function rlasso(formula::FormulaTerm, Data::DataFrame; post = true, intercept = true, model = true, homoskedastic = false, X_dependent_lambda = false, lambda_start = nothing, c = 1.1, maxIter = 15, tol::Float64 = 1e-5, gamma = 0.1 / log(n), threshold = nothing)
     x, y = data_formula(formula, Data)
     
-    rlasso(x, y; post = post, intercept = intercept, model = model, homoskedastic = homoskedastic, X_dependent_lambda = X_dependent_lambda, lambda_start = lambda_start, c = c, maxIter = maxIter, tol::Float64 = tol, n = size(y, 1), gamma = gamma / log(n), threshold = threshold)
+    rlasso(x, y; post = post, intercept = intercept, model = model, homoskedastic = homoskedastic, X_dependent_lambda = X_dependent_lambda, lambda_start = lambda_start, c = c, maxIter = maxIter, tol = tol, n = size(y, 1), gamma = gamma / log(n), threshold = threshold)
 end
 
 function r_summary(rlasso_obj::Dict; all = false)
