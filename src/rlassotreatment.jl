@@ -174,6 +174,11 @@ function rlassoATE(x, d, y; bootstrap = "none", n_rep = 500)
 end
 
 function rlassoLATET(x, d, y, z; bootstrap::String = "none", n_rep::Int64 = 500, post::Bool = true, always_takers::Bool = true, never_takers::Bool = true, intercept::Bool = true)
+    x = Matrix(x[:, :])
+    d = Matrix(d)
+    y = Matrix(y)
+    z = Matrix(z)
+    
     n = size(x, 1)
     p = size(x, 2)
     lambda = 2.2 * sqrt(n) * quantile(Normal(0.0, 1.0),  1 - (0.1 / log(n)) / (2 * (2 * p)))
