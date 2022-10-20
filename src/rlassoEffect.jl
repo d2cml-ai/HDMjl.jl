@@ -450,11 +450,11 @@ function r_summary(object::rlassoEffects1)
             b[parse.(Float64, a) .>= 0.1 .&& parse.(Float64, a).< 1] .= a[parse.(Float64, a) .>= 0.1 .&& parse.(Float64, a).< 1] .* " "
             b = vec(b)
             table2[:, 4] .= b
-            table2 = DataFrame(hcat(object.coefficients[:,1], table2), :auto)
-            table2 = rename(table2, [" ", "coeff.", "se.", "t-value", "p-value"])
+            table2 = DataFrame(table2, :auto)
+            table2 = rename(table2, ["coeff.", "se.", "t-value", "p-value"])
             print("Estimates and significance testing of the effect of target variables", 
                     "\n")
-            pretty_table(table2, show_row_number = false, header = [" ","Estimate.", "Std. Error", "t value", "Pr(>|t|)"], tf = tf_borderless, row_names = ["$y" for y = object.dict["coef_names"][object.index]])
+            pretty_table(table2, show_row_number = false, header = ["Estimate.", "Std. Error", "t value", "Pr(>|t|)"], tf = tf_borderless, row_names = ["$y" for y = object.dict["coef_names"][object.index]])
             print("---", "\n", "Signif. codes:","\n", "0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1")
             print("\n")
         end
