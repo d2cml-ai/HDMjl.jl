@@ -12,6 +12,13 @@ function rlassologit(x, y; model::Bool = true, c::Float64 = 1.1, post::Bool = tr
     threshold::Any = nothing)
     
     x_0 = copy(x)
+
+    names_x = try
+        names(x)
+    catch
+        nothing
+    end
+
     y_0 = copy(y)
 
     x = Matrix(x[:, :])
@@ -109,9 +116,8 @@ function rlassologit(x, y; model::Bool = true, c::Float64 = 1.1, post::Bool = tr
     select_columns = []
 
     # print(names(x_0))
-    if typeof(x_0) == DataFrame
+    if !isnothing(names_x)
         names_columns = vcat(names_columns, names(x_0))
-        # print(names_columns)
     else
         for i in 1:p
             vl = "V $i"
@@ -137,16 +143,16 @@ function rlassologit(x, y; model::Bool = true, c::Float64 = 1.1, post::Bool = tr
     ------
     "
 
-    println(head1)
+    # println(head1)
 
-    println(" ")
+    # println(" ")
 
     table_lgt = hcat(names_columns, coefs)
-    @ptconf tf = tf_simple alignment = :l
-    header = ["Variable", "Estimate"]
-    @pt :header = header table_lgt[select_columns, :]
+    # @ptconf tf = tf_simple alignment = :l
+    # header = ["Variable", "Estimate"]
+    # @pt :header = header table_lgt[select_columns, :]
 
-    print("rlassologit")
+    # print("rlassologit")
     # print("head")
     ###
     
@@ -170,8 +176,29 @@ function r_summary(result::rlassologit, all::Bool = false)
         table_print = table_print[result.select, :]
     end
     # print("")
-    @pt :header = ["Variable", "Estimate"] table_print 
+    # @pt :header = ["Variable", "Estimate"] table_print 
     # @pt :header = ["Variable", "Estimate"] result.table
+end
+
+
+function r_predict(r_logit::rlassologit, x_new = x, type = "response")
+    x1 = Matrix(x_new)
+    n = size(x1, 1)
+    
+    if r_logit.result["intercept"]
+        x1 = hcat(ones(n), x1)
+    end
+
+    yp = x1 * r_logit.result["coefficients"]
+
+    if type == "response"
+        yhat = 1 ./ (1 .+ exp.(-yp))
+    elseif type == "link"
+        yhat = yp
+    end
+
+    return yhat
+
 end
 
 
@@ -282,7 +309,7 @@ function rlassologitEffect(X, Y, D; I3::Any = nothing, post = true)
 
     # main_table = hcat(coe)
     # GLM.residuals(l3)
-    print(main_mssg)
+    # print(main_mssg)
 
     res = Dict("epsilon" => y - g3, "v" => z)
     results = Dict(
@@ -372,13 +399,13 @@ function rlassologitEffects(x, y; index = 1:size(x, 2), I3 = nothing, post = tru
     
     header = ["Variable", "Estimate"]
 
-    print(head_mssg)
+    # print(head_mssg)
 
 
-    print("\n")
+    # print("\n")
 
-    @ptconf tf = tf_simple alignment = :l
-    @pt :header = header main_table
+    # @ptconf tf = tf_simple alignment = :l
+    # @pt :header = header main_table
 
     # residual = 
     res = Dict(
