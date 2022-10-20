@@ -14,7 +14,7 @@ function data_formula(frml::FormulaTerm, data::DataFrame)
     # return coef_names
 end
 
-function data_formula(;x_names::Array{String} = nothing, y_name::String = nothing, Data = nothing, upto::Int = 2, intercept::Bool = false)
+function data_formula(x_names::Array{String} = nothing, y_name::String = nothing, Data = nothing; upto::Int = 2, intercept::Bool = false)
     # ref: https://stackoverflow.com/questions/74117969/statsmodels-jl-exponential-formulas-formulay-x1-x2-x3-x4-x52-in/74118944#74118944
     """
     return a dataframe of covariates
