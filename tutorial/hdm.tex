@@ -1,0 +1,1655 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[a4paper,text={16.5cm,25.2cm},centering]{geometry}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{bm}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage{hyperref}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1.2ex}
+
+\hypersetup
+       {   pdfauthor = { VICTOR CHERNOZHUKOV, CHRISTIAN HANSEN, MARTIN SPINDLER },
+           pdftitle={ High Dimensional Metrics in Julia },
+           colorlinks=TRUE,
+           linkcolor=black,
+           citecolor=blue,
+           urlcolor=blue
+       }
+
+\title{ High Dimensional Metrics in Julia }
+
+\author{ VICTOR CHERNOZHUKOV, CHRISTIAN HANSEN, MARTIN SPINDLER }
+
+\date{ October - 13 - 2022 }
+
+\usepackage{upquote}
+\usepackage{listings}
+\usepackage{xcolor}
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    upquote=true,
+    breaklines=true,
+    breakindent=0pt,
+    keepspaces=true,
+    showspaces=false,
+    columns=fullflexible,
+    showtabs=false,
+    showstringspaces=false,
+    escapeinside={(*@}{@*)},
+    extendedchars=true,
+}
+\newcommand{\HLJLt}[1]{#1}
+\newcommand{\HLJLw}[1]{#1}
+\newcommand{\HLJLe}[1]{#1}
+\newcommand{\HLJLeB}[1]{#1}
+\newcommand{\HLJLo}[1]{#1}
+\newcommand{\HLJLk}[1]{\textcolor[RGB]{148,91,176}{\textbf{#1}}}
+\newcommand{\HLJLkc}[1]{\textcolor[RGB]{59,151,46}{\textit{#1}}}
+\newcommand{\HLJLkd}[1]{\textcolor[RGB]{214,102,97}{\textit{#1}}}
+\newcommand{\HLJLkn}[1]{\textcolor[RGB]{148,91,176}{\textbf{#1}}}
+\newcommand{\HLJLkp}[1]{\textcolor[RGB]{148,91,176}{\textbf{#1}}}
+\newcommand{\HLJLkr}[1]{\textcolor[RGB]{148,91,176}{\textbf{#1}}}
+\newcommand{\HLJLkt}[1]{\textcolor[RGB]{148,91,176}{\textbf{#1}}}
+\newcommand{\HLJLn}[1]{#1}
+\newcommand{\HLJLna}[1]{#1}
+\newcommand{\HLJLnb}[1]{#1}
+\newcommand{\HLJLnbp}[1]{#1}
+\newcommand{\HLJLnc}[1]{#1}
+\newcommand{\HLJLncB}[1]{#1}
+\newcommand{\HLJLnd}[1]{\textcolor[RGB]{214,102,97}{#1}}
+\newcommand{\HLJLne}[1]{#1}
+\newcommand{\HLJLneB}[1]{#1}
+\newcommand{\HLJLnf}[1]{\textcolor[RGB]{66,102,213}{#1}}
+\newcommand{\HLJLnfm}[1]{\textcolor[RGB]{66,102,213}{#1}}
+\newcommand{\HLJLnp}[1]{#1}
+\newcommand{\HLJLnl}[1]{#1}
+\newcommand{\HLJLnn}[1]{#1}
+\newcommand{\HLJLno}[1]{#1}
+\newcommand{\HLJLnt}[1]{#1}
+\newcommand{\HLJLnv}[1]{#1}
+\newcommand{\HLJLnvc}[1]{#1}
+\newcommand{\HLJLnvg}[1]{#1}
+\newcommand{\HLJLnvi}[1]{#1}
+\newcommand{\HLJLnvm}[1]{#1}
+\newcommand{\HLJLl}[1]{#1}
+\newcommand{\HLJLld}[1]{\textcolor[RGB]{148,91,176}{\textit{#1}}}
+\newcommand{\HLJLs}[1]{\textcolor[RGB]{201,61,57}{#1}}
+\newcommand{\HLJLsa}[1]{\textcolor[RGB]{201,61,57}{#1}}
+\newcommand{\HLJLsb}[1]{\textcolor[RGB]{201,61,57}{#1}}
+\newcommand{\HLJLsc}[1]{\textcolor[RGB]{201,61,57}{#1}}
+\newcommand{\HLJLsd}[1]{\textcolor[RGB]{201,61,57}{#1}}
+\newcommand{\HLJLsdB}[1]{\textcolor[RGB]{201,61,57}{#1}}
+\newcommand{\HLJLsdC}[1]{\textcolor[RGB]{201,61,57}{#1}}
+\newcommand{\HLJLse}[1]{\textcolor[RGB]{59,151,46}{#1}}
+\newcommand{\HLJLsh}[1]{\textcolor[RGB]{201,61,57}{#1}}
+\newcommand{\HLJLsi}[1]{#1}
+\newcommand{\HLJLso}[1]{\textcolor[RGB]{201,61,57}{#1}}
+\newcommand{\HLJLsr}[1]{\textcolor[RGB]{201,61,57}{#1}}
+\newcommand{\HLJLss}[1]{\textcolor[RGB]{201,61,57}{#1}}
+\newcommand{\HLJLssB}[1]{\textcolor[RGB]{201,61,57}{#1}}
+\newcommand{\HLJLnB}[1]{\textcolor[RGB]{59,151,46}{#1}}
+\newcommand{\HLJLnbB}[1]{\textcolor[RGB]{59,151,46}{#1}}
+\newcommand{\HLJLnfB}[1]{\textcolor[RGB]{59,151,46}{#1}}
+\newcommand{\HLJLnh}[1]{\textcolor[RGB]{59,151,46}{#1}}
+\newcommand{\HLJLni}[1]{\textcolor[RGB]{59,151,46}{#1}}
+\newcommand{\HLJLnil}[1]{\textcolor[RGB]{59,151,46}{#1}}
+\newcommand{\HLJLnoB}[1]{\textcolor[RGB]{59,151,46}{#1}}
+\newcommand{\HLJLoB}[1]{\textcolor[RGB]{102,102,102}{\textbf{#1}}}
+\newcommand{\HLJLow}[1]{\textcolor[RGB]{102,102,102}{\textbf{#1}}}
+\newcommand{\HLJLp}[1]{#1}
+\newcommand{\HLJLc}[1]{\textcolor[RGB]{153,153,119}{\textit{#1}}}
+\newcommand{\HLJLch}[1]{\textcolor[RGB]{153,153,119}{\textit{#1}}}
+\newcommand{\HLJLcm}[1]{\textcolor[RGB]{153,153,119}{\textit{#1}}}
+\newcommand{\HLJLcp}[1]{\textcolor[RGB]{153,153,119}{\textit{#1}}}
+\newcommand{\HLJLcpB}[1]{\textcolor[RGB]{153,153,119}{\textit{#1}}}
+\newcommand{\HLJLcs}[1]{\textcolor[RGB]{153,153,119}{\textit{#1}}}
+\newcommand{\HLJLcsB}[1]{\textcolor[RGB]{153,153,119}{\textit{#1}}}
+\newcommand{\HLJLg}[1]{#1}
+\newcommand{\HLJLgd}[1]{#1}
+\newcommand{\HLJLge}[1]{#1}
+\newcommand{\HLJLgeB}[1]{#1}
+\newcommand{\HLJLgh}[1]{#1}
+\newcommand{\HLJLgi}[1]{#1}
+\newcommand{\HLJLgo}[1]{#1}
+\newcommand{\HLJLgp}[1]{#1}
+\newcommand{\HLJLgs}[1]{#1}
+\newcommand{\HLJLgsB}[1]{#1}
+\newcommand{\HLJLgt}[1]{#1}
+
+
+\begin{document}
+
+\maketitle
+
+{\textbackslash}pagebreak 
+
+\section{Introduction}
+Analysis of high-dimensional models, models in which the number of parameters to be estimated is large relative to the sample size, is becoming increasingly important. Such models arise naturally in modern data sets which have many measured characteristics available per individual observation as in, for example, population census data, scanner data, and text data. Such models also arise naturally even in data with a small number of measured characteristics in situations where the exact functional form with which the observed variables enter the model is unknown and we create many technical variables, a dictionary, from the raw characteristics. Examples covered by this scenario include semi-parametric models with non-parametric nuisance functions. More generally, models with many parameters relative to the sample size often arise when attempting to model complex phenomena. With increasing availability of such data sets in economics and other data science fields, new methods for analyzing those data have been developed. The \texttt{Julia} package \texttt{HDMjl} contains implementations of recently developed methods for high-dimensional approximately sparse models, mainly relying on forms of lasso and post-lasso as well as related estimation and inference methods. The methods are illustrated with econometric applications, but are also useful in other disciplines such as medicine, biology, sociology or psychology.
+
+The methods which are implemented in this package are distinct from already available methods in other packages in the following four major ways:
+
+\begin{itemize}
+\item[1. ] First, we provide a version of Lasso regression that expressly handles and allows for non-Gaussian and heteroscedastic errors.
+
+
+\item[2. ] Second, we implement a theoretically grounded, data-driven choice of the penalty level $\lambda$ in the Lasso regressions. To underscore this choice, we call the Lasso implementation in this package "rigorous"Lasso (=\texttt{rlasso}). The prefix $\mathbf{r}$ in function names should underscore this. In high dimensional settings cross-validation is very popular; but it lacks a theoretical justification for use in the present context and some theoretical proposals for the choice of $\lambda$ are often not feasible. Moreover, the theoretically grounded, data-driven choice redundancies cross-validation which is time-consuming particularly in large data sets.
+
+
+\item[3. ] Third, we provide efficient estimators and uniformly valid confidence intervals for various low-dimensional causal/structural parameters appearing in high-dimensional approximately sparse models. For example, we provide efficient estimators and uniformly valid confidence intervals for a regression coefficient on a target variable (e.g., a treatment or policy variable) in a high-dimensional sparse regression model. Target variable in this context means the object not interest, e.g. a pre-specified regression coefficient. We also provide estimates and confidence intervals for average treatment effect (ATE) and average treatment effect for the treated (ATET), as well extensions of these parameters to the endogenous setting.
+
+
+\item[4. ] Fourth, joint/ simultaneous confidence intervals for estimated coefficients in a high-dimensional approximately sparse models are provided, based on the methods and theory developed in Belloni, Chernozhukov, and Kato (2014). They proposed uniformly valid confidence regions for regressions coefficients in a high-dimensional sparse Z-estimation problems, which include median, mean, and many other regression problems as special cases. In this article we apply this method to the coefficients of a Lasso regression and highlight this method with an empirical example.
+
+\end{itemize}
+\section{How to get started}
+Julia is an open source software project and can be freely downloaded from the \href{julialang.org}{julialang.org} website along with its associated documentation. The Julia package \texttt{HDMjl} can be downloaded from juliahub. To install the \texttt{HDMjl} package from Julia we simply type.
+
+
+\begin{lstlisting}
+(*@\HLJLcs{{\#}}@*) (*@\HLJLcs{]}@*) (*@\HLJLcs{add}@*) (*@\HLJLcs{HDMjl}@*)
+\end{lstlisting}
+
+The most current version of the package (development version) can installed by
+
+
+\begin{lstlisting}
+(*@\HLJLk{using}@*)  (*@\HLJLn{Pkg}@*)(*@\HLJLp{;}@*) (*@\HLJLn{Pkg}@*)(*@\HLJLoB{.}@*)(*@\HLJLnf{add}@*)(*@\HLJLp{(}@*)(*@\HLJLs{"{}HDMjl"{}}@*)(*@\HLJLp{)}@*)
+\end{lstlisting}
+
+You may also install the dev version of the package by directly acquiring it from the repository by using
+
+
+\begin{lstlisting}
+(*@\HLJLcs{{\#}}@*) (*@\HLJLcs{]}@*) (*@\HLJLcs{add}@*) (*@\HLJLcs{https://github.com/d2cml-ai/HDMjl.jl}@*)
+\end{lstlisting}
+
+or 
+
+
+\begin{lstlisting}
+(*@\HLJLk{import}@*) (*@\HLJLn{Pkg}@*)(*@\HLJLp{;}@*) (*@\HLJLn{Pkg}@*)(*@\HLJLoB{.}@*)(*@\HLJLnf{add}@*)(*@\HLJLp{(}@*)(*@\HLJLn{url}@*) (*@\HLJLoB{=}@*) (*@\HLJLs{"{}https://github.com/d2cml-ai/HDMjl.jl"{}}@*)(*@\HLJLp{)}@*)
+\end{lstlisting}
+
+Provided that your machine has a proper internet connection and you have write permission in the appropriate system directories, the installation of the package should proceed automatically. Once the \texttt{HDMjl} package is installed, it can be loaded to the current Julia session by the command
+
+
+\begin{lstlisting}
+(*@\HLJLk{using}@*) (*@\HLJLn{HDMjl}@*)
+\end{lstlisting}
+
+
+\section{Prediction using Approximate Sparsity}
+\subsection{Prediction in Linear Models using Approximate Sparsity.}
+Consider high dimensional approximately sparse linear regression models. These models have a large number of regressors $p$, possibly much larger than the sample size $n$, but only a relatively small number $s = o(n)$ of these regressors are important for capturing accurately the main features of the regression function. The latter assumption makes it possible to estimate these models effectively by searching for approximately the right set of regressors.
+
+The model reads
+
+\[
+y_i=x_i^{\prime} \beta_0+\varepsilon_i, \quad E\left[\varepsilon_i x_i\right]=0, \quad \beta_0 \in \mathbb{R}^p, \quad i=1, \ldots, n
+\]
+where $y_i$ are observations of the response variable, $x_i = (x_{i,j},\dots, x_{i,p})$\ensuremath{\rq}s are observations of $p$-dimensional regressors, and $\varepsilon_i$\ensuremath{\rq}s are centered disturbances, where possibly $p \gg n.$ Assume that the data sequence is i.i.d. for the sake of exposition, although the framework covered is considerably more general. An important point is that the errors $\varepsilon_i$ may be non-Gaussian or heteroskedastic (Belloni, Chen, Chernozhukov, and Hansen, 2012).
+
+The model can be exactly sparse, namely
+
+\[
+\left\|\beta_0\right\|_0 \leq s=o(n)
+\]
+or approximately sparse, namely that the values of coefficients, sorted in decreasing order, $(|\beta_0|_{(j)})_{j=1}^p$ obey,
+
+\[
+\left|\beta_0\right|_{(j)} \leq \mathrm{A} j^{-\mathrm{a}\left(\beta_0\right)}, \quad \mathrm{a}\left(\beta_0\right)>1 / 2, \quad j=1, \ldots, p
+\]
+An approximately sparse model can be well-approximated by an exactly sparse model with sparsity index
+
+\[
+s \propto n^{1 /\left(2 a\left(\beta_0\right)\right)}.
+\]
+In order to get theoretically justified performance guarantees, we consider the Lasso estimator with data-driven penalty loadings:
+
+\[
+\hat{\beta}=\arg \min _{\beta \in \mathbb{R}^p} \mathbb{E}_n\left[\left(y_i-x_i^{\prime} \beta\right)^2\right]+\frac{\lambda}{n}\|\hat{\Psi} \beta\|_1
+\]
+where $\|\beta\|_1=\sum_{j=1}^p\left|\beta_j\right|,\hat{\Psi}=\operatorname{diag}\left(\hat{\psi}_1, \ldots, \hat{\psi}_p\right)$ is a diagonal matrix consisting of penalty loadings, and En abbreviates the empirical average. The penalty loadings are chosen to insure basic equivariance of coefficient estimates to rescaling of $x_i,_j$ and can also be chosen to address heteroskedasticity in model errors. We discuss the choice of $\lambda$ and $\hat{\Psi}$ below.
+
+Regularization by the $\mathbf{l}$ 1-norm naturally helps the Lasso estimator to avoid overfitting, but it also shrinks the fitted coefficients towards zero, causing a potentially significant bias. In order to remove some of this bias, consider the Post-Lasso estimator that applies ordinary least squares to the model $\hat{T}$ selected by Lasso, formally,
+
+\[
+\hat{T}=\operatorname{support}(\hat{\beta})=\{j \in\{1, \ldots, p\}:|\hat{\beta}|>0\}.
+\]
+The Post-Lasso estimate is then defined as
+
+\[
+\tilde{\beta} \in \arg \min _{\beta \in \mathbb{R}^p} \mathbb{E}_n\left\{y_i-\sum_{j=1}^p x_{i, j} \beta_j\right)^2: \beta_j=0 \quad \text { if } \hat{\beta}_j=0, \quad \forall j.
+\]
+In words, the estimator is ordinary least squares applied to the data after removing the regressors that were not selected by Lasso. The Post-Lasso estimator was introduced and analysed in Belloni and Chernozhukov (2013).
+
+A crucial matter is the choice of the penalization parameter $\lambda$. With the right choice of the penalty level, Lasso and Post-Lasso estimators possess excellent performance guarantees: They both achieve the near-oracle rate for estimating the regression function, namely with probability $1 - \gamma - o(1)$,
+
+\[
+\sqrt{\mathbb{E}_n\left[\left(x_i^{\prime}\left(\hat{\beta}-\beta_0\right)\right)^2\right]} \lesssim \sqrt{(s / n) \log p}
+\]
+In high-dimensions setting, cross-validation is very popular in practice but lacks theoretical justification and so may not provide such a performance guarantee. In sharp contrast, the choice of the penalization parameter $\lambda$ in the Lasso and Post-Lasso methods in this package is theoretical grounded and feasible. Therefore we call the resulting method the \ensuremath{\ldq}rigorous\ensuremath{\rdq}Lasso method and hence add a prefix {\textbackslash}textbf\{r\} to the function names.
+
+{\textbackslash}underline\{In the case of homoscedasticity\}, we set the penalty loadings $\hat{\psi}_j=\sqrt{\mathrm{E}_n x_{i, j}^2}$, which insures basic equivariance properties. There are two choices for penalty level $\lambda$ : the $X$-independent choice and $X$ dependent choice. In the $X$-independent choice we set the penalty level to
+
+\[
+\lambda=2 c \sqrt{n} \hat{\sigma} \Phi^{-1}(1-\gamma /(2 p)),
+\]
+where $\Phi$ denotes the cumulative standard normal distribution, $\hat{\sigma}$ is a preliminary estimate of $\sigma=\sqrt{\mathbb{E} \varepsilon^2}$, and $c$ is a theoretical constant, which is set to $c=1.1$ by default for the Post-Lasso method and $c=.5$ for the Lasso method, and $\gamma$ is the probability level, which is set to $\gamma=.1$ by default. The parameter $\gamma$ can be interpreted as the probability of mistakenly not removing $X$ 's when all of them have zero coefficients. In the X-dependent choice the penalty level is calculated as
+
+\[
+\lambda=2 c \hat{\sigma} \Lambda(1-\gamma \mid X),
+\]
+where
+
+\[
+\Lambda(1-\gamma \mid X)=(1-\gamma) \text { - quantile of } n\left\|\mathbb{E}_n\left[x_i e_i\right]\right\|_{\infty} \mid X,
+\]
+where $X=\left[x_1, \ldots, x_n\right]^{\prime}$ and $e_i$ are iid $N(0,1)$, generated independently from $X$; this quantity is approximated by simulation. The $X$-independent penalty is more conservative than the $X$-dependent penalty. In particular the $X$-dependent penalty automatically adapts to highly correlated designs, using less aggressive penalization in this case Belloni, Chernozhukov, and Hansen (2010).
+
+In the case of heteroskedasticity, the loadings are set to $\hat{\psi}_j=\sqrt{\mathbb{E}_n\left[x_{i j}^2 \hat{\varepsilon}_i^2\right]}$, where $\hat{\varepsilon}_i$ are preliminary estimates of the errors. The penalty level can be $X$-independent (Belloni, Chen, Chernozhukov, and Hansen, 2012):
+
+\[
+\lambda=2 c \sqrt{n} \Phi^{-1}(1-\gamma /(2 p))
+\]
+or it can be X-dependent and estimated by a multiplier bootstrap procedure (Chernozhukov, Chetverikov, and Kato, 2013)
+
+\[
+\lambda=c \times c_W(1-\gamma),
+\]
+where $c_W(1-\gamma)$ is the $1-\gamma$-quantile of the random variable $W$, conditional on the data, where
+
+\[
+W:=n \max _{1 \leq j \leq p}\left|2 \mathbb{E}_n\left[x_{i j} \hat{\varepsilon}_i e_i\right]\right|,
+\]
+where $e_i$ are iid standard normal variables distributed independently from the data, and $\hat{\varepsilon}_i$ denotes an estimate of the residuals.
+
+Estimation proceeds by iteration. The estimates of residuals $\hat{\varepsilon}_i$ are initialized by running least squares of $y_i$ on five regressors that are most correlated to $y_i$. This implies conservative starting values for $\lambda$ and the penalty loadings, and leads to the initial Lasso and Post-Lasso estimates, which are then further updated by iteration. The resulting iterative procedure is fully justified in the theoretical literature.
+
+\subsection{A Joint Significance Test for Lasso Regression.}
+A basic question frequently arising in empirical work is whether the Lasso regression has explanatory power, comparable to a F-test for the classical linear regression model. The construction of a joint significance test follows (Chernozhukov, Chetverikov, and Kato, 2013) (Appendix M), and can be described as: Based on the model $y_i=a_0+x_i^{\prime} b_0+\varepsilon_i$, the null hypothesis of joint statistical in-significance is $b_0=0$. The alternative is that of the joint statistical significance: $b_0 \neq 0$. The null hypothesis implies that
+
+\[
+\mathrm{E}\left[\left(y_i-a_0\right) x_i\right]=0
+\]
+and restriction can be tested using the sup-score statistic:
+
+\[
+S=\left\|\sqrt{n} \mathbb{E}_n\left[\left(y_i-\hat{a}_0\right) x_i\right]\right\|_{\infty}
+\]
+where $\hat{a}_i=\mathbb{E}_n\left[y_i\right]$. The critical value for this statistic can be approximated by the multiplier bootstrap procedure, which simulates the statistic:
+
+\[
+S^*=\left\|\sqrt{n} \mathbb{E}_n\left[\left(y_i-\hat{a}_0\right) x_i g_i\right]\right\|_{\infty}
+\]
+where $g_i$ 's are iid $N(0,1)$, conditional on the data. The $(1-\alpha)$-quantile of $S^*$ serves as the critical value, $c(1-\alpha)$. We reject the null if $S>c(1-\alpha)$ in favor of statistical significant, and we keep the null of non-significance otherwise. This test procedure is implemented in the package when calling the \texttt{r\_summary}-method of \texttt{rlasso-constructor}.
+
+\textbf{Julia Implementation} The function \texttt{rlasso} implements Lasso and post-Lasso, where the prefix \ensuremath{\ldq}r\ensuremath{\rdq} signifies that these are theoretically rigorous versions of Lasso and post-Lasso. The default option is post-Lasso, \texttt{post=true}. This function returns an \texttt{constructor} of \texttt{rlasso} for which methods like \texttt{r\_predict}, \texttt{r\_print}, \texttt{r\_summary} are provided.
+
+\texttt{lassoShooting\_fit} is the computational algorithm that underlies the estimation procedure, which implements a version of the Shooting Lasso Algorithm (Fu, 1998). The user has several options for choosing the non-default options. Specifically, the user can decide if an unpenalized intercept should be included (\texttt{true} by default). The option penalty of the function rlasso allows different choices for the penalization parameter and loadings. It allows for homoskedastic or heteroskedastic errors with default \texttt{homoscedastic = false}. Moreover, the dependence structure of the design matrix might be taken into consideration for calculation of the penalization parameter with \texttt{X\_dependent\_lambda = true}. In combination with these options, the option \texttt{lambda\_start} allows the user to set a starting value for $\lambda$ for the different algorithms. Moreover, the user can provide her own fixed value for the penalty level - instead of the data-driven methods discussed above - by setting \texttt{homoscedastic = "none"} and supplying the value via \texttt{lambda\_start}.
+
+The constants c and $\ensuremath{\gamma}$ from above can be set in the option penalty. The quantities $\hat\varepsilon$, $\hat\psi$, $\hat\sigma$ are calculated in a iterative manner. The maximum number of iterations and the tolerance when the algorithms should stop can be set with control.
+
+The method \texttt{r\_summary} of rlasso-objects displays additionally for model diagnosis the R2 value, the adjusted R2 with degrees of freedom equal to the number of selected parameters, and the sup-score statistic for joint significance - described above - with corresponding p-value.
+
+\textbf{Example.} (Prediction Using Lasso and Post-Lasso) Consider generated data from a sparse linear model:
+
+
+\begin{lstlisting}
+(*@\HLJLk{using}@*) (*@\HLJLn{CodecXz}@*)(*@\HLJLp{,}@*) (*@\HLJLn{RData}@*)(*@\HLJLp{,}@*) (*@\HLJLn{DataFrames}@*)(*@\HLJLp{,}@*) (*@\HLJLn{StatsModels}@*)(*@\HLJLp{,}@*) (*@\HLJLn{LinearAlgebra}@*)
+(*@\HLJLk{using}@*) (*@\HLJLn{Statistics}@*)(*@\HLJLp{,}@*) (*@\HLJLn{Distributions}@*)(*@\HLJLp{,}@*) (*@\HLJLn{PrettyTables}@*)(*@\HLJLp{,}@*) (*@\HLJLn{GLM}@*)(*@\HLJLp{,}@*) (*@\HLJLn{CSV}@*)
+
+(*@\HLJLn{dta}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{get{\_}data}@*)(*@\HLJLp{(}@*)(*@\HLJLs{"{}seed{\_}100"{}}@*)(*@\HLJLp{)}@*)
+(*@\HLJLn{n}@*)(*@\HLJLp{,}@*) (*@\HLJLn{p}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{size}@*)(*@\HLJLp{(}@*)(*@\HLJLn{dta}@*)(*@\HLJLp{);}@*)
+(*@\HLJLn{Y}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{dta}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*)(*@\HLJLni{1}@*)(*@\HLJLp{];}@*)
+(*@\HLJLn{X}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{dta}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*)(*@\HLJLni{2}@*)(*@\HLJLoB{:}@*)(*@\HLJLk{end}@*)(*@\HLJLp{];}@*)
+\end{lstlisting}
+
+
+Next we estimate the model, print the results, and make in-sample and out-of sample predictions. We can use methods print and summarize to print the results, where the option all can be set to \texttt{false} to limit the print only to the non-zero coefficients.
+
+We can estimate the models using Lasso
+
+
+\begin{lstlisting}
+(*@\HLJLn{lasso{\_}reg}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{rlasso}@*)(*@\HLJLp{(}@*)(*@\HLJLn{X}@*)(*@\HLJLp{,}@*) (*@\HLJLn{Y}@*)(*@\HLJLp{,}@*) (*@\HLJLn{post}@*) (*@\HLJLoB{=}@*) (*@\HLJLkc{false}@*)(*@\HLJLp{);}@*)
+(*@\HLJLn{sum{\_}lasso}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{r{\_}summary}@*)(*@\HLJLp{(}@*)(*@\HLJLn{lasso{\_}reg}@*)(*@\HLJLp{)}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+Post-Lasso Estimation: false
+    Total number of variables: 100
+    Number of selected variables: 11
+    ---
+     
+============ ==============
+  Variable    Estimate
+============ ==============
+  Intercept   0.056855
+  X2          4.77121
+  X3          4.69284
+  X4          4.76568
+  X14         -0.0453685
+  X16         -0.0467382
+  X17         -0.00499617
+  X20         -0.0922336
+  X23         -0.0272553
+  X41         -0.0105032
+  X62         0.113585
+  X101        -0.0247296
+============ ==============
+
+    ----
+    Multiple R-squared: 0.9912720815874809
+    Adjusted R-squared: 0.9901810917859161
+\end{lstlisting}
+
+
+\begin{lstlisting}
+(*@\HLJLn{new{\_}dta}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{get{\_}data}@*)(*@\HLJLp{(}@*)(*@\HLJLs{"{}seed{\_}200"{}}@*)(*@\HLJLp{)}@*)
+(*@\HLJLn{Xnew}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{new{\_}dta}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*) (*@\HLJLnf{Not}@*)(*@\HLJLp{(}@*)(*@\HLJLni{1}@*)(*@\HLJLp{)]}@*)
+(*@\HLJLn{Ynew}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{new{\_}dta}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*) (*@\HLJLni{1}@*)(*@\HLJLp{]}@*)
+(*@\HLJLn{yhat{\_}lasso{\_}new}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{r{\_}predict}@*)(*@\HLJLp{(}@*)(*@\HLJLn{lasso{\_}reg}@*)(*@\HLJLp{,}@*) (*@\HLJLn{xnew}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{Matrix}@*)(*@\HLJLp{(}@*)(*@\HLJLn{Xnew}@*)(*@\HLJLp{))}@*)
+(*@\HLJLn{post{\_}lasso{\_}reg}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{rlasso}@*)(*@\HLJLp{(}@*)(*@\HLJLn{X}@*)(*@\HLJLp{,}@*) (*@\HLJLn{Y}@*)(*@\HLJLp{,}@*) (*@\HLJLn{post}@*) (*@\HLJLoB{=}@*) (*@\HLJLkc{true}@*)(*@\HLJLp{)}@*)
+(*@\HLJLn{y{\_}hat{\_}postlasso}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{r{\_}predict}@*)(*@\HLJLp{(}@*)(*@\HLJLn{post{\_}lasso{\_}reg}@*)(*@\HLJLp{,}@*) (*@\HLJLn{xnew}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{Matrix}@*)(*@\HLJLp{(}@*)(*@\HLJLn{Xnew}@*)(*@\HLJLp{))}@*)
+(*@\HLJLnf{r{\_}summary}@*)(*@\HLJLp{(}@*)(*@\HLJLn{post{\_}lasso{\_}reg}@*)(*@\HLJLp{)}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+Post-Lasso Estimation: true
+    Total number of variables: 100
+    Number of selected variables: 3
+    ---
+     
+============ ============
+  Variable    Estimate
+============ ============
+  Intercept   0.0341043
+  X2          4.92413
+  X3          4.85787
+  X4          4.96442
+============ ============
+
+    ----
+    Multiple R-squared: 0.9906284190077158
+    Adjusted R-squared: 0.990335557101707
+\end{lstlisting}
+
+
+\begin{lstlisting}
+(*@\HLJLcs{{\#}in-sample}@*) (*@\HLJLcs{prediction}@*)
+(*@\HLJLn{yhat{\_}postlasso}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{r{\_}predict}@*)(*@\HLJLp{(}@*)(*@\HLJLn{post{\_}lasso{\_}reg}@*)(*@\HLJLp{)}@*) 
+(*@\HLJLcs{{\#}in-sample}@*) (*@\HLJLcs{prediction;}@*)
+(*@\HLJLn{yhat{\_}postlasso{\_}new}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{r{\_}predict}@*)(*@\HLJLp{(}@*)(*@\HLJLn{post{\_}lasso{\_}reg}@*)(*@\HLJLp{,}@*) (*@\HLJLn{xnew}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{Matrix}@*)(*@\HLJLp{(}@*)(*@\HLJLn{Xnew}@*)(*@\HLJLp{));}@*)
+\end{lstlisting}
+
+
+\begin{lstlisting}
+(*@\HLJLn{MAE}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{mean}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{eachrow}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{hcat}@*)(*@\HLJLp{(}@*)
+    (*@\HLJLn{abs}@*)(*@\HLJLoB{.}@*)(*@\HLJLp{(}@*)(*@\HLJLn{Ynew}@*) (*@\HLJLoB{-}@*) (*@\HLJLn{yhat{\_}lasso{\_}new}@*)(*@\HLJLp{),}@*) (*@\HLJLn{abs}@*)(*@\HLJLoB{.}@*)(*@\HLJLp{(}@*)(*@\HLJLn{Ynew}@*) (*@\HLJLoB{-}@*) (*@\HLJLn{yhat{\_}postlasso{\_}new}@*)(*@\HLJLp{)}@*)
+    (*@\HLJLp{)))}@*)
+(*@\HLJLn{MAE}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{DataFrame}@*)(*@\HLJLp{([[}@*)(*@\HLJLn{MAE}@*)(*@\HLJLp{[}@*)(*@\HLJLni{1}@*)(*@\HLJLp{]],}@*) (*@\HLJLp{[}@*)(*@\HLJLn{MAE}@*)(*@\HLJLp{[}@*)(*@\HLJLni{2}@*)(*@\HLJLp{]]],}@*) (*@\HLJLsc{:auto}@*)(*@\HLJLp{)}@*)
+(*@\HLJLn{MAE}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{rename!}@*)(*@\HLJLp{(}@*)(*@\HLJLn{MAE}@*)(*@\HLJLp{,}@*) (*@\HLJLp{[}@*)(*@\HLJLs{"{}lasso}@*) (*@\HLJLs{MAE"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}Post-lasso}@*) (*@\HLJLs{MAE"{}}@*)(*@\HLJLp{])}@*)
+(*@\HLJLnf{pretty{\_}table}@*)(*@\HLJLp{(}@*)(*@\HLJLn{MAE}@*)(*@\HLJLp{,}@*) (*@\HLJLn{tf}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{tf{\_}simple}@*)(*@\HLJLp{,}@*) (*@\HLJLn{nosubheader}@*) (*@\HLJLoB{=}@*) (*@\HLJLkc{true}@*)(*@\HLJLp{)}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+============ =================
+  lasso MAE   Post-lasso MAE
+============ =================
+   0.879583          0.78017
+============ =================
+\end{lstlisting}
+
+
+\section{Inference on Target Regression Coefficient}
+Here we consider inference on the target coefficient $\alpha$ in the model:
+
+\[
+y_i = d_i \alpha_0 + x_i'\beta_0 + \epsilon_i, \quad \mathbb E_i\left(x_i', d_i'\right)' = 0 
+\]
+Here $d_i$ is a target regressor such as treatment, policy or other variable whose regression coefficient $\alpha_0$ we would like to learn (Belloni, Chernozhukov, and Hansen, 2014). If we are interested in coefficients of several or even many variables, we can simply write the model in the above form treating each variable of interest as $d_i$ in turn and then applying the estimation and inference procedures described below.
+
+We assume approximate sparsity for $x'_i\beta_0$ with sufficient speed of decay of the sorted components of $\beta_0$, namely $\mathrm a(\beta_0) > 1$. This condition translates into having a sparsity index $s \ll \sqrt{n}$. In general $d_i$ is correlated to $x_i$, so $\alpha_0$ cannot be consistently estimated by the regression of $y_i$ on $d_i$. To keep track of the relationship of $d_i$ to $x_i$, write
+
+\[
+d_i = x'_i \pi_0^d + \rho_i^d, \quad \mathbb E\rho_i^dx_i = 0
+\]
+To estimate $\alpha _0$, we also impose approximate sparsity on the regression function $x'_i \pi_0^d$ with sufficient speed of decay of sorted components of $\pi_0^d$, namely $\mathrm a(${\textbackslash}pi\^{}d\_0) > 1\$.
+
+\textbf{The Orthogonality Principle}.  Note that we can not use naive estimates of $\alpha_0$ based simply on applying Lasso and Post-Lasso to the first equation. Such a strategy in general does not produce root-$n$ consistent and asymptotically normal estimators of $\alpha$, due to the possibility of large omitted variable bias resulting from estimating the nuisance function $x_i'\beta_0$ in high-dimensional setting. In order to overcome the omitted variable bias, we need to use orthogonalized estimating equations for $\alpha_0$. Specifically we seek to find a score $\psi\left(w_i, \alpha, \eta\right)$, where $w_i = (y_i, x_i')'$ and $\eta$ is the nuisance parameter, such that
+
+\[
+\mathbb E \psi(w_i, \alpha_0, \eta_0) = 0, \quad \frac{\partial}{\partial \eta} \mathbb E \psi(w_i, \alpha_0, \eta_0) = 0
+\]
+The second equation is the orthogonality condition, which states that the equations are not sensitive to the first-order perturbations of the nuisance parameter $\eta$ near the true value. The latter property allows estimation of these nuisance parameters $\eta_0$ by regularized estimators $\hat{\eta}$, where regularization is done via penalization or selection. Without this property, regularization may have too much effect on the estimator of $\alpha_0$ for regular inference to proceed. The estimators $\alpha$ of $\alpha_0$ solve the empirical analog of the equation above,
+
+\[
+\mathbb E_n \psi(w_i, \hat\alpha, \hat\eta) = 0,
+\]
+where we have plugged in the estimator $\hat \eta$ for the nuisance parameter.
+
+Due to the orthogonality property the estimator is first-order equivalent to the infeasible estimator $\tilde{\alpha}$ solving
+
+\[
+\mathbb E_n \psi(w_i, \tilde\alpha, \eta_0) = 0,
+\]
+where we use the true value of the nuisance parameter. The equivalence holds in a variety of models under plausible conditions. The systematic development of the orthogonality condition for inference on low-dimensional parameters in modern high-dimensional settings is given in  Chernozhukov, Hansen, and Spindler (2015a).
+
+In turns out that in the linear model the orthogonal equations are closely connected to the classical ideas of partialling out.
+
+\subsection{Intuition for the Orthogonality Principle in Linear Models via Partialling Out.}
+One way to think about estimation of $\alpha_0$ is to think of the regression model:
+
+\[
+\rho_i^y=\alpha_0 \rho_i^d+\epsilon_i
+\]
+where $\rho_i^y$ is the residual that is left after partialling out the linear effect of $x_i$ from $y_i$ and $\rho_i^d$ is the residual that is left after partialling out the linear effect of $x_i$ from $d_i$, both done in the population. Note that we have $\mathbb{E} \rho_i^y x_i=0 \text {, i.e. } \rho_i^y=y_i-x_i^{\prime} \pi_0^y$ where $x_i^{\prime} \pi_0^y$ is the linear projection of $y_i$ on $x_i$. After partialling out, $\alpha_0$ is the population regression coefficient in the univariate regression of $\rho^y_i$ on $\rho^d_i$. This is the Frisch-Waugh-Lovell theorem. Thus, $\alpha = \alpha_0$ solves the population equation:
+
+\[
+\mathbb{E}\left(\rho_i^y-\alpha \rho_i^d\right) \rho_i^d=0
+\]
+The score associated to this equation is:
+
+\[
+\begin{gathered}
+\left.\psi\left(w_i, \alpha, \eta\right)=\left(y_i-x_i^{\prime} \pi^y\right)-\alpha\left(d_i-x_i^{\prime} \pi^d\right)\right)\left(d_i-x_i^{\prime} \pi^d\right), \quad \eta=\left(\pi^{y^{\prime}}, \pi^{d^{\prime}}\right)^{\prime}, \\
+\psi\left(w_i, \alpha_0, \eta_0\right)=\left(\rho_i^y-\alpha \rho_i^d\right) \rho_i^d, \quad \eta_0=\left(\pi_0^{y^{\prime}}, \pi_0^{d^{\prime}}\right) .
+\end{gathered}
+\]
+It is straightforward to check that this score obeys the orthogonality principle; moreover, this score is the semi-parametrically efficient score for estimating the regression coefficient $\alpha_0$.
+
+\textbf{In low-dimensional settings}, the empirical version of the partialling out approach is simply another way to do the least squares. Let's verify this in an example. First, we generate some data
+
+
+\begin{lstlisting}
+(*@\HLJLn{dta}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{get{\_}data}@*)(*@\HLJLp{(}@*)(*@\HLJLs{"{}seed{\_}300"{}}@*)(*@\HLJLp{)}@*)
+(*@\HLJLn{n}@*)(*@\HLJLp{,}@*) (*@\HLJLn{p}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{size}@*)(*@\HLJLp{(}@*)(*@\HLJLn{dta}@*)(*@\HLJLp{);}@*)
+(*@\HLJLn{y}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{dta}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*)(*@\HLJLs{"{}y"{}}@*)(*@\HLJLp{];}@*)
+(*@\HLJLn{d}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{dta}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*)(*@\HLJLs{"{}d"{}}@*)(*@\HLJLp{];}@*)
+(*@\HLJLn{x}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{dta}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*)(*@\HLJLni{3}@*)(*@\HLJLoB{:}@*)(*@\HLJLk{end}@*)(*@\HLJLp{];}@*)
+\end{lstlisting}
+
+
+We can estimate $\alpha_0$ by running full least squares:
+
+
+\begin{lstlisting}
+(*@\HLJLn{full{\_}fit}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{lm}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{hcat}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{ones}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{length}@*)(*@\HLJLp{(}@*)(*@\HLJLn{y}@*)(*@\HLJLp{)),}@*) (*@\HLJLnf{Matrix}@*)(*@\HLJLp{(}@*)(*@\HLJLn{dta}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*)(*@\HLJLni{2}@*)(*@\HLJLoB{:}@*)(*@\HLJLk{end}@*)(*@\HLJLp{])),}@*) (*@\HLJLn{y}@*)(*@\HLJLp{);}@*)
+(*@\HLJLnf{DataFrame}@*)(*@\HLJLp{(}@*)
+    (*@\HLJLn{Estimate}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{coef}@*)(*@\HLJLp{(}@*)(*@\HLJLn{full{\_}fit}@*)(*@\HLJLp{)[}@*)(*@\HLJLni{2}@*)(*@\HLJLp{],}@*) 
+    (*@\HLJLn{Std{\_}Error}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{stderror}@*)(*@\HLJLp{(}@*)(*@\HLJLn{full{\_}fit}@*)(*@\HLJLp{)[}@*)(*@\HLJLni{2}@*)(*@\HLJLp{])}@*)
+\end{lstlisting}
+
+
+\begin{tabular}{r|cc}
+	& Estimate & Std\_Error\\
+	\hline
+	& Float64 & Float64\\
+	\hline
+	1 & 0.978075 & 0.0137122 \\
+\end{tabular}
+
+
+Another way to estimate $alpha_0$ is to first partial out the x-variables from $y_i$ and $d_i$, and run least squares on the residuals:
+
+
+\begin{lstlisting}
+(*@\HLJLn{rY{\_}1}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{lm}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{hcat}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{ones}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{length}@*)(*@\HLJLp{(}@*)(*@\HLJLn{y}@*)(*@\HLJLp{)),}@*) (*@\HLJLnf{Matrix}@*)(*@\HLJLp{(}@*)(*@\HLJLn{dta}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*)(*@\HLJLni{3}@*)(*@\HLJLoB{:}@*)(*@\HLJLk{end}@*)(*@\HLJLp{])),}@*) (*@\HLJLn{y}@*)(*@\HLJLp{);}@*)
+(*@\HLJLn{rY}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{y}@*) (*@\HLJLoB{-}@*) (*@\HLJLnf{predict}@*)(*@\HLJLp{(}@*)(*@\HLJLn{rY{\_}1}@*)(*@\HLJLp{)}@*)
+(*@\HLJLn{rD{\_}1}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{lm}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{hcat}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{ones}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{length}@*)(*@\HLJLp{(}@*)(*@\HLJLn{y}@*)(*@\HLJLp{)),}@*) (*@\HLJLnf{Matrix}@*)(*@\HLJLp{(}@*)(*@\HLJLn{dta}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*)(*@\HLJLni{3}@*)(*@\HLJLoB{:}@*)(*@\HLJLk{end}@*)(*@\HLJLp{])),}@*) (*@\HLJLn{d}@*)(*@\HLJLp{);}@*)
+(*@\HLJLn{rD}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{d}@*) (*@\HLJLoB{-}@*) (*@\HLJLnf{predict}@*)(*@\HLJLp{(}@*)(*@\HLJLn{rD{\_}1}@*)(*@\HLJLp{);}@*)
+(*@\HLJLn{partial{\_}fit{\_}ls}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{lm}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{hcat}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{ones}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{length}@*)(*@\HLJLp{(}@*)(*@\HLJLn{y}@*)(*@\HLJLp{)),}@*) (*@\HLJLn{rD}@*)(*@\HLJLp{),}@*) (*@\HLJLn{rY}@*)(*@\HLJLp{)}@*)
+(*@\HLJLnf{DataFrame}@*)(*@\HLJLp{(}@*)
+    (*@\HLJLn{Estimate}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{coef}@*)(*@\HLJLp{(}@*)(*@\HLJLn{partial{\_}fit{\_}ls}@*)(*@\HLJLp{)[}@*)(*@\HLJLni{2}@*)(*@\HLJLp{],}@*) 
+    (*@\HLJLn{Std{\_}Error}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{stderror}@*)(*@\HLJLp{(}@*)(*@\HLJLn{partial{\_}fit{\_}ls}@*)(*@\HLJLp{)[}@*)(*@\HLJLni{2}@*)(*@\HLJLp{]}@*)
+    (*@\HLJLp{)}@*)
+\end{lstlisting}
+
+
+\begin{tabular}{r|cc}
+	& Estimate & Std\_Error\\
+	\hline
+	& Float64 & Float64\\
+	\hline
+	1 & 0.978075 & 0.0136862 \\
+\end{tabular}
+
+
+One can see that the estimates are identical, while standard errors are nearly identical. In fact, the standard errors are asymptotically equivalent due to the orthogonality property of the estimating equations associated with the partialling out approach.
+
+\textbf{In high-dimensional settings}, we can no longer rely on the full least-squares and instead may rely on Lasso or Post-Lasso for partialling out. This amounts to using orthogonal estimating equations, where we estimate the nuisance parameters by Lasso or Post-Lasso. Let\ensuremath{\rq}s try this in the above example, using Post-Lasso for partialling out:
+
+
+\begin{lstlisting}
+(*@\HLJLn{rY{\_}1}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{rlasso}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{hcat}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{ones}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{length}@*)(*@\HLJLp{(}@*)(*@\HLJLn{y}@*)(*@\HLJLp{)),}@*) (*@\HLJLnf{Matrix}@*)(*@\HLJLp{(}@*)(*@\HLJLn{dta}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*)(*@\HLJLni{3}@*)(*@\HLJLoB{:}@*)(*@\HLJLk{end}@*)(*@\HLJLp{])),}@*) (*@\HLJLn{y}@*)(*@\HLJLp{);}@*)
+(*@\HLJLn{rY}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{rY{\_}1}@*)(*@\HLJLp{[}@*)(*@\HLJLs{"{}residuals"{}}@*)(*@\HLJLp{]}@*)
+(*@\HLJLn{rD{\_}1}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{rlasso}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{hcat}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{ones}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{length}@*)(*@\HLJLp{(}@*)(*@\HLJLn{y}@*)(*@\HLJLp{)),}@*) (*@\HLJLnf{Matrix}@*)(*@\HLJLp{(}@*)(*@\HLJLn{dta}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*)(*@\HLJLni{3}@*)(*@\HLJLoB{:}@*)(*@\HLJLk{end}@*)(*@\HLJLp{])),}@*) (*@\HLJLn{d}@*)(*@\HLJLp{);}@*)
+(*@\HLJLn{rD}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{rD{\_}1}@*)(*@\HLJLp{[}@*)(*@\HLJLs{"{}residuals"{}}@*)(*@\HLJLp{]}@*)
+(*@\HLJLn{partial{\_}fit{\_}postlasso}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{lm}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{hcat}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{ones}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{length}@*)(*@\HLJLp{(}@*)(*@\HLJLn{y}@*)(*@\HLJLp{)),}@*) (*@\HLJLn{rD}@*)(*@\HLJLp{),}@*) (*@\HLJLnf{vec}@*)(*@\HLJLp{(}@*)(*@\HLJLn{rY}@*)(*@\HLJLp{))}@*)
+(*@\HLJLnf{DataFrame}@*)(*@\HLJLp{(}@*)
+    (*@\HLJLn{Estimate}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{coef}@*)(*@\HLJLp{(}@*)(*@\HLJLn{partial{\_}fit{\_}postlasso}@*)(*@\HLJLp{)[}@*)(*@\HLJLni{2}@*)(*@\HLJLp{],}@*) 
+    (*@\HLJLn{Std{\_}Error}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{stderror}@*)(*@\HLJLp{(}@*)(*@\HLJLn{partial{\_}fit{\_}postlasso}@*)(*@\HLJLp{)[}@*)(*@\HLJLni{2}@*)(*@\HLJLp{]}@*)
+    (*@\HLJLp{)}@*)
+\end{lstlisting}
+
+
+\begin{tabular}{r|cc}
+	& Estimate & Std\_Error\\
+	\hline
+	& Float64 & Float64\\
+	\hline
+	1 & 0.972739 & 0.0136868 \\
+\end{tabular}
+
+
+We see that this estimate and standard errors are nearly identical to the previous estimates given above. In fact they are asymptotically equivalent to the previous estimates in the low-dimensional settings, with the advantage that, unlike the previous estimates, they will continue to be valid in the high-dimensional settings.
+
+The orthogonal estimating equations method ' based on partialling out via Lasso or post-Lasso ' is implemented by the function \texttt{rlassoEffect}, using \texttt{method= "partialling out"}:
+
+
+\begin{lstlisting}
+(*@\HLJLn{Eff}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{rlassoEffect}@*)(*@\HLJLp{(}@*)(*@\HLJLn{x}@*)(*@\HLJLp{,}@*) (*@\HLJLn{y}@*)(*@\HLJLp{,}@*) (*@\HLJLn{d}@*)(*@\HLJLp{,}@*) (*@\HLJLn{method}@*) (*@\HLJLoB{=}@*) (*@\HLJLs{"{}partialling}@*) (*@\HLJLs{out"{}}@*)(*@\HLJLp{);}@*)
+(*@\HLJLnf{r{\_}summary}@*)(*@\HLJLp{(}@*)(*@\HLJLn{Eff}@*)(*@\HLJLp{);}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+Estimates and significance testing of the effect of target variables
+  Row   Estimate.   Std. Error    t value   Pr(>|t|)
+
+    1     0.97274      0.01369   71.05478    0.0 ***
+---
+Signif. codes:
+0 (*@{{\textquotesingle}}@*)***(*@{{\textquotesingle}}@*) 0.001 (*@{{\textquotesingle}}@*)**(*@{{\textquotesingle}}@*) 0.01 (*@{{\textquotesingle}}@*)*(*@{{\textquotesingle}}@*) 0.05 (*@{{\textquotesingle}}@*).(*@{{\textquotesingle}}@*) 0.1 (*@{{\textquotesingle}}@*) (*@{{\textquotesingle}}@*) 1
+\end{lstlisting}
+
+
+Another orthogonal estimating equations method ' based on the double selection of covariates ' is implemented by the the function \texttt{rlassoEffect}, using \texttt{method= "double selection"}. Algorithmically the method is as follows:
+
+\begin{itemize}
+\item[1. ] Select controls $x_{ij}$\ensuremath{\rq}s that predict $y_i$ by Lasso.
+
+
+\item[2. ] Select controls $x_{ij}$'s that predict $d_i$ by Lasso.
+
+
+\item[3. ] Run OLS of $y_i$ on $d_i$ and the union of controls selected in steps 1 and 2.
+
+\end{itemize}
+
+\begin{lstlisting}
+(*@\HLJLn{Eff}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{rlassoEffect}@*)(*@\HLJLp{(}@*)(*@\HLJLn{x}@*)(*@\HLJLp{,}@*) (*@\HLJLn{y}@*)(*@\HLJLp{,}@*) (*@\HLJLn{d}@*)(*@\HLJLp{,}@*) (*@\HLJLn{method}@*) (*@\HLJLoB{=}@*) (*@\HLJLs{"{}double}@*) (*@\HLJLs{selection"{}}@*)(*@\HLJLp{);}@*)
+(*@\HLJLnf{r{\_}summary}@*)(*@\HLJLp{(}@*)(*@\HLJLn{Eff}@*)(*@\HLJLp{);}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+Estimates and significance testing of the effect of target variables
+  Row   Estimate.   Std. Error    t value   Pr(>|t|)
+
+    1     0.97807      0.01416   69.07274    0.0 ***
+---
+Signif. codes:
+0 (*@{{\textquotesingle}}@*)***(*@{{\textquotesingle}}@*) 0.001 (*@{{\textquotesingle}}@*)**(*@{{\textquotesingle}}@*) 0.01 (*@{{\textquotesingle}}@*)*(*@{{\textquotesingle}}@*) 0.05 (*@{{\textquotesingle}}@*).(*@{{\textquotesingle}}@*) 0.1 (*@{{\textquotesingle}}@*) (*@{{\textquotesingle}}@*) 1
+\end{lstlisting}
+
+
+\subsection{Inference: Confidence Intervals and Significance Testing.}
+The function \texttt{rlassoEffects} does inference ' namely construction of confidence intervals and significance testing ' for target variables. Those can be specified either by the variable names, an integer valued vector giving their position in $x$ or by a logical vector indicating the variables for which inference should be conducted. It returns an object of S3 class \texttt{rlassoEffects} for which the methods \texttt{r\_summary}, \texttt{r\_print}, and \texttt{r\_confint} are provided. \texttt{rlassoEffects} is a wrap function for the function \texttt{rlassoEffect} which does inference for a single target regressor. The theoretical underpinning is given in Belloni, Chernozhukov, and Hansen (2014) and for a more general class of models in Belloni, Chernozhukov, and Kato (2014). The function \texttt{rlassoEffects} might either be used in the form \texttt{rlassoEffects(x, y, index)} where $\mathbf x$ is a matrix, $\mathbf y$ denotes the outcome variable and index specifies the variables of $\mathbf x$ for which inference is conducted. This can done by an integer vector (postion of the variables), a logical vector or the name of the variables. An alternative usage is as \texttt{rlassoEffects(formula, data, I)} where I is a one-sided formula which specifies the variables for which is inference is conducted. For further details we refer to the help page of the function and the following examples where both methods for usage are shown.
+
+Here is an example of the use.
+
+
+\begin{lstlisting}
+(*@\HLJLn{data}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{get{\_}data}@*)(*@\HLJLp{(}@*)(*@\HLJLs{"{}seed{\_}400"{}}@*)(*@\HLJLp{)}@*)
+(*@\HLJLn{n}@*)(*@\HLJLp{,}@*) (*@\HLJLn{p}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{size}@*)(*@\HLJLp{(}@*)(*@\HLJLn{data}@*)(*@\HLJLp{);}@*)
+(*@\HLJLn{y}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{data}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*)(*@\HLJLni{1}@*)(*@\HLJLp{];}@*)
+(*@\HLJLcs{{\#}d}@*) (*@\HLJLcs{=}@*) (*@\HLJLcs{dta[:,"{}d"{}];}@*)
+(*@\HLJLn{x}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{data}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*)(*@\HLJLni{2}@*)(*@\HLJLoB{:}@*)(*@\HLJLk{end}@*)(*@\HLJLp{];}@*)
+\end{lstlisting}
+
+
+We can do inference on a set of variables of interest, e.g. the first, second, third, and the fiftieth:
+
+
+\begin{lstlisting}
+(*@\HLJLn{lasso{\_}effects}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{rlassoEffects}@*)(*@\HLJLp{(}@*)(*@\HLJLn{x}@*)(*@\HLJLp{,}@*) (*@\HLJLn{y}@*)(*@\HLJLp{,}@*) (*@\HLJLn{index}@*) (*@\HLJLoB{=}@*) (*@\HLJLp{[}@*)(*@\HLJLni{1}@*)(*@\HLJLp{,}@*)(*@\HLJLni{2}@*)(*@\HLJLp{,}@*)(*@\HLJLni{3}@*)(*@\HLJLp{,}@*)(*@\HLJLni{50}@*)(*@\HLJLp{]);}@*)
+\end{lstlisting}
+
+
+\begin{lstlisting}
+(*@\HLJLnf{r{\_}print}@*)(*@\HLJLp{(}@*)(*@\HLJLn{lasso{\_}effects}@*)(*@\HLJLp{,}@*) (*@\HLJLn{digits}@*) (*@\HLJLoB{=}@*) (*@\HLJLni{4}@*)(*@\HLJLp{)}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+Coefficients:
+
+     X1          X2          X3          X50
+
+   2.9445      3.0413      2.9754       0.072
+\end{lstlisting}
+
+
+\begin{lstlisting}
+(*@\HLJLnf{r{\_}summary}@*)(*@\HLJLp{(}@*)(*@\HLJLn{lasso{\_}effects}@*)(*@\HLJLp{);}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+Estimates and significance testing of the effect of target variables
+        Estimate.   Std. Error    t value   Pr(>|t|)
+
+   X1     2.94448      0.08815   33.40306    0.0 ***
+   X2     3.04127      0.08389   36.25307    0.0 ***
+   X3      2.9754      0.07804    38.1266    0.0 ***
+  X50     0.07196      0.07765    0.92672   0.35407
+---
+Signif. codes:
+0 (*@{{\textquotesingle}}@*)***(*@{{\textquotesingle}}@*) 0.001 (*@{{\textquotesingle}}@*)**(*@{{\textquotesingle}}@*) 0.01 (*@{{\textquotesingle}}@*)*(*@{{\textquotesingle}}@*) 0.05 (*@{{\textquotesingle}}@*).(*@{{\textquotesingle}}@*) 0.1 (*@{{\textquotesingle}}@*) (*@{{\textquotesingle}}@*) 1
+\end{lstlisting}
+
+
+\begin{lstlisting}
+(*@\HLJLnf{r{\_}confint}@*)(*@\HLJLp{(}@*)(*@\HLJLn{lasso{\_}effects}@*)(*@\HLJLp{);}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+2.5(*@{{\%}}@*)      97.5(*@{{\%}}@*)
+
+   X1      2.77171    3.11724
+   X2      2.87685     3.2057
+   X3      2.82245    3.12836
+  X50   -0.0802271   0.224138
+\end{lstlisting}
+
+
+The two methods are first-order equivalent in both low-dimensional and high-dimensional settings under regularity conditions. Not surprisingly we see that in the numerical example of this section, the estimates and standard errors produced by the two methods are very close to each other.
+
+It is also possible to estimate joint confidence intervals. The method relies on a multiplier bootstrap method as described in Belloni, Chernozhukov, and Kato (2014). Joint confidence intervals can be invoked by setting the option joint to \texttt{true} in the method \texttt{confint} for objects of class \texttt{rlassoEffects}.
+
+
+\begin{lstlisting}
+(*@\HLJLnf{r{\_}confint}@*)(*@\HLJLp{(}@*)(*@\HLJLn{lasso{\_}effects}@*)(*@\HLJLp{,}@*) (*@\HLJLn{joint}@*) (*@\HLJLoB{=}@*) (*@\HLJLkc{true}@*)(*@\HLJLp{);}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+2.5(*@{{\%}}@*)      97.5(*@{{\%}}@*)
+
+   X1     2.72502    3.16393
+   X2     2.83436    3.24819
+   X3     2.78072    3.17009
+  X50   -0.117984   0.261895
+\end{lstlisting}
+
+
+We will also demonstrate the application of joint confidence intervals in an empirical application in the next section.
+
+%  Finally, we can also plot the estimated effects with their confidence intervals:
+% 
+% ```
+% plot
+% ``` 
+For logistic regression we provide the functions \texttt{rlassologit} and \texttt{rlassologitEffects}.
+
+\subsection{Application: the effect of gender on wage.}
+In Labour Economics an important question is how the wage is related to the gender of the employed. We use US census data from the year 2012 to analyse the effect of gender and interaction effects of other variables with gender on wage jointly. The dependent variable is the logarithm of the wage, the target variable is \texttt{female} (in combination with other variables). All other variables denote some other socio-economic characteristics, e.g. marital status, education, and experience. For a detailed description of the variables we refer to the help page.
+
+First, we load and prepare the data.
+
+
+\begin{lstlisting}
+(*@\HLJLn{cps2012}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{get{\_}data}@*)(*@\HLJLp{(}@*)(*@\HLJLs{"{}cps2012"{}}@*)(*@\HLJLp{)}@*)
+(*@\HLJLn{n}@*)(*@\HLJLp{,}@*) (*@\HLJLn{p}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{size}@*)(*@\HLJLp{(}@*)(*@\HLJLn{cps2012}@*)(*@\HLJLp{);}@*)
+(*@\HLJLnf{size}@*)(*@\HLJLp{(}@*)(*@\HLJLn{cps2012}@*)(*@\HLJLp{)}@*)
+
+(*@\HLJLcs{{\#}{\#}}@*) (*@\HLJLcs{Two}@*) (*@\HLJLcs{parts}@*) (*@\HLJLcs{X}@*) (*@\HLJLcs{<-}@*) (*@\HLJLcs{model.matrix({\textasciitilde}-1}@*) (*@\HLJLcs{+}@*) (*@\HLJLcs{female}@*) (*@\HLJLcs{+}@*) (*@\HLJLcs{female:(widowed}@*) (*@\HLJLcs{+}@*) (*@\HLJLcs{divorced}@*) (*@\HLJLcs{+}@*) 
+(*@\HLJLcs{{\#}{\#}}@*) (*@\HLJLcs{separated}@*) (*@\HLJLcs{+}@*) (*@\HLJLcs{nevermarried}@*) (*@\HLJLcs{+}@*) (*@\HLJLcs{hsd08}@*) (*@\HLJLcs{+}@*) (*@\HLJLcs{hsd911}@*) (*@\HLJLcs{+}@*) (*@\HLJLcs{hsg}@*) (*@\HLJLcs{+}@*) (*@\HLJLcs{cg}@*) (*@\HLJLcs{+}@*) (*@\HLJLcs{ad}@*) (*@\HLJLcs{+}@*) (*@\HLJLcs{mw}@*) (*@\HLJLcs{+}@*) 
+(*@\HLJLcs{{\#}{\#}}@*) (*@\HLJLcs{so}@*) (*@\HLJLcs{+}@*) (*@\HLJLcs{we}@*) (*@\HLJLcs{+}@*) (*@\HLJLcs{exp1}@*) (*@\HLJLcs{+}@*) (*@\HLJLcs{exp2}@*) (*@\HLJLcs{+}@*) (*@\HLJLcs{exp3)}@*) 
+
+
+(*@\HLJLn{x{\_}formula1}@*) (*@\HLJLoB{=}@*) (*@\HLJLnd{@formula}@*)(*@\HLJLp{(}@*)
+    (*@\HLJLn{lnw}@*) (*@\HLJLoB{{\textasciitilde}}@*) (*@\HLJLn{female}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{female}@*) (*@\HLJLoB{{\&}}@*) 
+        (*@\HLJLp{(}@*)(*@\HLJLn{widowed}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{divorced}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{separated}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{nevermarried}@*) (*@\HLJLoB{+}@*)
+        (*@\HLJLn{hsd08}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{hsd911}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{hsg}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{cg}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{ad}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{mw}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{so}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{we}@*) (*@\HLJLoB{+}@*) 
+        (*@\HLJLn{exp1}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{exp2}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{exp3}@*)(*@\HLJLp{)}@*)
+    (*@\HLJLp{)}@*)
+(*@\HLJLn{y}@*)(*@\HLJLp{,}@*) (*@\HLJLn{x1}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{data{\_}formula}@*)(*@\HLJLp{(}@*)(*@\HLJLn{x{\_}formula1}@*)(*@\HLJLp{,}@*) (*@\HLJLn{cps2012}@*)(*@\HLJLp{);}@*)
+
+(*@\HLJLcs{{\#}}@*) (*@\HLJLcs{(widowed}@*) (*@\HLJLcs{+}@*) (*@\HLJLcs{divorced}@*) (*@\HLJLcs{+}@*) (*@\HLJLcs{separated}@*) (*@\HLJLcs{+}@*) (*@\HLJLcs{nevermarried}@*) (*@\HLJLcs{+}@*) (*@\HLJLcs{hsd08}@*) (*@\HLJLcs{+}@*) (*@\HLJLcs{hsd911}@*) (*@\HLJLcs{+}@*) (*@\HLJLcs{hsg}@*) 
+(*@\HLJLcs{{\#}}@*) (*@\HLJLcs{+}@*) (*@\HLJLcs{cg}@*) (*@\HLJLcs{+}@*) (*@\HLJLcs{ad}@*) (*@\HLJLcs{+}@*) (*@\HLJLcs{mw}@*) (*@\HLJLcs{+}@*) (*@\HLJLcs{so}@*) (*@\HLJLcs{+}@*) (*@\HLJLcs{we}@*) (*@\HLJLcs{+}@*) (*@\HLJLcs{exp1}@*) (*@\HLJLcs{+}@*) (*@\HLJLcs{exp2}@*) (*@\HLJLcs{+}@*) (*@\HLJLcs{exp3){\textasciicircum}2}@*)
+
+(*@\HLJLn{x0}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{data{\_}formula}@*)(*@\HLJLp{(}@*)(*@\HLJLn{x{\_}names}@*) (*@\HLJLoB{=}@*) (*@\HLJLp{[}@*)(*@\HLJLs{"{}widowed"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}divorced"{}}@*)(*@\HLJLp{,}@*)  (*@\HLJLs{"{}separated"{}}@*)(*@\HLJLp{,}@*)
+    (*@\HLJLs{"{}nevermarried"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}hsd08"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}hsd911"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}hsg"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}cg"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}ad"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}mw"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}so"{}}@*)(*@\HLJLp{,}@*)
+    (*@\HLJLs{"{}we"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}exp1"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}exp2"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}exp3"{}}@*)(*@\HLJLp{],}@*) 
+    (*@\HLJLn{y{\_}name}@*) (*@\HLJLoB{=}@*) (*@\HLJLs{"{}lnw"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLn{Data}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{cps2012}@*)(*@\HLJLp{)}@*)
+
+
+(*@\HLJLn{x}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{hcat}@*)(*@\HLJLp{(}@*)(*@\HLJLn{x1}@*)(*@\HLJLp{,}@*) (*@\HLJLn{x0}@*)(*@\HLJLp{);}@*)
+
+(*@\HLJLn{index{\_}gender}@*) (*@\HLJLoB{=}@*) (*@\HLJLp{[]}@*)
+(*@\HLJLn{female}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{findfirst}@*)(*@\HLJLoB{.}@*)(*@\HLJLp{(}@*)(*@\HLJLs{"{}female"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLnf{names}@*)(*@\HLJLp{(}@*)(*@\HLJLn{x}@*)(*@\HLJLp{))}@*)
+(*@\HLJLk{for}@*) (*@\HLJLn{i}@*) (*@\HLJLkp{in}@*) (*@\HLJLnf{eachindex}@*)(*@\HLJLp{(}@*)(*@\HLJLn{female}@*)(*@\HLJLp{)}@*)
+    (*@\HLJLk{if}@*)  (*@\HLJLnf{isnothing}@*)(*@\HLJLp{(}@*)(*@\HLJLn{female}@*)(*@\HLJLp{[}@*)(*@\HLJLn{i}@*)(*@\HLJLp{])}@*)
+        (*@\HLJLk{continue}@*)
+    (*@\HLJLk{else}@*)
+        (*@\HLJLnf{append!}@*)(*@\HLJLp{(}@*)(*@\HLJLn{index{\_}gender}@*)(*@\HLJLp{,}@*) (*@\HLJLn{i}@*)(*@\HLJLp{)}@*)
+    (*@\HLJLk{end}@*)
+(*@\HLJLk{end}@*)
+(*@\HLJLn{y}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{cps2012}@*)(*@\HLJLoB{.}@*)(*@\HLJLn{lnw}@*)(*@\HLJLp{;}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+[(*@{"{}}@*)female(*@{"{}}@*), (*@{"{}}@*)female (*@{{\&}}@*) widowed(*@{"{}}@*), (*@{"{}}@*)female (*@{{\&}}@*) divorced(*@{"{}}@*), (*@{"{}}@*)female (*@{{\&}}@*) separated(*@{"{}}@*), (*@{"{}}@*)
+female (*@{{\&}}@*) nevermarried(*@{"{}}@*), (*@{"{}}@*)female (*@{{\&}}@*) hsd08(*@{"{}}@*), (*@{"{}}@*)female (*@{{\&}}@*) hsd911(*@{"{}}@*), (*@{"{}}@*)female (*@{{\&}}@*) hsg(*@{"{}}@*)
+, (*@{"{}}@*)female (*@{{\&}}@*) cg(*@{"{}}@*), (*@{"{}}@*)female (*@{{\&}}@*) ad(*@{"{}}@*), (*@{"{}}@*)female (*@{{\&}}@*) mw(*@{"{}}@*), (*@{"{}}@*)female (*@{{\&}}@*) so(*@{"{}}@*), (*@{"{}}@*)female (*@{{\&}}@*) we(*@{"{}}@*)
+, (*@{"{}}@*)female (*@{{\&}}@*) exp1(*@{"{}}@*), (*@{"{}}@*)female (*@{{\&}}@*) exp2(*@{"{}}@*), (*@{"{}}@*)female (*@{{\&}}@*) exp3(*@{"{}}@*)]
+\end{lstlisting}
+
+
+The parameter estimates for the target parameters, i.e. all coefficients related to gender (i.e. by interaction with other variables) are calculated and summarized by the following commands
+
+
+\begin{lstlisting}
+(*@\HLJLn{effects{\_}female}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{rlassoEffects}@*)(*@\HLJLp{(}@*)(*@\HLJLn{x}@*)(*@\HLJLp{,}@*) (*@\HLJLn{y}@*)(*@\HLJLp{,}@*) (*@\HLJLn{index}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{index{\_}gender}@*)(*@\HLJLp{);}@*)
+(*@\HLJLnf{r{\_}summary}@*)(*@\HLJLp{(}@*)(*@\HLJLn{effects{\_}female}@*)(*@\HLJLp{);}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+Estimates and significance testing of the effect of target variables
+                          Estimate.   Std. Error    t value      Pr(>|t|)
+
+                 female    -0.17712       0.0363   -4.87934       0.0 ***
+       female (*@{{\&}}@*) widowed      0.1361      0.09066    1.50121       0.1333
+      female (*@{{\&}}@*) divorced     0.13694      0.02218    6.17403       0.0 ***
+     female (*@{{\&}}@*) separated      0.0233      0.05321    0.43789      0.66147
+  female (*@{{\&}}@*) nevermarried     0.18685      0.01994    9.37061       0.0 ***
+         female (*@{{\&}}@*) hsd08     0.02781      0.12091    0.23001      0.81808
+        female (*@{{\&}}@*) hsd911    -0.11492      0.05151   -2.23102     0.02568 *
+           female (*@{{\&}}@*) hsg    -0.01245      0.01922   -0.64776      0.51714
+            female (*@{{\&}}@*) cg     0.01014      0.01833    0.55319      0.58013
+            female (*@{{\&}}@*) ad    -0.03046      0.02181   -1.39661      0.16253
+            female (*@{{\&}}@*) mw    -0.00215      0.01918    -0.1121      0.91074
+            female (*@{{\&}}@*) so    -0.00818      0.01936   -0.42252      0.67265
+            female (*@{{\&}}@*) we    -0.00423      0.02117   -0.19981      0.84163
+          female (*@{{\&}}@*) exp1     0.00494       0.0078    0.63333      0.52652
+          female (*@{{\&}}@*) exp2    -0.15952       0.0453   -3.52141   0.00043 ***
+          female (*@{{\&}}@*) exp3     0.03845      0.00786    4.89186       0.0 ***
+---
+Signif. codes:
+0 (*@{{\textquotesingle}}@*)***(*@{{\textquotesingle}}@*) 0.001 (*@{{\textquotesingle}}@*)**(*@{{\textquotesingle}}@*) 0.01 (*@{{\textquotesingle}}@*)*(*@{{\textquotesingle}}@*) 0.05 (*@{{\textquotesingle}}@*).(*@{{\textquotesingle}}@*) 0.1 (*@{{\textquotesingle}}@*) (*@{{\textquotesingle}}@*) 1
+\end{lstlisting}
+
+
+Finally, we estimate and plot confident intervals, first \ensuremath{\rdq}pointwise\ensuremath{\rdq} and then the joint confidence intervals.
+
+%  % -------------- 
+
+\begin{lstlisting}
+(*@\HLJLn{joint{\_}CI}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{r{\_}confint}@*)(*@\HLJLp{(}@*)(*@\HLJLn{effects{\_}female}@*)(*@\HLJLp{,}@*) (*@\HLJLnfB{0.95}@*)(*@\HLJLp{,}@*) (*@\HLJLn{joint}@*) (*@\HLJLoB{=}@*) (*@\HLJLkc{true}@*)(*@\HLJLp{);}@*)
+(*@\HLJLn{joint{\_}CI}@*)(*@\HLJLp{;}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+2.5(*@{{\%}}@*)        97.5(*@{{\%}}@*)
+
+                 female    -0.281116   -0.0731218
+       female (*@{{\&}}@*) widowed    -0.142157     0.414348
+      female (*@{{\&}}@*) divorced    0.0728423     0.201036
+     female (*@{{\&}}@*) separated    -0.121121     0.167726
+  female (*@{{\&}}@*) nevermarried     0.127446     0.246261
+         female (*@{{\&}}@*) hsd08    -0.387157     0.442777
+        female (*@{{\&}}@*) hsd911    -0.268827    0.0389941
+           female (*@{{\&}}@*) hsg   -0.0663663    0.0414762
+            female (*@{{\&}}@*) cg   -0.0433117    0.0635888
+            female (*@{{\&}}@*) ad   -0.0978932    0.0369657
+            female (*@{{\&}}@*) mw   -0.0573897    0.0530957
+            female (*@{{\&}}@*) so   -0.0644362    0.0480695
+            female (*@{{\&}}@*) we   -0.0675601    0.0591079
+          female (*@{{\&}}@*) exp1   -0.0171695      0.02704
+          female (*@{{\&}}@*) exp2    -0.288065    -0.030974
+          female (*@{{\&}}@*) exp3    0.0161683    0.0607329
+\end{lstlisting}
+
+
+This analysis allows a closer look how discrimination according to gender is related to other socio- economic variables.
+
+\subsection{Application: Estimation of the treatment effect in a linear model with many confounding factors.}
+A part of empirical growth literature has focused on estimating the effect of an initial (lagged) level of GDP (Gross Domestic Product) per capita on the growth rates of GDP per capita. In particular, a key prediction from the classical Solow-Swan-Ramsey growth model is the hypothesis of convergence, which states that poorer countries should typically grow faster and therefore should tend to catch up with the richer countries, conditional on a set of institutional and societal characteristics. Covariates that describe such characteristics include variables measuring education and science policies, strength of market institutions, trade openness, savings rates and others.
+
+Thus, we are interested in a specification of the form:
+
+\[
+y_i = \alpha_0d_i + \sum_{j=1}^p \beta_j x_{ij} + \varepsilon_i, 
+\]
+where $y_i$ is the growth rate of GDP over a specified decade in country $i$, $d_i$ is the log of the initial level of GDP at the beginning of the specified period, and the $x_{ij}'s$ form a long list of country $i$\ensuremath{\rq}s characteristics at the beginning of the specified period. We are interested in testing the hypothesis of convergence, namely that $\alpha_1 < 0$. Given that in the Barro and Lee (1994) data, the number of covariates $p$ is large relative to the sample size $n$, covariate selection becomes a crucial issue in this analysis. We employ here the partialling out approach (as well as the double selection version) introduced in the previous section.
+
+First, we load and prepare the data
+
+
+\begin{lstlisting}
+(*@\HLJLn{GrowthData}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{get{\_}data}@*)(*@\HLJLp{(}@*)(*@\HLJLs{"{}GrowthData"{}}@*)(*@\HLJLp{)}@*)
+(*@\HLJLn{y}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{GrowthData}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*) (*@\HLJLni{1}@*)(*@\HLJLp{];}@*)
+(*@\HLJLn{d}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{GrowthData}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*) (*@\HLJLni{3}@*)(*@\HLJLoB{:}@*)(*@\HLJLni{3}@*)(*@\HLJLp{];}@*)
+(*@\HLJLn{X}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{Matrix}@*)(*@\HLJLp{(}@*)(*@\HLJLn{GrowthData}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*) (*@\HLJLnf{Not}@*)(*@\HLJLp{(}@*)(*@\HLJLni{1}@*)(*@\HLJLp{,}@*) (*@\HLJLni{2}@*)(*@\HLJLp{,}@*) (*@\HLJLni{3}@*)(*@\HLJLp{)]);}@*)
+(*@\HLJLn{X{\_}1}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{Matrix}@*)(*@\HLJLp{(}@*)(*@\HLJLn{GrowthData}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*) (*@\HLJLnf{Not}@*)(*@\HLJLp{(}@*)(*@\HLJLni{1}@*)(*@\HLJLp{,}@*) (*@\HLJLni{2}@*)(*@\HLJLp{)]);}@*)
+\end{lstlisting}
+
+
+Now we can estimate the effect of the initial GDP level. First, we estimate by OLS:
+
+
+\begin{lstlisting}
+(*@\HLJLn{Q}@*)(*@\HLJLp{,}@*) (*@\HLJLn{R}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{qr}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{hcat}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{ones}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{length}@*)(*@\HLJLp{(}@*)(*@\HLJLn{y}@*)(*@\HLJLp{)),}@*) (*@\HLJLn{X{\_}1}@*)(*@\HLJLp{))}@*)
+(*@\HLJLn{beta{\_}i}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{pinv}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{hcat}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{ones}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{length}@*)(*@\HLJLp{(}@*)(*@\HLJLn{y}@*)(*@\HLJLp{)),}@*) (*@\HLJLn{X{\_}1}@*)(*@\HLJLp{))}@*) (*@\HLJLoB{*}@*) (*@\HLJLn{y}@*)
+
+(*@\HLJLn{res}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{y}@*) (*@\HLJLoB{-}@*) (*@\HLJLnf{hcat}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{ones}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{length}@*)(*@\HLJLp{(}@*)(*@\HLJLn{y}@*)(*@\HLJLp{)),}@*) (*@\HLJLn{X{\_}1}@*)(*@\HLJLp{)}@*) (*@\HLJLoB{*}@*) (*@\HLJLn{beta{\_}i}@*)(*@\HLJLp{;}@*)
+(*@\HLJLn{n}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{size}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{hcat}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{ones}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{length}@*)(*@\HLJLp{(}@*)(*@\HLJLn{y}@*)(*@\HLJLp{)),}@*) (*@\HLJLn{X{\_}1}@*)(*@\HLJLp{))[}@*)(*@\HLJLni{1}@*)(*@\HLJLp{]}@*)
+(*@\HLJLn{k}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{size}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{hcat}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{ones}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{length}@*)(*@\HLJLp{(}@*)(*@\HLJLn{y}@*)(*@\HLJLp{)),}@*) (*@\HLJLn{X{\_}1}@*)(*@\HLJLp{))[}@*)(*@\HLJLni{2}@*)(*@\HLJLp{]}@*)
+
+(*@\HLJLn{sigma2{\_}hat}@*) (*@\HLJLoB{=}@*) (*@\HLJLp{(}@*)(*@\HLJLn{res}@*)(*@\HLJLoB{{\textquotesingle}}@*) (*@\HLJLoB{*}@*) (*@\HLJLn{res}@*)(*@\HLJLp{)}@*) (*@\HLJLoB{/}@*) (*@\HLJLp{(}@*)(*@\HLJLn{n}@*) (*@\HLJLoB{-}@*) (*@\HLJLn{k}@*)(*@\HLJLp{)}@*)
+(*@\HLJLn{vcov{\_}beta{\_}hat}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{sigma2{\_}hat}@*) (*@\HLJLoB{.*}@*) (*@\HLJLnf{inv}@*)(*@\HLJLp{(}@*)
+    (*@\HLJLnf{hcat}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{ones}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{length}@*)(*@\HLJLp{(}@*)(*@\HLJLn{y}@*)(*@\HLJLp{)),}@*) (*@\HLJLn{X{\_}1}@*)(*@\HLJLp{)}@*)(*@\HLJLoB{{\textquotesingle}}@*) (*@\HLJLoB{*}@*) (*@\HLJLnf{hcat}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{ones}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{length}@*)(*@\HLJLp{(}@*)(*@\HLJLn{y}@*)(*@\HLJLp{)),}@*) (*@\HLJLn{X{\_}1}@*)(*@\HLJLp{)}@*)
+    (*@\HLJLp{);}@*)
+(*@\HLJLn{se}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{sqrt}@*)(*@\HLJLoB{.}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{diag}@*)(*@\HLJLp{(}@*)(*@\HLJLn{vcov{\_}beta{\_}hat}@*)(*@\HLJLp{))}@*)
+
+(*@\HLJLn{ls{\_}effect}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{DataFrame}@*)(*@\HLJLp{(}@*)(*@\HLJLn{Estimate}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{beta{\_}i}@*)(*@\HLJLp{,}@*) (*@\HLJLn{stderror}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{se}@*)(*@\HLJLp{);}@*)
+\end{lstlisting}
+
+
+Second, we estimate the effect by the partialling out by Post-Lasso:
+
+
+\begin{lstlisting}
+(*@\HLJLn{lasso{\_}effect}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{rlassoEffect}@*)(*@\HLJLp{(}@*)(*@\HLJLn{X}@*)(*@\HLJLp{,}@*) (*@\HLJLn{y}@*)(*@\HLJLp{,}@*) (*@\HLJLn{d}@*)(*@\HLJLp{,}@*) (*@\HLJLn{method}@*) (*@\HLJLoB{=}@*) (*@\HLJLs{"{}partialling}@*) (*@\HLJLs{out"{}}@*)(*@\HLJLp{);}@*)
+(*@\HLJLnf{r{\_}summary}@*)(*@\HLJLp{(}@*)(*@\HLJLn{lasso{\_}effect}@*)(*@\HLJLp{);}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+Estimates and significance testing of the effect of target variables
+  Row   Estimate.   Std. Error    t value      Pr(>|t|)
+
+    1    -0.04981      0.01394   -3.57317   0.00035 ***
+---
+Signif. codes:
+0 (*@{{\textquotesingle}}@*)***(*@{{\textquotesingle}}@*) 0.001 (*@{{\textquotesingle}}@*)**(*@{{\textquotesingle}}@*) 0.01 (*@{{\textquotesingle}}@*)*(*@{{\textquotesingle}}@*) 0.05 (*@{{\textquotesingle}}@*).(*@{{\textquotesingle}}@*) 0.1 (*@{{\textquotesingle}}@*) (*@{{\textquotesingle}}@*) 1
+\end{lstlisting}
+
+
+Third, we estimate the effect by the double selection method:
+
+
+\begin{lstlisting}
+(*@\HLJLn{double{\_}effect}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{rlassoEffect}@*)(*@\HLJLp{(}@*)(*@\HLJLn{X}@*)(*@\HLJLp{,}@*) (*@\HLJLn{y}@*)(*@\HLJLp{,}@*) (*@\HLJLn{d}@*)(*@\HLJLp{,}@*) (*@\HLJLn{method}@*) (*@\HLJLoB{=}@*) (*@\HLJLs{"{}double}@*) (*@\HLJLs{selection"{}}@*)(*@\HLJLp{);}@*)
+(*@\HLJLnf{r{\_}summary}@*)(*@\HLJLp{(}@*)(*@\HLJLn{double{\_}effect}@*)(*@\HLJLp{);}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+Estimates and significance testing of the effect of target variables
+             Estimate.   Std. Error    t value     Pr(>|t|)
+
+  gdpsh465    -0.05001      0.01579   -3.16719   0.00154 **
+---
+Signif. codes:
+0 (*@{{\textquotesingle}}@*)***(*@{{\textquotesingle}}@*) 0.001 (*@{{\textquotesingle}}@*)**(*@{{\textquotesingle}}@*) 0.01 (*@{{\textquotesingle}}@*)*(*@{{\textquotesingle}}@*) 0.05 (*@{{\textquotesingle}}@*).(*@{{\textquotesingle}}@*) 0.1 (*@{{\textquotesingle}}@*) (*@{{\textquotesingle}}@*) 1
+\end{lstlisting}
+
+
+We then collect results in a nice table:
+
+
+\begin{lstlisting}
+(*@\HLJLn{table}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{zeros}@*)(*@\HLJLp{(}@*)(*@\HLJLni{3}@*)(*@\HLJLp{,}@*)(*@\HLJLni{2}@*)(*@\HLJLp{)}@*)
+(*@\HLJLn{table}@*)(*@\HLJLp{[}@*)(*@\HLJLni{1}@*)(*@\HLJLp{,}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{]}@*) (*@\HLJLoB{=}@*) (*@\HLJLp{[}@*)
+    (*@\HLJLnf{round}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{Matrix}@*)(*@\HLJLp{(}@*)(*@\HLJLn{ls{\_}effect}@*)(*@\HLJLp{)[}@*)(*@\HLJLni{2}@*)(*@\HLJLp{,}@*)(*@\HLJLni{1}@*)(*@\HLJLp{],}@*) (*@\HLJLn{digits}@*) (*@\HLJLoB{=}@*) (*@\HLJLni{2}@*)(*@\HLJLp{),}@*) 
+    (*@\HLJLn{round}@*)(*@\HLJLoB{.}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{Matrix}@*)(*@\HLJLp{(}@*)(*@\HLJLn{ls{\_}effect}@*)(*@\HLJLp{)[}@*)(*@\HLJLni{2}@*)(*@\HLJLp{,}@*)(*@\HLJLni{2}@*)(*@\HLJLp{],}@*) (*@\HLJLn{digits}@*) (*@\HLJLoB{=}@*) (*@\HLJLni{5}@*)(*@\HLJLp{)}@*)
+    (*@\HLJLp{]}@*)
+(*@\HLJLn{table}@*)(*@\HLJLp{[}@*)(*@\HLJLni{2}@*)(*@\HLJLp{,}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{]}@*) (*@\HLJLoB{=}@*) (*@\HLJLp{[}@*)
+    (*@\HLJLnf{round}@*)(*@\HLJLp{(}@*)(*@\HLJLn{lasso{\_}effect}@*)(*@\HLJLoB{.}@*)(*@\HLJLn{coefficients}@*)(*@\HLJLp{,}@*) (*@\HLJLn{digits}@*) (*@\HLJLoB{=}@*)(*@\HLJLni{2}@*)(*@\HLJLp{),}@*) 
+    (*@\HLJLnf{round}@*)(*@\HLJLp{(}@*)(*@\HLJLn{lasso{\_}effect}@*)(*@\HLJLoB{.}@*)(*@\HLJLn{se}@*)(*@\HLJLp{,}@*) (*@\HLJLn{digits}@*) (*@\HLJLoB{=}@*) (*@\HLJLni{5}@*)(*@\HLJLp{)}@*)
+    (*@\HLJLp{]}@*)
+(*@\HLJLn{table}@*)(*@\HLJLp{[}@*)(*@\HLJLni{3}@*)(*@\HLJLp{,}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{]}@*) (*@\HLJLoB{=}@*) (*@\HLJLp{[}@*)
+    (*@\HLJLnf{round}@*)(*@\HLJLp{(}@*)(*@\HLJLn{double{\_}effect}@*)(*@\HLJLoB{.}@*)(*@\HLJLn{coefficients}@*)(*@\HLJLp{,}@*) (*@\HLJLn{digits}@*) (*@\HLJLoB{=}@*)(*@\HLJLni{2}@*)(*@\HLJLp{),}@*) 
+    (*@\HLJLnf{round}@*)(*@\HLJLp{(}@*)(*@\HLJLn{double{\_}effect}@*)(*@\HLJLoB{.}@*)(*@\HLJLn{se}@*)(*@\HLJLp{,}@*) (*@\HLJLn{digits}@*) (*@\HLJLoB{=}@*) (*@\HLJLni{5}@*)(*@\HLJLp{)}@*)
+    (*@\HLJLp{];}@*)
+(*@\HLJLn{index}@*) (*@\HLJLoB{=}@*) (*@\HLJLp{[}@*)(*@\HLJLs{"{}full}@*) (*@\HLJLs{reg}@*) (*@\HLJLs{via}@*) (*@\HLJLs{ols"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}partial}@*) (*@\HLJLs{reg}@*)
+(*@\HLJLs{via}@*) (*@\HLJLs{post-lasso}@*) (*@\HLJLs{"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}partial}@*) (*@\HLJLs{reg}@*) (*@\HLJLs{via}@*) (*@\HLJLs{double}@*) (*@\HLJLs{selection"{}}@*)(*@\HLJLp{]}@*)
+(*@\HLJLnf{pretty{\_}table}@*)(*@\HLJLp{(}@*)
+    (*@\HLJLnf{hcat}@*)(*@\HLJLp{(}@*)(*@\HLJLn{index}@*)(*@\HLJLp{,}@*) (*@\HLJLn{table}@*)(*@\HLJLp{),}@*) (*@\HLJLn{show{\_}row{\_}number}@*) (*@\HLJLoB{=}@*) (*@\HLJLkc{false}@*)(*@\HLJLp{,}@*) 
+    (*@\HLJLn{header}@*) (*@\HLJLoB{=}@*) (*@\HLJLp{[}@*)(*@\HLJLs{"{}}@*) (*@\HLJLs{"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}Estimate"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}Std.}@*) (*@\HLJLs{Error"{}}@*)(*@\HLJLp{],}@*) 
+    (*@\HLJLn{tf}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{tf{\_}simple}@*)(*@\HLJLp{,}@*) (*@\HLJLn{nosubheader}@*) (*@\HLJLoB{=}@*) (*@\HLJLkc{true}@*)
+    (*@\HLJLp{)}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+=================================== ========== =============
+                                     Estimate   Std. Error
+=================================== ========== =============
+                  full reg via ols      -0.01      0.02989
+      partial reg(*@{{\textbackslash}}@*)nvia post-lasso       -0.05      0.01394
+  partial reg via double selection      -0.05      0.01579
+=================================== ========== =============
+\end{lstlisting}
+
+
+We see that the OLS estimates are noisy, which is not surprising given that $p$ is comparable to $n$. The partial regression approaches, based on Lasso selection of covariates in the two projection equations, in contrast yields much more precise estimates, which does support the hypothesis of conditional convergence. We note that the partial regression approaches represent a special case of the orthogonal estimating equations approach.
+
+\section{Instrumental Variable Estimation in a High-Dimensional Setting}
+In many applied settings the researcher is interested in estimating the (structural) effect of a variable (treatment variable), but this variable is endogenous, i.e. correlated with the error term. In this case, instrumental variables (IV) methods are used for identification of the causal parameters.
+
+We consider the linear instrumental variables model:
+
+\[
+y_i = \alpha_0 d_i + \gamma_0 x_i' + \epsilon_i,
+\]
+\[
+d_i = z_i'\prod + \beta_0 x_i' + \nu_i,
+\]
+where $\mathbb E\left[\epsilon_i(x_i', z_i')\right] = 0$, $\mathbb E\left[\nu(x_i', z_i')\right] = 0$, but $\mathbb E[\epsilon_i, \nu_i] \neq 0$ leading to endogeneity. In this setting $d_i$ is a scalar endogenous variable of interest, $z_i$ is a pz-dimensional vector of instruments and $x_i$ is a px-dimensional vector of control variables.
+
+In this section we present methods to estimate the effect $\alpha_0$ in a setting where either x is high-dimensional or z is high-dimensional. Instrumental variables estimation with very many instruments was analysed in Belloni, Chen, Chernozhukov, and Hansen (2012), the extension with many instruments and many controls in Chernozhukov, Hansen, and Spindler (2015b).
+
+\subsection{Estimation and Inference.}
+To get efficient estimators and uniformly valid confidence intervals for the structural parameters there are different strategies which are asymptotically equivalent where again orthogonalization (via partialling out) is a key concept.
+
+In the case of the high-dimensional instrument $z_i$ and low-dimensional $x_i$. We predict the endogenous variable $d_i$ using (Post-)Lasso regression of $d_i$ on the instruments $z_i$ and $x_i$, forcing the inclusion of $x_i$. Then we compute the IV estimator (2SLS) $\hat \alpha$ of the parameter $\alpha_0$ using the predicted value $\hat{d}_i$ as instrument and using $x_i'$s as controls. We then perform inference on $\alpha_0$ using $\hat{\alpha}$ and conventional heteroskedasticity robust standard errors.
+
+In the case of the low-dimensional instrument $z_i$ and high-dimensional $x_i$, we first partial out the effect of $x_i$ from $d_i$, $y_i$, and $z_i$ by (Post-)Lasso. Second, we then use the residuals to compute the IV estimator (2SLS) $\hat{\alpha}$ of the parameter \ensuremath{\alpha}0. We then perform inference on $\alpha_0$ using $\hat{\alpha}$ and conventional heteroskedasticity robust standard errors. 
+
+In the case of the high-dimensional instrument $z_i$ and high-dimensional $x_i$ the algorithm described in Chernozhukov, Hansen, and Spindler (2015b) is adopted.
+
+\textbf{Julia Implementation}. The wrap function \texttt{rlassoIV} handles all of the previous cases. It has the options \textbf{select.X} and \textbf{select.Z} which implement selection of either covariates or instruments, both with default values set to \textbf{true}. The class of the return object depends on the chosen options, but the methods summary, print and confint are available for all. The functions \textbf{rlassoSelectX} and \textbf{rlassoSelectZ} do selection on x-variables only and z-variables only. Selection on both is done in \textbf{rlassoIV}. All functions employ the option \textbf{post=true} as default, which uses post-Lasso for partialling out. By setting \textbf{post=true} we can employ Lasso instead of Post-Lasso. Finally, the package provides the standard function \textbf{tsls}, which implements the \ensuremath{\ldq}classical\ensuremath{\rdq} two-stage least squares estimation.
+
+\textbf{Function} usage both the family of \textbf{rlassoIV}-functions and the family of the functions for treatment effects , which are introduced in the next section, allow use with both formula-interface and by handing over the prepard model matrices. Hence the general pattern for use with formula is function(formula, data, ...) where formula consists of two-parts and is a member of the class Formula. These formulas are of the pattern y d + x | x + z where y is the outcome variable, x are exogenous variables, d endogenous varialbes (if several ones are allowed depends on the concrete function), and z denote the instrumental variables. A more primitive use of the functions is by simply hand over the required group of variables as matrices: function(x=x, d=d, y=y, z=z). In some of the following examples both alternatives are displayed.
+
+\subsection{Application: Economic Development and Institutions.}
+Estimating the causal effect of institutions on output is complicated by the simultaneity between institutions and output: specifically, better institutions may lead to higher incomes, but higher incomes may also lead to the development of better institutions. To help overcome this simultaneity, Acemoglu, Johnson, and Robinson (2001) use mortality rates for early European settlers as an instrument for institution quality. The validity of this instrument hinges on the argument that settlers set up better institutions in places where they are more likely to establish long-term settlements, that where they are likely to settle for the long term is related to settler mortality at the time of initial colonization, and that institutions are highly persistent. The exclusion restriction for the instrumental variable is then motivated by the argument that GDP, while persistent, is unlikely to be strongly influenced by mortality in the previous century, or earlier, except through institutions.
+
+In this application, we consider the problem of selecting controls. The input raw controls are the Latitude and the continental dummies. The technical controls can include various polynomial transformations of the Latitude, possibly interacted with the continental dummies. Such flexible specifications of raw controls results in the high-dimensional x, with dimension comparable to the sample size.
+
+First, we process the data
+
+
+\begin{lstlisting}
+(*@\HLJLn{AJR}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{get{\_}data}@*)(*@\HLJLp{(}@*)(*@\HLJLs{"{}AJR"{}}@*)(*@\HLJLp{)}@*)
+(*@\HLJLn{y}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{AJR}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{!}@*)(*@\HLJLp{,}@*)(*@\HLJLs{"{}GDP"{}}@*)(*@\HLJLp{]}@*)
+(*@\HLJLn{d}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{AJR}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{!}@*)(*@\HLJLp{,}@*) (*@\HLJLni{2}@*)(*@\HLJLp{]}@*)
+(*@\HLJLn{z}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{AJR}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{!}@*)(*@\HLJLp{,}@*)(*@\HLJLs{"{}logMort"{}}@*)(*@\HLJLp{];}@*)
+(*@\HLJLn{x{\_}formula}@*) (*@\HLJLoB{=}@*) (*@\HLJLnd{@formula}@*)(*@\HLJLp{(}@*)(*@\HLJLn{GDP}@*) (*@\HLJLoB{{\textasciitilde}}@*) (*@\HLJLoB{-}@*)(*@\HLJLni{1}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude2}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Africa}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Asia}@*) (*@\HLJLoB{+}@*) 
+    (*@\HLJLn{Namer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Samer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Latitude2}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Africa}@*) (*@\HLJLoB{+}@*) 
+    (*@\HLJLn{Latitude}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Asia}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Namer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Samer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude2}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Africa}@*) (*@\HLJLoB{+}@*)
+    (*@\HLJLn{Latitude2}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Asia}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude2}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Namer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude2}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Samer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Africa}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Asia}@*) 
+    (*@\HLJLoB{+}@*) (*@\HLJLn{Africa}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Namer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Africa}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Samer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Asia}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Namer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Asia}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Samer}@*)
+    (*@\HLJLoB{+}@*) (*@\HLJLn{Namer}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Samer}@*)
+    (*@\HLJLp{)}@*)
+(*@\HLJLn{y}@*)(*@\HLJLp{,}@*) (*@\HLJLn{x}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{data{\_}formula}@*)(*@\HLJLp{(}@*)(*@\HLJLn{x{\_}formula}@*)(*@\HLJLp{,}@*) (*@\HLJLn{AJR}@*)(*@\HLJLp{)}@*)
+(*@\HLJLnf{size}@*)(*@\HLJLp{(}@*)(*@\HLJLn{x}@*)(*@\HLJLp{)}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+Any[(*@{"{}}@*)Latitude(*@{"{}}@*), (*@{"{}}@*)Latitude2(*@{"{}}@*), (*@{"{}}@*)Africa(*@{"{}}@*), (*@{"{}}@*)Asia(*@{"{}}@*), (*@{"{}}@*)Namer(*@{"{}}@*), (*@{"{}}@*)Samer(*@{"{}}@*), (*@{"{}}@*)Latitude 
+(*@{{\&}}@*) Latitude2(*@{"{}}@*), (*@{"{}}@*)Latitude (*@{{\&}}@*) Africa(*@{"{}}@*), (*@{"{}}@*)Latitude (*@{{\&}}@*) Asia(*@{"{}}@*), (*@{"{}}@*)Latitude (*@{{\&}}@*) Namer(*@{"{}}@*), (*@{"{}}@*)
+Latitude (*@{{\&}}@*) Samer(*@{"{}}@*), (*@{"{}}@*)Latitude2 (*@{{\&}}@*) Africa(*@{"{}}@*), (*@{"{}}@*)Latitude2 (*@{{\&}}@*) Asia(*@{"{}}@*), (*@{"{}}@*)Latitude2 (*@{{\&}}@*) N
+amer(*@{"{}}@*), (*@{"{}}@*)Latitude2 (*@{{\&}}@*) Samer(*@{"{}}@*), (*@{"{}}@*)Africa (*@{{\&}}@*) Asia(*@{"{}}@*), (*@{"{}}@*)Africa (*@{{\&}}@*) Namer(*@{"{}}@*), (*@{"{}}@*)Africa (*@{{\&}}@*) Sa
+mer(*@{"{}}@*), (*@{"{}}@*)Asia (*@{{\&}}@*) Namer(*@{"{}}@*), (*@{"{}}@*)Asia (*@{{\&}}@*) Samer(*@{"{}}@*), (*@{"{}}@*)Namer (*@{{\&}}@*) Samer(*@{"{}}@*)]
+(64, 21)
+\end{lstlisting}
+
+
+Then we estimate an IV model with selection on the X
+
+
+\begin{lstlisting}
+(*@\HLJLn{AJR{\_}Xselect}@*)  (*@\HLJLoB{=}@*) (*@\HLJLnf{rlassoIV}@*)(*@\HLJLp{(}@*)(*@\HLJLn{x}@*)(*@\HLJLp{,}@*) (*@\HLJLn{d}@*)(*@\HLJLp{,}@*) (*@\HLJLn{y}@*)(*@\HLJLp{,}@*) (*@\HLJLn{z}@*)(*@\HLJLp{,}@*) (*@\HLJLn{select{\_}X}@*)(*@\HLJLoB{=}@*)(*@\HLJLkc{true}@*)(*@\HLJLp{,}@*) (*@\HLJLn{select{\_}Z}@*)(*@\HLJLoB{=}@*)(*@\HLJLkc{false}@*)(*@\HLJLp{);}@*)
+(*@\HLJLnf{r{\_}summary}@*)(*@\HLJLp{(}@*)(*@\HLJLn{AJR{\_}Xselect}@*)(*@\HLJLp{);}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+Estimates and Significance Testing of the effect of target variables in the
+ IV regression model
+        coeff.       se.   t-value      p-value
+
+  d1   0.84503   0.26993   3.13055   0.00174 **
+---
+Signif. codes:
+0 (*@{{\textquotesingle}}@*)***(*@{{\textquotesingle}}@*) 0.001 (*@{{\textquotesingle}}@*)**(*@{{\textquotesingle}}@*) 0.01 (*@{{\textquotesingle}}@*)*(*@{{\textquotesingle}}@*) 0.05 (*@{{\textquotesingle}}@*).(*@{{\textquotesingle}}@*) 0.1 (*@{{\textquotesingle}}@*) (*@{{\textquotesingle}}@*) 1
+\end{lstlisting}
+
+
+\begin{lstlisting}
+(*@\HLJLnf{r{\_}confint}@*)(*@\HLJLp{(}@*)(*@\HLJLn{AJR{\_}Xselect}@*)(*@\HLJLp{);}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+2.5(*@{{\%}}@*)     97.5(*@{{\%}}@*)
+
+  d1   0.315981   1.37407
+\end{lstlisting}
+
+
+It is interesting to understand what the procedure above is doing. In essence, it partials out $x_i$ from $y_i$, $d_i$ and $z_i$ using Post-Lasso and applies the 2SLS to the residual quantities. Let us investigate partialling out in more detail in this example. We can first try to use OLS for partialling out:
+
+
+\begin{lstlisting}
+(*@\HLJLn{rY{\_}1}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{lm}@*)(*@\HLJLp{(}@*)(*@\HLJLnd{@formula}@*)(*@\HLJLp{(}@*)
+    (*@\HLJLn{GDP}@*) (*@\HLJLoB{{\textasciitilde}}@*) (*@\HLJLn{Latitude}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude2}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Africa}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Asia}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Namer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Samer}@*) (*@\HLJLoB{+}@*) 
+    (*@\HLJLn{Latitude}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Latitude2}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Africa}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Asia}@*) (*@\HLJLoB{+}@*) 
+    (*@\HLJLn{Latitude}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Namer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Samer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude2}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Africa}@*) (*@\HLJLoB{+}@*) 
+    (*@\HLJLn{Latitude2}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Asia}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude2}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Namer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude2}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Samer}@*) (*@\HLJLoB{+}@*) 
+    (*@\HLJLn{Africa}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Asia}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Africa}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Namer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Africa}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Samer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Asia}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Namer}@*) (*@\HLJLoB{+}@*) 
+    (*@\HLJLn{Asia}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Samer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Namer}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Samer}@*)(*@\HLJLp{),}@*) (*@\HLJLn{AJR}@*)
+    (*@\HLJLp{)}@*)
+(*@\HLJLn{rY}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{y}@*) (*@\HLJLoB{-}@*) (*@\HLJLnf{predict}@*)(*@\HLJLp{(}@*)(*@\HLJLn{rY{\_}1}@*)(*@\HLJLp{)}@*)
+
+(*@\HLJLn{rD{\_}1}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{lm}@*)(*@\HLJLp{(}@*)(*@\HLJLnd{@formula}@*)(*@\HLJLp{(}@*)
+    (*@\HLJLn{Exprop}@*) (*@\HLJLoB{{\textasciitilde}}@*) (*@\HLJLn{Latitude}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude2}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Africa}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Asia}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Namer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Samer}@*) (*@\HLJLoB{+}@*) 
+    (*@\HLJLn{Latitude}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Latitude2}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Africa}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Asia}@*) (*@\HLJLoB{+}@*) 
+    (*@\HLJLn{Latitude}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Namer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Samer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude2}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Africa}@*) (*@\HLJLoB{+}@*) 
+    (*@\HLJLn{Latitude2}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Asia}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude2}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Namer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude2}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Samer}@*) (*@\HLJLoB{+}@*) 
+    (*@\HLJLn{Africa}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Asia}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Africa}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Namer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Africa}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Samer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Asia}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Namer}@*) (*@\HLJLoB{+}@*) 
+    (*@\HLJLn{Asia}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Samer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Namer}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Samer}@*)(*@\HLJLp{),}@*) (*@\HLJLn{AJR}@*)
+    (*@\HLJLp{)}@*)
+(*@\HLJLn{rD}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{d}@*) (*@\HLJLoB{-}@*) (*@\HLJLnf{predict}@*)(*@\HLJLp{(}@*)(*@\HLJLn{rD{\_}1}@*)(*@\HLJLp{)}@*)
+
+(*@\HLJLn{rZ{\_}1}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{lm}@*)(*@\HLJLp{(}@*)(*@\HLJLnd{@formula}@*)(*@\HLJLp{(}@*)
+    (*@\HLJLn{logMort}@*) (*@\HLJLoB{{\textasciitilde}}@*) (*@\HLJLn{Latitude}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude2}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Africa}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Asia}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Namer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Samer}@*) (*@\HLJLoB{+}@*) 
+    (*@\HLJLn{Latitude}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Latitude2}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Africa}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Asia}@*) (*@\HLJLoB{+}@*) 
+    (*@\HLJLn{Latitude}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Namer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Samer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude2}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Africa}@*) (*@\HLJLoB{+}@*) 
+    (*@\HLJLn{Latitude2}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Asia}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude2}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Namer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude2}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Samer}@*) (*@\HLJLoB{+}@*) 
+    (*@\HLJLn{Africa}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Asia}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Africa}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Namer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Africa}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Samer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Asia}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Namer}@*) (*@\HLJLoB{+}@*) 
+    (*@\HLJLn{Asia}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Samer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Namer}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Samer}@*)(*@\HLJLp{),}@*) (*@\HLJLn{AJR}@*)
+    (*@\HLJLp{)}@*)
+(*@\HLJLn{rZ}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{z}@*) (*@\HLJLoB{-}@*) (*@\HLJLnf{predict}@*)(*@\HLJLp{(}@*)(*@\HLJLn{rZ{\_}1}@*)(*@\HLJLp{);}@*)
+\end{lstlisting}
+
+
+\begin{lstlisting}
+(*@\HLJLn{ivfit{\_}lm}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{tsls}@*)(*@\HLJLp{(}@*)(*@\HLJLn{rD}@*)(*@\HLJLp{,}@*) (*@\HLJLn{rY}@*)(*@\HLJLp{,}@*) (*@\HLJLn{rZ}@*)(*@\HLJLp{,}@*) (*@\HLJLn{nothing}@*)(*@\HLJLp{,}@*) (*@\HLJLn{intercept}@*)(*@\HLJLoB{=}@*)(*@\HLJLkc{false}@*)(*@\HLJLp{)}@*)
+(*@\HLJLnf{DataFrame}@*)(*@\HLJLp{(}@*)(*@\HLJLn{Estimate}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{ivfit{\_}lm}@*)(*@\HLJLp{[}@*)(*@\HLJLs{"{}coefficients"{}}@*)(*@\HLJLp{][}@*)(*@\HLJLni{1}@*)(*@\HLJLp{,}@*)(*@\HLJLni{2}@*)(*@\HLJLp{],}@*) 
+    (*@\HLJLn{Std{\_}Error}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{ivfit{\_}lm}@*)(*@\HLJLp{[}@*)(*@\HLJLs{"{}se"{}}@*)(*@\HLJLp{])}@*)
+\end{lstlisting}
+
+
+\begin{tabular}{r|cc}
+	& Estimate & Std\_Error\\
+	\hline
+	& Float64 & Float64\\
+	\hline
+	1 & 1.26721 & 1.73054 \\
+\end{tabular}
+
+
+We see that the estimates exhibit large standard errors. The imprecision is expected because dimension of x is quite large, comparable to the sample size.
+
+Next, we replace the OLS operator by post-Lasso for partialling out
+
+
+\begin{lstlisting}
+(*@\HLJLn{x{\_}formula1}@*) (*@\HLJLoB{=}@*) (*@\HLJLnd{@formula}@*)(*@\HLJLp{(}@*)(*@\HLJLn{GDP}@*) (*@\HLJLoB{{\textasciitilde}}@*) (*@\HLJLn{Latitude}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude2}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Africa}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Asia}@*) (*@\HLJLoB{+}@*) 
+    (*@\HLJLn{Namer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Samer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Latitude2}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Africa}@*) (*@\HLJLoB{+}@*) 
+    (*@\HLJLn{Latitude}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Asia}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Namer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Samer}@*) (*@\HLJLoB{+}@*) 
+    (*@\HLJLn{Latitude2}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Africa}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude2}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Asia}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Latitude2}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Namer}@*) (*@\HLJLoB{+}@*) 
+    (*@\HLJLn{Latitude2}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Samer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Africa}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Asia}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Africa}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Namer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Africa}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Samer}@*)
+    (*@\HLJLoB{+}@*) (*@\HLJLn{Asia}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Namer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Asia}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Samer}@*) (*@\HLJLoB{+}@*) (*@\HLJLn{Namer}@*)(*@\HLJLoB{*}@*)(*@\HLJLn{Samer}@*)
+    (*@\HLJLp{)}@*)
+
+
+(*@\HLJLn{y}@*)(*@\HLJLp{,}@*) (*@\HLJLn{xx}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{data{\_}formula}@*)(*@\HLJLp{(}@*)(*@\HLJLn{x{\_}formula1}@*)(*@\HLJLp{,}@*) (*@\HLJLn{AJR}@*)(*@\HLJLp{)}@*)
+
+(*@\HLJLn{rY{\_}1}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{rlasso}@*)(*@\HLJLp{(}@*)(*@\HLJLn{xx}@*)(*@\HLJLp{,}@*) (*@\HLJLn{y}@*)(*@\HLJLp{);}@*)
+(*@\HLJLn{rY}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{rY{\_}1}@*)(*@\HLJLp{[}@*)(*@\HLJLs{"{}residuals"{}}@*)(*@\HLJLp{]}@*)
+(*@\HLJLn{rD{\_}1}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{rlasso}@*)(*@\HLJLp{(}@*)(*@\HLJLn{xx}@*)(*@\HLJLp{,}@*) (*@\HLJLn{d}@*)(*@\HLJLp{);}@*)
+(*@\HLJLn{rD}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{rD{\_}1}@*)(*@\HLJLp{[}@*)(*@\HLJLs{"{}residuals"{}}@*)(*@\HLJLp{]}@*)
+(*@\HLJLn{rZ{\_}1}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{rlasso}@*)(*@\HLJLp{(}@*)(*@\HLJLn{xx}@*)(*@\HLJLp{,}@*) (*@\HLJLn{z}@*)(*@\HLJLp{);}@*)
+(*@\HLJLn{rZ}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{rZ{\_}1}@*)(*@\HLJLp{[}@*)(*@\HLJLs{"{}residuals"{}}@*)(*@\HLJLp{]}@*)
+
+(*@\HLJLn{ivfit{\_}lasso}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{tsls}@*)(*@\HLJLp{(}@*)(*@\HLJLn{rD}@*)(*@\HLJLp{,}@*) (*@\HLJLn{rY}@*)(*@\HLJLp{,}@*) (*@\HLJLn{rZ}@*)(*@\HLJLp{)}@*)
+(*@\HLJLnf{DataFrame}@*)(*@\HLJLp{(}@*)
+    (*@\HLJLn{Estimate}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{ivfit{\_}lasso}@*)(*@\HLJLp{[}@*)(*@\HLJLs{"{}coefficients"{}}@*)(*@\HLJLp{][}@*)(*@\HLJLni{1}@*)(*@\HLJLp{,}@*)(*@\HLJLni{2}@*)(*@\HLJLp{],}@*) 
+    (*@\HLJLn{Std{\_}Error}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{ivfit{\_}lasso}@*)(*@\HLJLp{[}@*)(*@\HLJLs{"{}se"{}}@*)(*@\HLJLp{][}@*)(*@\HLJLni{1}@*)(*@\HLJLp{]}@*)
+    (*@\HLJLp{)}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+[(*@{"{}}@*)Latitude(*@{"{}}@*), (*@{"{}}@*)Latitude2(*@{"{}}@*), (*@{"{}}@*)Africa(*@{"{}}@*), (*@{"{}}@*)Asia(*@{"{}}@*), (*@{"{}}@*)Namer(*@{"{}}@*), (*@{"{}}@*)Samer(*@{"{}}@*), (*@{"{}}@*)Latitude (*@{{\&}}@*) L
+atitude2(*@{"{}}@*), (*@{"{}}@*)Latitude (*@{{\&}}@*) Africa(*@{"{}}@*), (*@{"{}}@*)Latitude (*@{{\&}}@*) Asia(*@{"{}}@*), (*@{"{}}@*)Latitude (*@{{\&}}@*) Namer(*@{"{}}@*), (*@{"{}}@*)Lat
+itude (*@{{\&}}@*) Samer(*@{"{}}@*), (*@{"{}}@*)Latitude2 (*@{{\&}}@*) Africa(*@{"{}}@*), (*@{"{}}@*)Latitude2 (*@{{\&}}@*) Asia(*@{"{}}@*), (*@{"{}}@*)Latitude2 (*@{{\&}}@*) Name
+r(*@{"{}}@*), (*@{"{}}@*)Latitude2 (*@{{\&}}@*) Samer(*@{"{}}@*), (*@{"{}}@*)Africa (*@{{\&}}@*) Asia(*@{"{}}@*), (*@{"{}}@*)Africa (*@{{\&}}@*) Namer(*@{"{}}@*), (*@{"{}}@*)Africa (*@{{\&}}@*) Samer
+(*@{"{}}@*), (*@{"{}}@*)Asia (*@{{\&}}@*) Namer(*@{"{}}@*), (*@{"{}}@*)Asia (*@{{\&}}@*) Samer(*@{"{}}@*), (*@{"{}}@*)Namer (*@{{\&}}@*) Samer(*@{"{}}@*)]
+\end{lstlisting}
+
+
+\begin{tabular}{r|cc}
+	& Estimate & Std\_Error\\
+	\hline
+	& Float64 & Float64\\
+	\hline
+	1 & 0.845027 & 0.272094 \\
+\end{tabular}
+
+
+This is exactly what command \texttt{rlassoIV} is doing by calling the command \texttt{rlassoSelectX}, so the numbers we see are identical to those reported first. In comparison to OLS results, we see precision is improved by doing selection on the exogenous variables.
+
+\subsection{Application: Impact of Eminent Domain Decisions on Economic Outcomes.}
+Here we investigate the effect of pro-plaintiff decisions in cases of eminent domain (government\ensuremath{\rq}s takings of private property) on economic outcomes. The analysis of the effects of such decisions is complicated by the possible endogeneity between judicial decisions and potential economic outcomes. To address the potential endogeneity, we employ an instrumental variables strategy based on the random assignment of judges to the federal appellate panels that make the decisions. Because judges are randomly assigned to three-judge panels, the exact identity of the judges and their demographics are randomly assigned conditional on the distribution of characteristics of federal circuit court judges in a given circuit-year.
+
+Under this random assignment, the characteristics of judges serving on federal appellate panels can only be related to property prices through the judges\ensuremath{\rq} decisions; thus the judge\ensuremath{\rq}s characteristics will plausibly satisfy the instrumental variable exclusion restriction. For further information on this application and the data set we refer to Chen and Yeh (2010) and Belloni, Chen, Chernozhukov, and Hansen (2012).
+
+First, we load the data a construct the matrices with the controls (x), instruments (z), outcome (y),and treatment variables (d). Here we consider regional GDP as the outcome variable.
+
+
+\begin{lstlisting}
+(*@\HLJLn{EminentDomain}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{get{\_}data}@*)(*@\HLJLp{(}@*)(*@\HLJLs{"{}EminentDomain"{}}@*)(*@\HLJLp{)}@*)
+(*@\HLJLn{z}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{EminentDomain}@*)(*@\HLJLp{[}@*)(*@\HLJLs{"{}logGDP"{}}@*)(*@\HLJLp{][}@*)(*@\HLJLs{"{}z"{}}@*)(*@\HLJLp{];}@*)
+(*@\HLJLn{x}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{EminentDomain}@*)(*@\HLJLp{[}@*)(*@\HLJLs{"{}logGDP"{}}@*)(*@\HLJLp{][}@*)(*@\HLJLs{"{}x"{}}@*)(*@\HLJLp{];}@*)
+(*@\HLJLn{d}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{EminentDomain}@*)(*@\HLJLp{[}@*)(*@\HLJLs{"{}logGDP"{}}@*)(*@\HLJLp{][}@*)(*@\HLJLs{"{}d"{}}@*)(*@\HLJLp{];}@*)
+(*@\HLJLn{y}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{EminentDomain}@*)(*@\HLJLp{[}@*)(*@\HLJLs{"{}logGDP"{}}@*)(*@\HLJLp{][}@*)(*@\HLJLs{"{}y"{}}@*)(*@\HLJLp{];}@*)
+(*@\HLJLn{x}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{x}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*) (*@\HLJLp{(}@*)(*@\HLJLnf{mean}@*)(*@\HLJLp{(}@*)(*@\HLJLn{x}@*)(*@\HLJLp{,}@*) (*@\HLJLn{dims}@*) (*@\HLJLoB{=}@*) (*@\HLJLni{1}@*)(*@\HLJLp{)}@*) (*@\HLJLoB{.>}@*) (*@\HLJLnfB{0.05}@*)(*@\HLJLp{)}@*)(*@\HLJLoB{{\textquotesingle}}@*)(*@\HLJLp{];}@*)
+(*@\HLJLn{z}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{z}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*) (*@\HLJLp{(}@*)(*@\HLJLnf{mean}@*)(*@\HLJLp{(}@*)(*@\HLJLn{z}@*)(*@\HLJLp{,}@*) (*@\HLJLn{dims}@*) (*@\HLJLoB{=}@*) (*@\HLJLni{1}@*)(*@\HLJLp{)}@*) (*@\HLJLoB{.>}@*) (*@\HLJLnfB{0.05}@*)(*@\HLJLp{)}@*)(*@\HLJLoB{{\textquotesingle}}@*)(*@\HLJLp{];}@*)
+\end{lstlisting}
+
+
+As mentioned above, $y$ is the economic outcome, the logarithm of the GDP, d the number of pro plaintiff appellate takings decisions in federal circuit court $c$ and year $t$, $x$ is a matrix with control variables, and $z$ is the matrix with instruments. Here we consider socio-economic and demographic characteristics of the judges as instruments.
+
+First, we estimate the effect of the treatment variable by simple OLS and 2SLS using two instruments:
+
+
+\begin{lstlisting}
+(*@\HLJLn{ED{\_}ols}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{lm}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{hcat}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{ones}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{length}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{vec}@*)(*@\HLJLp{(}@*)(*@\HLJLn{y}@*)(*@\HLJLp{))),}@*) (*@\HLJLnf{hcat}@*)(*@\HLJLp{(}@*)(*@\HLJLn{d}@*)(*@\HLJLp{,}@*) (*@\HLJLn{x}@*)(*@\HLJLp{)),}@*) (*@\HLJLnf{vec}@*)(*@\HLJLp{(}@*)(*@\HLJLn{y}@*)(*@\HLJLp{));}@*)
+(*@\HLJLn{ED{\_}2sls}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{tsls}@*)(*@\HLJLp{(}@*)(*@\HLJLn{d}@*)(*@\HLJLp{,}@*) (*@\HLJLn{y}@*)(*@\HLJLp{,}@*) (*@\HLJLn{z}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*)(*@\HLJLni{1}@*)(*@\HLJLoB{:}@*)(*@\HLJLni{2}@*)(*@\HLJLp{],}@*) (*@\HLJLn{x}@*)(*@\HLJLp{,}@*) (*@\HLJLn{intercept}@*) (*@\HLJLoB{=}@*) (*@\HLJLkc{false}@*)(*@\HLJLp{);}@*)
+\end{lstlisting}
+
+
+Next, we estimate the model with selection on the instruments
+
+
+\begin{lstlisting}
+(*@\HLJLn{lasso{\_}IV{\_}Z}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{rlassoIV}@*)(*@\HLJLp{(}@*)(*@\HLJLn{x}@*)(*@\HLJLp{,}@*) (*@\HLJLn{d}@*)(*@\HLJLp{,}@*) (*@\HLJLn{y}@*)(*@\HLJLp{,}@*) (*@\HLJLn{z}@*)(*@\HLJLp{,}@*) (*@\HLJLn{select{\_}X}@*) (*@\HLJLoB{=}@*) (*@\HLJLkc{false}@*)(*@\HLJLp{,}@*) (*@\HLJLn{select{\_}Z}@*) (*@\HLJLoB{=}@*) (*@\HLJLkc{true}@*)(*@\HLJLp{);}@*)
+(*@\HLJLnf{r{\_}summary}@*)(*@\HLJLp{(}@*)(*@\HLJLn{lasso{\_}IV{\_}Z}@*)(*@\HLJLp{);}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+Estimates and Significance Testing of the effect of target variables in the
+ IV regression model
+       coeff.       se.   t-value    p-value
+
+  d1   0.4146   0.29025   1.42842   0.15317
+---
+Signif. codes:
+0 (*@{{\textquotesingle}}@*)***(*@{{\textquotesingle}}@*) 0.001 (*@{{\textquotesingle}}@*)**(*@{{\textquotesingle}}@*) 0.01 (*@{{\textquotesingle}}@*)*(*@{{\textquotesingle}}@*) 0.05 (*@{{\textquotesingle}}@*).(*@{{\textquotesingle}}@*) 0.1 (*@{{\textquotesingle}}@*) (*@{{\textquotesingle}}@*) 1
+\end{lstlisting}
+
+
+\begin{lstlisting}
+(*@\HLJLnf{r{\_}confint}@*)(*@\HLJLp{(}@*)(*@\HLJLn{lasso{\_}IV{\_}Z}@*)(*@\HLJLp{);}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+2.5(*@{{\%}}@*)     97.5(*@{{\%}}@*)
+
+  d1   -0.154276   0.98348
+\end{lstlisting}
+
+
+%  % ----------- 
+Finally, we do selection on both the x and z variables.
+
+%  % ----------- 
+
+\begin{lstlisting}
+(*@\HLJLn{lasso{\_}IV{\_}XZ}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{rlassoIV}@*)(*@\HLJLp{(}@*)(*@\HLJLn{x}@*)(*@\HLJLp{,}@*) (*@\HLJLn{d}@*)(*@\HLJLp{,}@*) (*@\HLJLn{y}@*)(*@\HLJLp{,}@*) (*@\HLJLn{z}@*)(*@\HLJLp{,}@*) (*@\HLJLn{select{\_}X}@*) (*@\HLJLoB{=}@*) (*@\HLJLkc{true}@*)(*@\HLJLp{,}@*) (*@\HLJLn{select{\_}Z}@*) (*@\HLJLoB{=}@*) (*@\HLJLkc{true}@*)(*@\HLJLp{);}@*)
+(*@\HLJLnf{r{\_}summary}@*)(*@\HLJLp{(}@*)(*@\HLJLn{lasso{\_}IV{\_}XZ}@*)(*@\HLJLp{)}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+Estimates and Significance Testing of the effect of target variables in the
+ IV regression model
+         coeff.       se.    t-value    p-value
+
+  d1   -0.02383   0.12851   -0.18543   0.85289
+---
+Signif. codes:
+0 (*@{{\textquotesingle}}@*)***(*@{{\textquotesingle}}@*) 0.001 (*@{{\textquotesingle}}@*)**(*@{{\textquotesingle}}@*) 0.01 (*@{{\textquotesingle}}@*)*(*@{{\textquotesingle}}@*) 0.05 (*@{{\textquotesingle}}@*).(*@{{\textquotesingle}}@*) 0.1 (*@{{\textquotesingle}}@*) (*@{{\textquotesingle}}@*) 1
+\end{lstlisting}
+
+
+\begin{tabular}{r|ccccc}
+	&   & coeff. & se. & t-value & p-value\\
+	\hline
+	& Any & Any & Any & Any & Any\\
+	\hline
+	1 & d1 & -0.02383 & 0.12851 & -0.18543 & 0.85289 \\
+\end{tabular}
+
+
+\begin{lstlisting}
+(*@\HLJLnf{r{\_}confint}@*)(*@\HLJLp{(}@*)(*@\HLJLn{lasso{\_}IV{\_}XZ}@*)(*@\HLJLp{);}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+2.5(*@{{\%}}@*)      97.5(*@{{\%}}@*)
+
+  d1   -0.275703   0.228033
+\end{lstlisting}
+
+
+Comparing the results we see, that the OLS estimates indicate that the influence of pro plaintiff appellate takings decisions in federal circuit court is significantly positive, but the 2SLS estimates which account for the potential endogeneity render the results insignificant. Employing selection on the instruments yields similar results. Doing selection on both the x- and z-variables results in extremely imprecise estimates.
+
+Finally, we compare all results
+
+
+\begin{lstlisting}
+(*@\HLJLn{table}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{zeros}@*)(*@\HLJLp{(}@*)(*@\HLJLni{4}@*)(*@\HLJLp{,}@*)(*@\HLJLni{2}@*)(*@\HLJLp{)}@*)
+(*@\HLJLn{table}@*)(*@\HLJLp{[}@*)(*@\HLJLni{1}@*)(*@\HLJLp{,}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{]}@*) (*@\HLJLoB{=}@*) (*@\HLJLp{[}@*)(*@\HLJLnf{coef}@*)(*@\HLJLp{(}@*)(*@\HLJLn{ED{\_}ols}@*)(*@\HLJLp{)[}@*)(*@\HLJLni{2}@*)(*@\HLJLp{],}@*) (*@\HLJLnf{stderror}@*)(*@\HLJLp{(}@*)(*@\HLJLn{ED{\_}ols}@*)(*@\HLJLp{)[}@*)(*@\HLJLni{2}@*)(*@\HLJLp{]];}@*)
+(*@\HLJLn{table}@*)(*@\HLJLp{[}@*)(*@\HLJLni{2}@*)(*@\HLJLp{,}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{]}@*) (*@\HLJLoB{=}@*) (*@\HLJLp{[}@*)(*@\HLJLn{ED{\_}2sls}@*)(*@\HLJLp{[}@*)(*@\HLJLs{"{}coefficients"{}}@*)(*@\HLJLp{][}@*)(*@\HLJLni{1}@*)(*@\HLJLp{,}@*)(*@\HLJLni{2}@*)(*@\HLJLp{],}@*) (*@\HLJLn{ED{\_}2sls}@*)(*@\HLJLp{[}@*)(*@\HLJLs{"{}se"{}}@*)(*@\HLJLp{][}@*)(*@\HLJLni{1}@*)(*@\HLJLp{]];}@*)
+(*@\HLJLn{table}@*)(*@\HLJLp{[}@*)(*@\HLJLni{3}@*)(*@\HLJLp{,}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{]}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{Matrix}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{r{\_}summary}@*)(*@\HLJLp{(}@*)(*@\HLJLn{lasso{\_}IV{\_}Z}@*)(*@\HLJLp{)[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*)(*@\HLJLni{2}@*)(*@\HLJLoB{:}@*)(*@\HLJLni{3}@*)(*@\HLJLp{]);}@*)
+(*@\HLJLn{table}@*)(*@\HLJLp{[}@*)(*@\HLJLni{4}@*)(*@\HLJLp{,}@*) (*@\HLJLoB{:}@*)(*@\HLJLp{]}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{Matrix}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{r{\_}summary}@*)(*@\HLJLp{(}@*)(*@\HLJLn{lasso{\_}IV{\_}XZ}@*)(*@\HLJLp{)[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*) (*@\HLJLni{2}@*)(*@\HLJLoB{:}@*)(*@\HLJLni{3}@*)(*@\HLJLp{]);}@*)
+(*@\HLJLn{index}@*) (*@\HLJLoB{=}@*) (*@\HLJLp{[}@*)
+    (*@\HLJLs{"{}ols}@*) (*@\HLJLs{regression"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}IV}@*) (*@\HLJLs{estimation}@*) (*@\HLJLs{"{}}@*)(*@\HLJLp{,}@*) 
+    (*@\HLJLs{"{}selection}@*) (*@\HLJLs{on}@*) (*@\HLJLs{Z"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}selection}@*) (*@\HLJLs{on}@*) (*@\HLJLs{X}@*) (*@\HLJLs{and}@*) (*@\HLJLs{Z"{}}@*)
+    (*@\HLJLp{]}@*)
+(*@\HLJLnf{pretty{\_}table}@*)(*@\HLJLp{(}@*)
+    (*@\HLJLnf{hcat}@*)(*@\HLJLp{(}@*)(*@\HLJLn{index}@*)(*@\HLJLp{,}@*) (*@\HLJLn{table}@*)(*@\HLJLp{),}@*) 
+    (*@\HLJLn{show{\_}row{\_}number}@*) (*@\HLJLoB{=}@*) (*@\HLJLkc{false}@*)(*@\HLJLp{,}@*) (*@\HLJLn{header}@*) (*@\HLJLoB{=}@*) (*@\HLJLp{[}@*)(*@\HLJLs{"{}}@*) (*@\HLJLs{"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}Estimate"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}Std.}@*) (*@\HLJLs{Error"{}}@*)(*@\HLJLp{],}@*)
+    (*@\HLJLn{tf}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{tf{\_}simple}@*)(*@\HLJLp{,}@*) (*@\HLJLn{nosubheader}@*) (*@\HLJLoB{=}@*) (*@\HLJLkc{true}@*)(*@\HLJLp{)}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+Estimates and Significance Testing of the effect of target variables in the
+ IV regression model
+       coeff.       se.   t-value    p-value
+
+  d1   0.4146   0.29025   1.42842   0.15317
+---
+Signif. codes:
+0 (*@{{\textquotesingle}}@*)***(*@{{\textquotesingle}}@*) 0.001 (*@{{\textquotesingle}}@*)**(*@{{\textquotesingle}}@*) 0.01 (*@{{\textquotesingle}}@*)*(*@{{\textquotesingle}}@*) 0.05 (*@{{\textquotesingle}}@*).(*@{{\textquotesingle}}@*) 0.1 (*@{{\textquotesingle}}@*) (*@{{\textquotesingle}}@*) 1
+Estimates and Significance Testing of the effect of target variables in the
+ IV regression model
+         coeff.       se.    t-value    p-value
+
+  d1   -0.02383   0.12851   -0.18543   0.85289
+---
+Signif. codes:
+0 (*@{{\textquotesingle}}@*)***(*@{{\textquotesingle}}@*) 0.001 (*@{{\textquotesingle}}@*)**(*@{{\textquotesingle}}@*) 0.01 (*@{{\textquotesingle}}@*)*(*@{{\textquotesingle}}@*) 0.05 (*@{{\textquotesingle}}@*).(*@{{\textquotesingle}}@*) 0.1 (*@{{\textquotesingle}}@*) (*@{{\textquotesingle}}@*) 1
+======================= ============ =============
+                           Estimate   Std. Error
+======================= ============ =============
+        ols regression   0.00786473   0.00986593
+        IV estimation    -0.0107097    0.0337652
+        selection on Z       0.4146      0.29025
+  selection on X and Z     -0.02383      0.12851
+======================= ============ =============
+\end{lstlisting}
+
+
+\section{Inference on Treatment Effects in a High-Dimensional Setting}
+In this section, we consider estimation and inference on treatment effects when the treatment variable $d$ enters non-separably in determination of the outcomes. This case is more complicated than the additive case, which is covered as a special case of Section 3. However, the same underlying principle ' the orthogonality principle ' applies for the estimation and inference on the treatment effect parameters. Estimation and inference of treatment effects in a high-dimensional setting is analysed in Belloni, Chernozhukov, Fern´andez-Val, and Hansen (2013).
+
+\subsection{Treatment Effects Parameters ' a short Introduction.}
+In many situations researchers are asked to evaluate the effect of a policy intervention. Examples are the effectiveness of a job related training program or the effect of a newly developed drug. We consider n units or individuals, $i = 1,\dots, n$. For each individual we observe the treatment status. The treatment variable $D_i$ takes the value 1, if the unit received (active) treatment, and 0, if it received the control treatment. For each individual we observe the outcome for only one of the two potential treatment states. Hence, the observed outcome depends on the treatment status and is denoted by $Y_i(D_i)$. One important parameter of interest is the average treatment effect (ATE):
+
+\[
+\mathbb E[Y(1) - Y(0)] = \mathbb E[Y(1)] - \mathbb E[Y(0)].
+\]
+This quantity can be interpreted as the average effect of the policy intervention.
+
+Researchers might also be interested in the average treatment effect on the treated (ATET) given by
+
+\[
+\mathbb E[Y(1) - Y (0)|D = 1] = \mathbb E[Y(1)|D = 1] - \mathbb E[Y(0)|D = 1].
+\]
+This is the average treatment effect restricted to the population the treated individuals. When treatment $D$ is randomly assigned conditional on confounding factors X, the ATE and ATET can be identified by regression or propensity score weighting methods. Our identification and estimation method rely on the combination of two methods to create orthogonal estimating equations for these parameters.
+
+In observational studies, the potential treatments are endogenous, i.e. jointly determined with the outcome variable. In such cases, causal effects may be identified with the use of a binary instrument $Z$ that affects the treatment but is independent of the potential outcomes. An important parameter in this case is the local average treatment effect (LATE):
+
+\[
+E[Y (1) - Y (0)|D(1) >  D(0)].
+\]
+The random variables $D(1)$ and $D(0)$ indicate the potential participation decisions under the instrument states 1 and 0. LATE is the average treatment effect for the subpopulation of compliers ' those units that respond to the change in the instrument. Another parameter of interest is the local average treatment effect of the treated (LATET):
+
+\[
+\mathbb E\left[Y (1) - Y (0)|D(1) > D(0), D = 1\right],
+\]
+which is the average effect for the subpopulation of the treated compliers.
+
+When the instrument $Z$ is randomly assigned conditional on confounding factors $X$, the LATE and LATET can be identified by instrumental variables regression or propensity score weighting methods. Our identification and estimation method rely on the combination of two methods to create orthogonal estimating equations for these parameters.{\textbackslash}footnote\{It turns out that the orthogonal estimating equations are the same as doubly robust estimating equations, but emphasizing the name \ensuremath{\rdq}doubly robust\ensuremath{\rdq} could be confusing in the present context.\}
+
+\subsection{Estimation and Inference of Treatment effects.}
+We consider the estimation of the effect of an endogenous binary treatment, $D$, on an outcome variable, $Y$ , in a setting with very many potential control variables. In the case of endogeneity, the presence of a binary instrumental variable, $Z$, is required for the estimation of the LATE and LATET.
+
+When trying to estimate treatment effects, the researcher has to decide what conditioning variables to include. In the case of a non-randomly assigned treatment or instrumental variable, the researcher must select the conditioning variables so that the instrument or treatment is plausibly exogenous. Even in the case of random assignment, for a precise estimation of the policy variable selection of control variables is necessary to absorb residual variation, but overfitting should be avoided. For uniformly valid post-selection inference, \ensuremath{\ldq}orthogonal \ensuremath{\rdq}estimating equations as described above are they key to the efficient estimation and valid inference. We refer to Belloni, Chernozhukov, Fernandez-Val, and Hansen (2013) for details.
+
+% --R Implementation. The package contains the functions rlassoATE, rlassoATET, rlassoLATE, and rlassoLATE to estimate the corresponding treatment effects. All functions have as arguments the outcome variable y, the treatment variable d, and the conditioning variables x. The functions rlassoLATE, and rlassoLATE have additionally the argument z for the binary instrumental variable. For the calculation of the standard errors bootstrap methods are implemented, with options to use Bayes, normal, or wild bootstrap. The number of repetitions can be specified with the argument nRep and the default is set to 500. By default no bootstrap standard errors are provided (bootstrap="none"). For the functions the logicals intercept and post can be specified to include an intercept and to do Post-Lasso at the selection steps. The family of treatment functions returns an object of class rlassoTE for which the methods print, summary, and confint are available.-
+\subsection{Application: 401(k) plan participation.}
+Though it is clear that 401(k) plans are widely used as vehicles for retirement saving, their effect on assets is less clear. The key problem in determining the effect of participation in 401(k) plans on accumulated assets is saver heterogeneity coupled with nonrandom selection into participation states. In particular, it is generally recognized that some people have a higher preference for saving than others. Thus, it seems likely that those individuals with the highest unobserved preference for saving would be most likely to choose to participate in tax-advantaged retirement savings plans and would also have higher savings in other assets than individuals with lower unobserved saving propensity. This implies that conventional estimates that do not allow for saver heterogeneity and selection of the participation state will be biased upward, tending to overstate the actual savings effects of 401(k) and IRA participation.
+
+Again, we start first with the data preparation:
+
+
+\begin{lstlisting}
+(*@\HLJLn{pension}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{get{\_}data}@*)(*@\HLJLp{(}@*)(*@\HLJLs{"{}pension"{}}@*)(*@\HLJLp{)}@*)
+(*@\HLJLn{y}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{pension}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}tw"{}}@*)(*@\HLJLp{];}@*)
+(*@\HLJLn{d}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{pension}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}p401"{}}@*)(*@\HLJLp{];}@*)
+(*@\HLJLn{z}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{pension}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}e401"{}}@*)(*@\HLJLp{];}@*)
+(*@\HLJLn{X}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{pension}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*) 
+        (*@\HLJLp{[}@*)(*@\HLJLs{"{}i2"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}i3"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}i4"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}i5"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}i6"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}i7"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}a2"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}a3"{}}@*)(*@\HLJLp{,}@*) 
+        (*@\HLJLs{"{}a4"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}a5"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}fsize"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}hs"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}smcol"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}col"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}marr"{}}@*)(*@\HLJLp{,}@*) 
+        (*@\HLJLs{"{}twoearn"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}db"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}pira"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}hown"{}}@*)(*@\HLJLp{]];}@*)
+\end{lstlisting}
+
+
+Now we can compute the estimates of the target treatment effect parameters. For ATE and ATET we report the the effect of eligibility for 401(k)
+
+
+\begin{lstlisting}
+(*@\HLJLn{pension{\_}ate}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{rlassoATE}@*)(*@\HLJLp{(}@*)(*@\HLJLn{X}@*)(*@\HLJLp{,}@*) (*@\HLJLn{d}@*)(*@\HLJLp{,}@*) (*@\HLJLn{y}@*)(*@\HLJLp{);}@*)
+(*@\HLJLnf{r{\_}summary}@*)(*@\HLJLp{(}@*)(*@\HLJLn{pension{\_}ate}@*)(*@\HLJLp{);}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+Estimation and significance tesing of the treatment effect
+    Type: ATE
+    Bootstrap: none
+    
+========== ========= ==========
+  Coeff     SE        t.value
+========== ========= ==========
+  10180.1   1930.68   5.2728
+========== ========= ==========
+\end{lstlisting}
+
+
+\begin{lstlisting}
+(*@\HLJLn{pension{\_}atet}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{rlassoATET}@*)(*@\HLJLp{(}@*)(*@\HLJLn{X}@*)(*@\HLJLp{,}@*) (*@\HLJLn{d}@*)(*@\HLJLp{,}@*) (*@\HLJLn{y}@*)(*@\HLJLp{);}@*)
+(*@\HLJLnf{r{\_}summary}@*)(*@\HLJLp{(}@*)(*@\HLJLn{pension{\_}atet}@*)(*@\HLJLp{);}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+Estimation and significance tesing of the treatment effect
+    Type: ATET
+    Bootstrap: none
+    
+========== ========= ==========
+  Coeff     SE        t.value
+========== ========= ==========
+  12628.5   2944.43   4.28893
+========== ========= ==========
+\end{lstlisting}
+
+
+For LATE and LATET we estimate the effect of 401(k) participation (d) with plan eligibility (z) as instrument.
+
+
+\begin{lstlisting}
+(*@\HLJLn{pension{\_}late}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{rlassoLATE}@*)(*@\HLJLp{(}@*)(*@\HLJLn{X}@*)(*@\HLJLp{,}@*) (*@\HLJLn{d}@*)(*@\HLJLp{,}@*) (*@\HLJLn{y}@*)(*@\HLJLp{,}@*) (*@\HLJLn{z}@*)(*@\HLJLp{);}@*)
+(*@\HLJLnf{r{\_}summary}@*)(*@\HLJLp{(}@*)(*@\HLJLn{pension{\_}late}@*)(*@\HLJLp{);}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+Estimation and significance tesing of the treatment effect
+    Type: LATE
+    Bootstrap: none
+    
+========== ======== ==========
+  Coeff     SE       t.value
+========== ======== ==========
+  12992.1   2326.9   5.58344
+========== ======== ==========
+\end{lstlisting}
+
+
+\begin{lstlisting}
+(*@\HLJLn{pension{\_}latet}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{rlassoLATET}@*)(*@\HLJLp{(}@*)(*@\HLJLn{X}@*)(*@\HLJLp{,}@*) (*@\HLJLn{d}@*)(*@\HLJLp{,}@*) (*@\HLJLn{y}@*)(*@\HLJLp{,}@*) (*@\HLJLn{z}@*)(*@\HLJLp{);}@*)
+(*@\HLJLnf{r{\_}summary}@*)(*@\HLJLp{(}@*)(*@\HLJLn{pension{\_}latet}@*)(*@\HLJLp{);}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+Estimation and significance tesing of the treatment effect
+    Type: LATET
+    Bootstrap: none
+    
+========== ========= ==========
+  Coeff     SE        t.value
+========== ========= ==========
+  15323.2   3645.28   4.20357
+========== ========= ==========
+\end{lstlisting}
+
+
+The results are summarized into a table:
+
+
+\begin{lstlisting}
+(*@\HLJLk{using}@*) (*@\HLJLn{PrettyTables}@*)
+(*@\HLJLn{table}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{zeros}@*)(*@\HLJLp{(}@*)(*@\HLJLni{4}@*)(*@\HLJLp{,}@*)(*@\HLJLni{2}@*)(*@\HLJLp{)}@*)
+(*@\HLJLn{table}@*)(*@\HLJLp{[}@*)(*@\HLJLni{1}@*)(*@\HLJLp{,}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{]}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{round}@*)(*@\HLJLoB{.}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{vec}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{r{\_}summary}@*)(*@\HLJLp{(}@*)(*@\HLJLn{pension{\_}ate}@*)(*@\HLJLp{)[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*) (*@\HLJLni{1}@*)(*@\HLJLoB{:}@*)(*@\HLJLni{2}@*)(*@\HLJLp{]),}@*) (*@\HLJLn{digits}@*) (*@\HLJLoB{=}@*) (*@\HLJLni{2}@*)(*@\HLJLp{);}@*)
+(*@\HLJLn{table}@*)(*@\HLJLp{[}@*)(*@\HLJLni{2}@*)(*@\HLJLp{,}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{]}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{round}@*)(*@\HLJLoB{.}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{vec}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{r{\_}summary}@*)(*@\HLJLp{(}@*)(*@\HLJLn{pension{\_}atet}@*)(*@\HLJLp{)[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*) (*@\HLJLni{1}@*)(*@\HLJLoB{:}@*)(*@\HLJLni{2}@*)(*@\HLJLp{]),}@*) (*@\HLJLn{digits}@*) (*@\HLJLoB{=}@*) (*@\HLJLni{2}@*)(*@\HLJLp{);}@*)
+(*@\HLJLn{table}@*)(*@\HLJLp{[}@*)(*@\HLJLni{3}@*)(*@\HLJLp{,}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{]}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{round}@*)(*@\HLJLoB{.}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{vec}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{r{\_}summary}@*)(*@\HLJLp{(}@*)(*@\HLJLn{pension{\_}late}@*)(*@\HLJLp{)[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*) (*@\HLJLni{1}@*)(*@\HLJLoB{:}@*)(*@\HLJLni{2}@*)(*@\HLJLp{]),}@*) (*@\HLJLn{digits}@*) (*@\HLJLoB{=}@*) (*@\HLJLni{2}@*)(*@\HLJLp{);}@*)
+(*@\HLJLn{table}@*)(*@\HLJLp{[}@*)(*@\HLJLni{4}@*)(*@\HLJLp{,}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{]}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{round}@*)(*@\HLJLoB{.}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{vec}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{r{\_}summary}@*)(*@\HLJLp{(}@*)(*@\HLJLn{pension{\_}latet}@*)(*@\HLJLp{)[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*) (*@\HLJLni{1}@*)(*@\HLJLoB{:}@*)(*@\HLJLni{2}@*)(*@\HLJLp{]),}@*) (*@\HLJLn{digits}@*) (*@\HLJLoB{=}@*) (*@\HLJLni{2}@*)(*@\HLJLp{);}@*)
+(*@\HLJLn{index}@*) (*@\HLJLoB{=}@*) (*@\HLJLp{[}@*)(*@\HLJLs{"{}ATE"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}ATET}@*) (*@\HLJLs{"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}LATE"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}LATET"{}}@*)(*@\HLJLp{];}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+Estimation and significance tesing of the treatment effect
+    Type: ATE
+    Bootstrap: none
+    
+========== ========= ==========
+  Coeff     SE        t.value
+========== ========= ==========
+  10180.1   1930.68   5.2728
+========== ========= ==========
+
+    Estimation and significance tesing of the treatment effect
+    Type: ATET
+    Bootstrap: none
+    
+========== ========= ==========
+  Coeff     SE        t.value
+========== ========= ==========
+  12628.5   2944.43   4.28893
+========== ========= ==========
+
+    Estimation and significance tesing of the treatment effect
+    Type: LATE
+    Bootstrap: none
+    
+========== ======== ==========
+  Coeff     SE       t.value
+========== ======== ==========
+  12992.1   2326.9   5.58344
+========== ======== ==========
+
+    Estimation and significance tesing of the treatment effect
+    Type: LATET
+    Bootstrap: none
+    
+========== ========= ==========
+  Coeff     SE        t.value
+========== ========= ==========
+  15323.2   3645.28   4.20357
+========== ========= ==========
+\end{lstlisting}
+
+
+\begin{lstlisting}
+(*@\HLJLnf{pretty{\_}table}@*)(*@\HLJLp{(}@*)
+    (*@\HLJLnf{hcat}@*)(*@\HLJLp{(}@*)(*@\HLJLn{index}@*)(*@\HLJLp{,}@*) (*@\HLJLn{table}@*)(*@\HLJLp{),}@*) (*@\HLJLn{show{\_}row{\_}number}@*) (*@\HLJLoB{=}@*) (*@\HLJLkc{false}@*)(*@\HLJLp{,}@*) 
+    (*@\HLJLn{header}@*) (*@\HLJLoB{=}@*) (*@\HLJLp{[}@*)(*@\HLJLs{"{}}@*) (*@\HLJLs{"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}Estimate"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}Std.}@*) (*@\HLJLs{Error"{}}@*)(*@\HLJLp{],}@*) 
+    (*@\HLJLn{tf}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{tf{\_}simple}@*)(*@\HLJLp{,}@*) (*@\HLJLn{nosubheader}@*) (*@\HLJLoB{=}@*) (*@\HLJLkc{true}@*)
+    (*@\HLJLp{)}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+======== ========== =============
+          Estimate   Std. Error
+======== ========== =============
+    ATE    10180.1      1930.68
+  ATET     12628.5      2944.43
+   LATE    12992.1       2326.9
+  LATET    15323.2      3645.28
+======== ========== =============
+\end{lstlisting}
+
+
+Finally, we estimate a model including all interaction effects:
+
+
+\begin{lstlisting}
+(*@\HLJLn{pension{\_}ate}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{rlassoATE}@*)(*@\HLJLp{(}@*)(*@\HLJLn{X}@*)(*@\HLJLp{,}@*) (*@\HLJLn{z}@*)(*@\HLJLp{,}@*) (*@\HLJLn{y}@*)(*@\HLJLp{);}@*)
+(*@\HLJLn{pension{\_}atet}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{rlassoATET}@*)(*@\HLJLp{(}@*)(*@\HLJLn{X}@*)(*@\HLJLp{,}@*) (*@\HLJLn{z}@*)(*@\HLJLp{,}@*) (*@\HLJLn{y}@*)(*@\HLJLp{);}@*)
+(*@\HLJLn{pension{\_}late}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{rlassoLATE}@*)(*@\HLJLp{(}@*)(*@\HLJLn{X}@*)(*@\HLJLp{,}@*) (*@\HLJLn{d}@*)(*@\HLJLp{,}@*) (*@\HLJLn{y}@*)(*@\HLJLp{,}@*) (*@\HLJLn{z}@*)(*@\HLJLp{);}@*)
+(*@\HLJLn{pension{\_}latet}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{rlassoLATET}@*)(*@\HLJLp{(}@*)(*@\HLJLn{X}@*)(*@\HLJLp{,}@*) (*@\HLJLn{d}@*)(*@\HLJLp{,}@*) (*@\HLJLn{y}@*)(*@\HLJLp{,}@*) (*@\HLJLn{z}@*)(*@\HLJLp{);}@*)
+\end{lstlisting}
+
+
+\begin{lstlisting}
+(*@\HLJLn{table}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{zeros}@*)(*@\HLJLp{(}@*)(*@\HLJLni{4}@*)(*@\HLJLp{,}@*) (*@\HLJLni{2}@*)(*@\HLJLp{)}@*)
+(*@\HLJLn{table}@*)(*@\HLJLp{[}@*)(*@\HLJLni{1}@*)(*@\HLJLp{,}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{]}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{r{\_}summary}@*)(*@\HLJLp{(}@*)(*@\HLJLn{pension{\_}ate}@*)(*@\HLJLp{)[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*) (*@\HLJLni{1}@*)(*@\HLJLoB{:}@*)(*@\HLJLni{2}@*)(*@\HLJLp{];}@*)
+(*@\HLJLn{table}@*)(*@\HLJLp{[}@*)(*@\HLJLni{2}@*)(*@\HLJLp{,}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{]}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{r{\_}summary}@*)(*@\HLJLp{(}@*)(*@\HLJLn{pension{\_}atet}@*)(*@\HLJLp{)[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*) (*@\HLJLni{1}@*)(*@\HLJLoB{:}@*)(*@\HLJLni{2}@*)(*@\HLJLp{];}@*)
+(*@\HLJLn{table}@*)(*@\HLJLp{[}@*)(*@\HLJLni{3}@*)(*@\HLJLp{,}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{]}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{r{\_}summary}@*)(*@\HLJLp{(}@*)(*@\HLJLn{pension{\_}late}@*)(*@\HLJLp{)[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*) (*@\HLJLni{1}@*)(*@\HLJLoB{:}@*)(*@\HLJLni{2}@*)(*@\HLJLp{];}@*)
+(*@\HLJLn{table}@*)(*@\HLJLp{[}@*)(*@\HLJLni{4}@*)(*@\HLJLp{,}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{]}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{r{\_}summary}@*)(*@\HLJLp{(}@*)(*@\HLJLn{pension{\_}latet}@*)(*@\HLJLp{)[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*) (*@\HLJLni{1}@*)(*@\HLJLoB{:}@*)(*@\HLJLni{2}@*)(*@\HLJLp{];}@*)
+(*@\HLJLn{index}@*) (*@\HLJLoB{=}@*) (*@\HLJLp{[}@*)(*@\HLJLs{"{}ATE"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}ATET}@*) (*@\HLJLs{"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}LATE"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}LATET"{}}@*)(*@\HLJLp{]}@*)
+(*@\HLJLnf{pretty{\_}table}@*)(*@\HLJLp{(}@*)
+    (*@\HLJLnf{hcat}@*)(*@\HLJLp{(}@*)(*@\HLJLn{index}@*)(*@\HLJLp{,}@*) (*@\HLJLn{table}@*)(*@\HLJLp{),}@*) (*@\HLJLn{show{\_}row{\_}number}@*) (*@\HLJLoB{=}@*) (*@\HLJLkc{false}@*)(*@\HLJLp{,}@*) 
+    (*@\HLJLn{header}@*) (*@\HLJLoB{=}@*) (*@\HLJLp{[}@*)(*@\HLJLs{"{}}@*) (*@\HLJLs{"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}Estimate"{}}@*)(*@\HLJLp{,}@*) (*@\HLJLs{"{}Std.}@*) (*@\HLJLs{Error"{}}@*)(*@\HLJLp{],}@*) 
+    (*@\HLJLn{tf}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{tf{\_}simple}@*)(*@\HLJLp{,}@*) (*@\HLJLn{nosubheader}@*) (*@\HLJLoB{=}@*) (*@\HLJLkc{true}@*)
+    (*@\HLJLp{)}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+Estimation and significance tesing of the treatment effect
+    Type: ATE
+    Bootstrap: none
+    
+========== ========= ==========
+  Coeff     SE        t.value
+========== ========= ==========
+  8491.99   1902.92   4.4626
+========== ========= ==========
+
+    Estimation and significance tesing of the treatment effect
+    Type: ATET
+    Bootstrap: none
+    
+========== ========= ==========
+  Coeff     SE        t.value
+========== ========= ==========
+  10795.3   2568.13   4.20357
+========== ========= ==========
+
+    Estimation and significance tesing of the treatment effect
+    Type: LATE
+    Bootstrap: none
+    
+========== ======== ==========
+  Coeff     SE       t.value
+========== ======== ==========
+  12992.1   2326.9   5.58344
+========== ======== ==========
+
+    Estimation and significance tesing of the treatment effect
+    Type: LATET
+    Bootstrap: none
+    
+========== ========= ==========
+  Coeff     SE        t.value
+========== ========= ==========
+  15323.2   3645.28   4.20357
+========== ========= ==========
+======== ========== =============
+          Estimate   Std. Error
+======== ========== =============
+    ATE    8491.99      1902.92
+  ATET     10795.3      2568.13
+   LATE    12992.1       2326.9
+  LATET    15323.2      3645.28
+======== ========== =============
+\end{lstlisting}
+
+
+\section{The Lasso Methods for Discovery of Significant Causes amongst Many Potential Causes, with Many Controls}
+Here we consider the model 
+
+\[
+\underbrace{Y_i}_{\text {Outcome }}=\underbrace{\sum_{l=1}^{p_1} D_{i l} \alpha_{\ell}}_{\text {Causes }}+\underbrace{\sum_{j=1}^{p_2} W_{i j} \beta_j}_{\text {Controls }}+\underbrace{\epsilon_i}_{\text {Noise }}
+\]
+where the number of potential causes $p_1$ could be very large and the number of controls $p_2$ could also be very large. The causes are randomly assigned conditional on controls. Under approximate sparsity of $\alpha = (\alpha_l)_{l_1}^{p1}$ and $\beta = (\beta_l)_{l=1}^{p2}$, we can use Lasso-based method of Belloni, Chernozhukov, and Kato (2014) for estimating $(\alpha_l)_{l=1}^{p1}$ and constructing a joint confidence band on $(\alpha_l)_{l=1}^{p1}$ and then checking which $\alpha$l\ensuremath{\rq}s are significantly different from zero. The approach is based on buliding orthogonal estimating equations for each of $(\alpha_l)_{l=1}^{p_1}$, and can be interpreted as doing Frisch-Waugh procedure for each coefficient of interest, where we do partialling out via Lasso or OLS-after-Lasso.
+
+This procedure is implemented in the \texttt{Julia} package \texttt{hdm}. Here is an example in which $n = 100$, $p_1 = 20$, and $p_2 = 20$, so that total number of regressors is $p = p_1 + p_2 = 40$. In this example $\alpha_1 = 5$ and $\beta_1 = 5$, i.e. there is only one true cause $D_{i1}$, among the large number of causes, $D_{i1}, \dots, D_{i20}$, and only one true control $W_{i1}$. This example is made super-simple for clarity sake. The Belloni, Chernozhukov, and Kato (2014) procedure, implemented by rlassoEffects function in Julia package HDMjl.
+
+
+\begin{lstlisting}
+(*@\HLJLn{data}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{get{\_}data}@*)(*@\HLJLp{(}@*)(*@\HLJLs{"{}seed{\_}500"{}}@*)(*@\HLJLp{)}@*)
+(*@\HLJLn{n}@*)(*@\HLJLp{,}@*) (*@\HLJLn{p}@*) (*@\HLJLoB{=}@*) (*@\HLJLnf{size}@*)(*@\HLJLp{(}@*)(*@\HLJLn{data}@*)(*@\HLJLp{);}@*)
+(*@\HLJLn{p1}@*) (*@\HLJLoB{=}@*) (*@\HLJLni{20}@*)(*@\HLJLp{;}@*)
+(*@\HLJLn{X}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{data}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*)(*@\HLJLni{2}@*)(*@\HLJLoB{:}@*)(*@\HLJLk{end}@*)(*@\HLJLp{]}@*)
+(*@\HLJLn{Y}@*) (*@\HLJLoB{=}@*) (*@\HLJLn{data}@*)(*@\HLJLp{[}@*)(*@\HLJLoB{:}@*)(*@\HLJLp{,}@*)(*@\HLJLni{1}@*)(*@\HLJLp{];}@*)
+
+(*@\HLJLnf{r{\_}confint}@*)(*@\HLJLp{(}@*)(*@\HLJLnf{rlassoEffects}@*)(*@\HLJLp{(}@*)(*@\HLJLn{X}@*)(*@\HLJLp{,}@*) (*@\HLJLn{Y}@*)(*@\HLJLp{,}@*) (*@\HLJLn{index}@*) (*@\HLJLoB{=}@*) (*@\HLJLp{[}@*)(*@\HLJLni{1}@*)(*@\HLJLoB{:}@*)(*@\HLJLn{p1}@*)(*@\HLJLp{;]),}@*) (*@\HLJLn{joint}@*) (*@\HLJLoB{=}@*) (*@\HLJLkc{true}@*)(*@\HLJLp{);}@*)
+\end{lstlisting}
+
+\begin{lstlisting}
+2.5(*@{{\%}}@*)       97.5(*@{{\%}}@*)
+
+   V2      4.51001     5.21889
+   V3    -0.318344       0.309
+   V4    -0.355941    0.190318
+   V5    -0.257789    0.290935
+   V6    -0.280199    0.279891
+   V7    -0.325498    0.298257
+   V8    -0.229702    0.304393
+   V9   -0.0507647    0.477074
+  V10    -0.190339    0.394011
+  V11    -0.240517    0.267394
+  V12     -0.31814     0.21289
+  V13    -0.312954    0.269485
+  V14    -0.177762    0.380431
+  V15    -0.328215    0.390073
+  V16    -0.326134    0.317282
+  V17    -0.268852    0.334908
+  V18    -0.183111    0.420864
+  V19     -0.37205   0.0496843
+  V20     -0.11059    0.396967
+  V21    -0.218802    0.258523
+\end{lstlisting}
+
+
+As you can see the procedure correctly tells that only the first cause $D_{i1}, among the large number of causes, $D{i1}, \dots D_{i20}$, is a statistically significant cause of $Y$ (see the confidence interval for variable V1).
+
+{\textbackslash}pagebreak
+
+\section{References}
+Acemoglu, D., Johnson, S., \& Robinson, J. A. (2001). The colonial origins of comparative development: An empirical investigation. American economic review, 91(5), 1369-1401.
+
+Barro, R. J., \& Lee, J. W. (1994). Data set for a panel of 138 countries.
+
+Belloni, A., D. Chen, V. Chernozhukov, and C. Hansen (2012): \ensuremath{\ldq}Sparse Models and Methods for Optimal Instruments with an Application to Eminent Domain,\ensuremath{\rdq} Econometrica, 80, 2369-2429, Arxiv, 2010.
+
+Belloni, A., and V. Chernozhukov (2013): \ensuremath{\ldq}Least Squares After Model Selection in High-dimensional Sparse Models,\ensuremath{\rdq} Bernoulli, 19(2), 521-547, ArXiv, 2009
+
+Belloni, A., V. Chernozhukov, I. Fernández-Val, and C. Hansen (2013): \ensuremath{\ldq}Program Evaluation with High-Dimensional Data,\ensuremath{\rdq} arXiv:1311.2645, ArXiv, 2013
+
+Belloni, A., V. Chernozhukov, and C. Hansen (2010): \ensuremath{\ldq}Inference for High-Dimensional Sparse Econometric Models,\ensuremath{\rdq} Advances in Economics and Econometrics. 10th World Congress of Econometric Society. August 2010, III, 245-295, ArXiv, 2011.
+
+Belloni, A., V. Chernozhukov, and C. Hansen (2014): \ensuremath{\ldq}Inference on Treatment Effects After Selection Amongst High-Dimensional Controls,\ensuremath{\rdq} Review of Economic Studies, 81, 608'650, ArXiv, 2011
+
+Belloni, A., V. Chernozhukov, and K. Kato (2014): \ensuremath{\ldq}Uniform post-selection inference for least absolute deviation regression and other Z-estimation problems,\ensuremath{\rdq} Biometrika.
+
+Berry, S., J. Levinsohn, and A. Pakes (1995): \ensuremath{\ldq}Automobile Prices in Market Equilibrium,\ensuremath{\rdq} Econometrica, 63, 841'890
+
+Chen, D. L., \& Yeh, S. (2010). The economic impacts of eminent domain. Unpublished Manuscript.[2373, 2403-2407].
+
+Chernozhukov, V., Chetverikov, D., \& Kato, K. (2013). Gaussian approximations and multiplier bootstrap for maxima of sums of high-dimensional random vectors. The Annals of Statistics, 41(6), 2786-2819.
+
+Chernozhukov, V., \& Hansen, C. (2004). The impact of 401 (k) participation on the wealth distribution: An instrumental quantile regression analysis. Review of Economics and statistics, 86(3), 735-751.
+
+Chernozhukov, V., Hansen, C., \& Spindler, M. (2015). Valid post-selection and post-regularization inference: An elementary, general approach. Annu. Rev. Econ., 7(1), 649-688.
+
+Chernozhukov, V., Hansen, C., \& Spindler, M. (2015). Post-selection and post-regularization inference in linear models with many controls and instruments. American Economic Review, 105(5), 486-90.
+
+Fu, W. J. (1998). Penalized regressions: the bridge versus the lasso. Journal of computational and graphical statistics, 7(3), 397-416.
+
+
+
+\end{document}

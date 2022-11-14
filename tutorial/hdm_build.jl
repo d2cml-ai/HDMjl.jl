@@ -13,7 +13,9 @@ using Weave, Highlights
 
 # @time weave("hdm.jmd"; doctype = "md2pdf", highlight_theme = Highlights.Themes.MonokaiMiniTheme, pandoc_options = ["--toc", "--toc-depth= 3", "--number-sections", "--self-contained"])
 # @time weave("hdm.jmd"; doctype="pandoc2pdf", pandoc_options=["--toc", "--toc-depth= 1", "--number-sections", "--self-contained"], highlight_theme = Highlights.Themes.TangoTheme)
-@time weave("test/hdm.jmd"; doctype="pandoc2pdf", pandoc_options=["--toc", "--toc-depth= 1", "--number-sections", "--self-contained"])
+@time weave("tutorial/hdm.jmd"; doctype="md2tex", pandoc_options=["--toc", "--toc-depth= 1", "--number-sections", "--self-contained"])
+
+
 
 
 
