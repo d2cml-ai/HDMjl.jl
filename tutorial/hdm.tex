@@ -11,7 +11,7 @@
 \setlength{\parskip}{1.2ex}
 
 \hypersetup
-       {   pdfauthor = { VICTOR CHERNOZHUKOV, CHRISTIAN HANSEN, MARTIN SPINDLER },
+       {   pdfauthor = { ALEXANDER QUISPE,VICTOR CHERNOZHUKOV, CHRISTIAN HANSEN, MARTIN SPINDLER },
            pdftitle={ High Dimensional Metrics in Julia },
            colorlinks=TRUE,
            linkcolor=black,
@@ -21,9 +21,9 @@
 
 \title{ High Dimensional Metrics in Julia }
 
-\author{ VICTOR CHERNOZHUKOV, CHRISTIAN HANSEN, MARTIN SPINDLER }
+\author{ ALEXANDER QUISPE,VICTOR CHERNOZHUKOV, CHRISTIAN HANSEN, MARTIN SPINDLER }
 
-\date{ October - 13 - 2022 }
+\date{ November - 30 - 2022 }
 
 \usepackage{upquote}
 \usepackage{listings}
@@ -676,10 +676,10 @@ It is also possible to estimate joint confidence intervals. The method relies on
 \begin{lstlisting}
 2.5(*@{{\%}}@*)      97.5(*@{{\%}}@*)
 
-   X1     2.72502    3.16393
-   X2     2.83436    3.24819
-   X3     2.78072    3.17009
-  X50   -0.117984   0.261895
+   X1     2.73588    3.15307
+   X2      2.8446    3.23795
+   X3     2.79036    3.16045
+  X50   -0.108585   0.252495
 \end{lstlisting}
 
 
@@ -793,22 +793,22 @@ Finally, we estimate and plot confident intervals, first \ensuremath{\rdq}pointw
 \begin{lstlisting}
 2.5(*@{{\%}}@*)        97.5(*@{{\%}}@*)
 
-                 female    -0.281116   -0.0731218
-       female (*@{{\&}}@*) widowed    -0.142157     0.414348
-      female (*@{{\&}}@*) divorced    0.0728423     0.201036
-     female (*@{{\&}}@*) separated    -0.121121     0.167726
-  female (*@{{\&}}@*) nevermarried     0.127446     0.246261
-         female (*@{{\&}}@*) hsd08    -0.387157     0.442777
-        female (*@{{\&}}@*) hsd911    -0.268827    0.0389941
-           female (*@{{\&}}@*) hsg   -0.0663663    0.0414762
-            female (*@{{\&}}@*) cg   -0.0433117    0.0635888
-            female (*@{{\&}}@*) ad   -0.0978932    0.0369657
-            female (*@{{\&}}@*) mw   -0.0573897    0.0530957
-            female (*@{{\&}}@*) so   -0.0644362    0.0480695
-            female (*@{{\&}}@*) we   -0.0675601    0.0591079
-          female (*@{{\&}}@*) exp1   -0.0171695      0.02704
-          female (*@{{\&}}@*) exp2    -0.288065    -0.030974
-          female (*@{{\&}}@*) exp3    0.0161683    0.0607329
+                 female    -0.276405   -0.0778324
+       female (*@{{\&}}@*) widowed    -0.129553     0.401744
+      female (*@{{\&}}@*) divorced    0.0757456     0.198133
+     female (*@{{\&}}@*) separated    -0.114579     0.161185
+  female (*@{{\&}}@*) nevermarried     0.130137      0.24357
+         female (*@{{\&}}@*) hsd08    -0.368361     0.423981
+        female (*@{{\&}}@*) hsd911    -0.261855    0.0320227
+           female (*@{{\&}}@*) hsg   -0.0639239    0.0390338
+            female (*@{{\&}}@*) cg   -0.0408907    0.0611678
+            female (*@{{\&}}@*) ad    -0.094839    0.0339115
+            female (*@{{\&}}@*) mw   -0.0548874    0.0505934
+            female (*@{{\&}}@*) so   -0.0618882    0.0455215
+            female (*@{{\&}}@*) we   -0.0646914    0.0562391
+          female (*@{{\&}}@*) exp1   -0.0161682    0.0260388
+          female (*@{{\&}}@*) exp2    -0.282242   -0.0367965
+          female (*@{{\&}}@*) exp3    0.0171776    0.0597236
 \end{lstlisting}
 
 
@@ -1592,26 +1592,26 @@ This procedure is implemented in the \texttt{Julia} package \texttt{hdm}. Here i
 \begin{lstlisting}
 2.5(*@{{\%}}@*)       97.5(*@{{\%}}@*)
 
-   V2      4.51001     5.21889
-   V3    -0.318344       0.309
-   V4    -0.355941    0.190318
-   V5    -0.257789    0.290935
-   V6    -0.280199    0.279891
-   V7    -0.325498    0.298257
-   V8    -0.229702    0.304393
-   V9   -0.0507647    0.477074
-  V10    -0.190339    0.394011
-  V11    -0.240517    0.267394
-  V12     -0.31814     0.21289
-  V13    -0.312954    0.269485
-  V14    -0.177762    0.380431
-  V15    -0.328215    0.390073
-  V16    -0.326134    0.317282
-  V17    -0.268852    0.334908
-  V18    -0.183111    0.420864
-  V19     -0.37205   0.0496843
-  V20     -0.11059    0.396967
-  V21    -0.218802    0.258523
+   V2      4.49851     5.23038
+   V3    -0.328515    0.319171
+   V4    -0.364797    0.199175
+   V5    -0.266685    0.299831
+   V6     -0.28928    0.288971
+   V7    -0.335611     0.30837
+   V8    -0.238361    0.313052
+   V9   -0.0593224    0.485632
+  V10    -0.199813    0.403485
+  V11    -0.248752    0.275628
+  V12     -0.32675    0.221499
+  V13    -0.322397    0.278928
+  V14    -0.186812    0.389481
+  V15     -0.33986    0.401718
+  V16    -0.336565    0.327714
+  V17     -0.27864    0.344697
+  V18    -0.192903    0.430656
+  V19    -0.378887   0.0565218
+  V20    -0.118819    0.405196
+  V21    -0.226541    0.266261
 \end{lstlisting}
 
 

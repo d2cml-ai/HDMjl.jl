@@ -1,10 +1,17 @@
 ---
 title: "High Dimensional Metrics in Julia"
-author: "VICTOR CHERNOZHUKOV, CHRISTIAN HANSEN, MARTIN SPINDLER"
-date: "October - 13 - 2022"
+author: 
+    - ALEXANDER QUISPE
+    - VICTOR CHERNOZHUKOV 
+    - CHRISTIAN HANSEN
+    - MARTIN SPINDLER
+
+
+date: "November - 30 - 2022"
 jupyter: julia-1.7
 weave_options:
   out_width : 40%
+  wrap: true
 ---
 
 \pagebreak 
